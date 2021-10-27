@@ -1,5 +1,5 @@
 //GetListOfProjects
-GetProjects ()
+export async function GetProjects ()
 {
     return ['Project 1', 'Project 2', 'Project 3'];
 }

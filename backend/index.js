@@ -1,10 +1,10 @@
 
-import { router } from './routes';
+import { router } from './routes.js';
 
-const Koa = require('koa');
+import Koa from 'koa';
 
 const app = new Koa();
-const router = new Router();
+//const router = new Router();
 
 const port = 3001
 
