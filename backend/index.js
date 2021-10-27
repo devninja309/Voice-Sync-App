@@ -3,8 +3,6 @@ import { router } from './routes';
 
 const Koa = require('koa');
 
-
-
 const app = new Koa();
 const router = new Router();
 
