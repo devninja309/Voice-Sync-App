@@ -1,0 +1,32 @@
+Transform: 'AWS::Serverless-2016-10-31'
+
+Parameters:
+  MasterUsername:
+    Type: String
+    Default: root
+  MasterUserPassword:
+    Type: String
+    Default: Entranc3$
+    NoEcho: true
+  Env:
+    Type: String
+    Default: dev
+
+Resources:
+  RDSCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      DeletionProtection: true
+      Engine: aurora
+      EngineMode: serverless
+      EngineVersion: '5.6'
+      DatabaseName: mmg
+      MasterUsername: !Ref MasterUsername
+      MasterUserPassword: !Ref MasterUserPassword
+      DBClusterIdentifier: !Sub 'mmg-aurora-cluster-${Env}'
+      ScalingConfiguration:
+        AutoPause: true
+        SecondsUntilAutoPause: 600
+        MinCapacity: 1
+        MaxCapacity: 4
+      BackupRetentionPeriod: 35
