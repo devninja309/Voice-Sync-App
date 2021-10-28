@@ -1,1 +1,0 @@
-//General VoiceSynth API Wrapper
