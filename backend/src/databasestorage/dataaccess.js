@@ -1,7 +1,8 @@
 //GetListOfProjects
-export async function GetProjects ()
+export function GetProjects ()
 {
-    return ['Project 1', 'Project 2', 'Project 3'];
+    //return "teapot";
+    return ["Project 1", "Project 2", "Project 3"];
 }
 
 //GetListOfNarrationsByProject

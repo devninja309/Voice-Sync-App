@@ -1,21 +1,21 @@
 
 import Router from 'koa-router';
-import * as Data from './databasestorage/dataaccess.js';
-//const Router = require('@koa/router');
-//const Data = require('./databasestorage/dataaccess');
+import {GetProjects} from './databasestorage/dataaccess.js';
 
 
 export const router = new Router()
 
-router.get('/', (ctx, next) => {
+router.get('/test', (ctx) => {
     ctx.body = 'Hello World'
 })
 
-.get('/stuff', (ctx, next) => {
+.get('/stuff', (ctx) => {
     ctx.body = 'stuff';
   })
 
-  .get('/projects', (ctx, next) => {
-      ctx.body = Data.GetProjects();
+  .get('/projects', (ctx) => {
+    //ctx.body = Array.prototype.join.call(GetProjects()[1]);
+    //ctx.body = GetProjects()[1];
+    ctx.body = GetProjects();
     });
 
