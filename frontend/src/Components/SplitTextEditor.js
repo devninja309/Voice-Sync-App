@@ -1,1 +1,0 @@
-//Big bad controll that contains all the split up sentences, a play button (active)
