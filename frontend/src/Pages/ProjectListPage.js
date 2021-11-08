@@ -15,17 +15,13 @@ const ProjectListPage = () => {
             setProjects(data);
         }
      )
-     //.then(data => {
-     //   console.log("Data : " + data);
-     //   setProjects(data);
-     //})
  },[]);
  function whyunowork() {
     if (projects)
     {
         console.log('Projects!');
         console.log(projects);
-        return projects.map(projectName => (<p> {projectName}</p>))
+        return projects.map(project => (<p key ={project.ID}> {project.ProjectName}</p>))
     }
     else {
         console.log('No projects :(')

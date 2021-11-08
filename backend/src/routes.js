@@ -13,9 +13,19 @@ router.get('/test', (ctx) => {
     ctx.body = 'stuff';
   })
 
-  .get('/projects', (ctx) => {
+  .get('/projects', async (ctx) => {
     //ctx.body = Array.prototype.join.call(GetProjects()[1]);
     //ctx.body = GetProjects()[1];
-    ctx.body = GetProjects();
+    //ctx.body = GetProjects();
+
+    var projectsList = await GetProjects();
+    console.log('returning?')
+    console.log(projectsList)
+    ctx.body = projectsList
+    // .then(results => {
+    //   console.log('returning?')
+    //   console.log(results)
+    //   ctx.body = results
+    // });
     });
 
