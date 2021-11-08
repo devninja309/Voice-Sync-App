@@ -1,0 +1,34 @@
+Transform: 'AWS::Serverless-2016-10-31'
+
+Globals:
+  Function:
+    Runtime: nodejs10.x
+    Timeout: 10
+    MemorySize: 256
+    Environment:
+      Variables:
+        Env: !Ref Env
+  Api:
+    EndpointConfiguration: REGIONAL
+    Cors: "'*'"
+
+Parameters:
+  Env:
+    Type: String
+    Default: qa
+    AllowedValues:
+      - qa
+      - prod
+
+Resources:
+  APILambdaV1:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./.webpack
+      Handler: main.handler
+      Events:
+        ProxyGateway:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
