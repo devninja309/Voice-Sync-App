@@ -1,25 +1,26 @@
 import React from "react";
-import { useAuth0 } from "@auth0/auth0-react";
+import { LoginButton } from "../Components/LoginButton";
+import { PageWrapper } from "../Components/PageWrapper";
 
 
 import logo from '../logo.svg';
 
 const LoginPage = () => {
 
-    const { loginWithRedirect } = useAuth0();
 
 
   return  (     
+    <PageWrapper>
     <div className="App">
         <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
             This is the Project Login Page
         </p>
-        <button onClick={() => loginWithRedirect()}>Log In</button>
-        
+        <LoginButton/>
         </header>
     </div>
+    </PageWrapper>
 )};
 
 
