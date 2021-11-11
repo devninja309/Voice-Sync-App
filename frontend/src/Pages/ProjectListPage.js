@@ -4,30 +4,9 @@ import {GetProjects} from '.././Etc/URLInterface'
 
 import {useState, useEffect} from 'react';
 import { PageWrapper } from '../Components/PageWrapper';
+import ProjectList from '../Components/ProjectList';
 
 const ProjectListPage = () => {
-
- const [projects, setProjects] = useState('');
- useEffect( () => {
-     GetProjects().then(
-        data => {
-            console.log('Getting Data')
-            console.log(data);
-            setProjects(data);
-        }
-     )
- },[]);
- function DisplayProjectsList() {
-    if (projects)
-    {
-        console.log('Projects!');
-        console.log(projects);
-        return projects.map(project => (<p key ={project.ID}> {project.ProjectName}</p>))
-    }
-    else {
-        console.log('No projects :(')
-    }
- }
 
     return  (     
         <PageWrapper>
@@ -37,7 +16,7 @@ const ProjectListPage = () => {
             <p>
                 This is the Project List Page
             </p>
-            { DisplayProjectsList()}
+            <ProjectList/>
             
             </header>
         </div>

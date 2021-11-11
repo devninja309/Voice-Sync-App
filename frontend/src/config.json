@@ -1,0 +1,4 @@
+{
+    "AUTH0MANAGEAUDIENCE" : "https://dev-l3ao-nin.us.auth0.com/api/v2/",
+    "AUTH0AUDIENCE" : "VoiceSynthManagerBackend"
+}

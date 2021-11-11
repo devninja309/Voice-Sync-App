@@ -4,11 +4,14 @@ import { router } from './routes.js';
 import Koa from 'koa';
 
 import env from 'dotenv'
+import { GetJWTCheck } from './security/tokenManager.js';
 
 var result = env.config();
 
 const app = new Koa();
 //const router = new Router();
+
+app.use(GetJWTCheck());
 
 const port = 3001
 
