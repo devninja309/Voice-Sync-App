@@ -6,7 +6,9 @@ import {useState, useEffect} from 'react';
 import { PageWrapper } from '../Components/PageWrapper';
 import ProjectList from '../Components/ProjectList';
 
-const ProjectListPage = () => {
+const ProjectListPage = (props) => {
+    console.log('AccessToken');
+    console.log(props);
 
     return  (     
         <PageWrapper>
@@ -16,7 +18,7 @@ const ProjectListPage = () => {
             <p>
                 This is the Project List Page
             </p>
-            <ProjectList/>
+            <ProjectList accessToken = {props.accessToken}/>
             
             </header>
         </div>

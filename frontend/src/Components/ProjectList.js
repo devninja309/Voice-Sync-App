@@ -3,14 +3,13 @@
 import {GetProjects} from '.././Etc/URLInterface'
 
 import {useState, useEffect} from 'react';
-import { PageWrapper } from '../Components/PageWrapper';
 
- export default function ProjectList () {
+ export default function ProjectList (props) {
 
  const [projects, setProjects] = useState('');
  
  useEffect( () => {
-     GetProjects().then(
+     GetProjects(props.accessToken).then(
         data => {
             console.log('Getting Data')
             console.log(data);

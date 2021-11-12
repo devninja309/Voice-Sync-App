@@ -5,16 +5,25 @@ export const getUrlPath = (route) => isLocal ? `http://localhost:3001/${route}` 
 
 //Database
 
-function getData(path) 
+function getData(path, accessToken) 
 {
-    //return projects;
-    //console.log(getUrlPath(path));
-    return fetch(getUrlPath(path))
+    if (accessToken)
+    {
+    return fetch(getUrlPath(path), {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
            .then(response => response.json())
-           //.then(data => console.log(data));
+    }
+    else
+    {
+        return fetch(getUrlPath(path)) 
+            .then(response => response.json())
+    }
 } 
 
-export function GetProjects()
+export function GetProjects(accessToken)
 {
-    return getData('projects');
+    return getData('projects', accessToken);
 }

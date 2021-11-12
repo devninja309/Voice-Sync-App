@@ -11,8 +11,6 @@ var result = env.config();
 const app = new Koa();
 //const router = new Router();
 
-app.use(GetJWTCheck());
-
 const port = 3001
 
 // app.use(async ctx => {
@@ -28,7 +26,8 @@ app
         await next();
   })
   .use(router.routes())
-  .use(router.allowedMethods());
+  .use(router.allowedMethods())
+  .use(GetJWTCheck());
 
 console.log('Listening to ' + port)
 app.listen(port);
