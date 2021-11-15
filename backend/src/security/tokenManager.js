@@ -13,7 +13,8 @@ var jwtCheck = jwt({
   }),
   audience: 'VoiceSynthManagerBackend',
   issuer: 'https://dev-l3ao-nin.us.auth0.com/',
-  algorithms: ['RS256']
+  algorithms: ['RS256'],
+  passthrough: true,
 });
 return jwtCheck;
 }

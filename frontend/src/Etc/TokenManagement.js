@@ -9,7 +9,6 @@ export const GetUserToken = async (useAuth0Data) => {
 
     if (isLoading) return;
     if (!isAuthenticated) return;
-    LogTraceMessage('Getting UserToken');
 
   try {
     const accessToken = await getAccessTokenSilently({
@@ -27,15 +26,12 @@ export const GetAdminToken = async () => {
 
     if (isLoading) return;
     if (!isAuthenticated) return;
-    LogTraceMessage('Getting Admin Token');
 
   try {
     const accessToken = await getAccessTokenSilently({
       audience: Audience,
       scope: "read:logs",
     });
-    console.log('AccessToken');
-    console.log(accessToken);
     return accessToken;
     }catch (e) {
         LogErrorMessage('failed to get Admin access token');
