@@ -11,9 +11,9 @@ function getData(path, accessToken)
     {
     return fetch(getUrlPath(path), {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
-      })
+     })
            .then(response => response.json())
     }
     else

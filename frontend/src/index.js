@@ -12,9 +12,7 @@ ReactDOM.render(
     clientId="QBRCxM8VfOqAvDzEOhOyP3uuywimKAUD"
     redirectUri={window.location.origin}
     audience="VoiceSynthManagerBackend"
-    //audience="https://dev-l3ao-nin.us.auth0.com/api/v2/"
     scope="read:projects edit:projects"
-    //scope="read:current_user"
   >
     <App />
     </Auth0Provider>

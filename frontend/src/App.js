@@ -12,7 +12,6 @@ import LoginPage from './Pages/LoginPage'
 import ProjectListPage from './Pages/ProjectListPage'
 
 import {GetUserToken} from './Etc/TokenManagement';
-import Config from "./config.json";
 import { LogError, LogErrorMessage, LogTraceMessage } from './Etc/ErrorHandler';
 
 
@@ -24,15 +23,11 @@ function App() {
     useEffect(() => {
       const getUserToken = async () => {
         if (userToken != null) { return }
-        LogTraceMessage('Use Effect');
           if (isLoading) return;
           if (!isAuthenticated) return;
 
       try {
-          LogTraceMessage('Getting User Token');
           const accessToken = await GetUserToken(useAuth0Data);
-          console.log('App User Token')
-          console.log(accessToken);
           setUserToken(accessToken);
       } catch (e) {
           LogErrorMessage('failed to get userToken');
@@ -42,8 +37,6 @@ function App() {
 
       getUserToken();
   }, [getAccessTokenSilently, user?.sub]);
-
-  console.log(userToken);
 
   return (
     <BrowserRouter>
