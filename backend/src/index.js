@@ -19,9 +19,9 @@ app
         ctx.set('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
         await next();
   })
+  .use(GetJWTCheck())
   .use(router.routes())
   .use(router.allowedMethods())
-  .use(GetJWTCheck());
 
 console.log('Listening to ' + port)
 app.listen(port);

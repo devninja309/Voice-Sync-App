@@ -35,22 +35,15 @@ function getCon()
 function SQLQuery(query)
 {
     return new Promise( function (resolve, reject) {
-  console.log(process.env.SQL_Host);
-  console.log(process.env.SQL_User);
-  console.log(process.env.SQL_PWD);
-  console.log(process.env.SQL_Schema);
 
   var con = getCon();
 
   con.connect(function(err) {
     if (err) console.log( err);
-    console.log("Connected!");
   });
   
   con.query(query, function (error, results, fields) {
     if (error) throw error;
-    console.log('results');
-    console.log(results);
     con.end();
     resolve( JSON.stringify(results));
   });
