@@ -12,19 +12,13 @@ export function NavigationHeader ()
 {
     const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
 
-    //TODO Move to CSS
-    const divStyle = {
-        display: 'flex',
-        'flex-direction': 'row',
-      };
-
     const accountGroup = () => {
         if (isLoading) {
             return <p>Loading ...</p>;
           }
         if (isAuthenticated) {
             console.log(user);
-            return (<div style = {divStyle}>
+            return (<div className = "InlineDivStyle">
                 <Navbar.Heading>{user.name} </Navbar.Heading>
                 <LogoutButton/>
                 </div>

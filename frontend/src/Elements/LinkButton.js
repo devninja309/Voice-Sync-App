@@ -8,9 +8,10 @@ import { SimpleButton } from "../Elements/SimpleButton";
 
 export function LinkButton (props) 
 {
+    const {Link: LinkAddress, ...childProps} = props;
     return (
-        <Link to={props.Link}>
-            <SimpleButton {...props}>
+        <Link to={LinkAddress}>
+            <SimpleButton {...childProps}>
             </SimpleButton>
         </Link>
     )

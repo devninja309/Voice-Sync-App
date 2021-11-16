@@ -11,17 +11,13 @@ import {useState, useEffect} from 'react';
  useEffect( () => {
      GetProjects(props.accessToken).then(
         data => {
-            console.log('Getting Data')
-            console.log(data);
             setProjects(data);
         }
      )
- },[]);
+ },[props.accessToken]);
  function DisplayProjectsList() {
     if (projects)
     {
-        console.log('Projects!');
-        console.log(projects);
         return projects.map(project => (<p key ={project.ID}> {project.ProjectName}</p>))
     }
     else {
