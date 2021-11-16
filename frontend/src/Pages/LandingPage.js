@@ -2,7 +2,7 @@
 import React from "react";
 import {Link } from "react-router-dom";
 import { PageWrapper } from '../Components/PageWrapper';
-import { SimpleButton } from "../Elements/SimpleButton";
+import {LinkButton} from '../Elements/LinkButton';
 import logo from '../logo.svg';
 
 export function LandingPage () 
@@ -16,11 +16,7 @@ export function LandingPage ()
       <p>
         This is the Landing Page
       </p>
-
-      <Link to="/projects"><SimpleButton>
-              Go to Projects
-            </SimpleButton>
-            </Link>
+      <LinkButton Link = '/projects' Text='Projects'/>
     </header>
     </PageWrapper>
   </div>

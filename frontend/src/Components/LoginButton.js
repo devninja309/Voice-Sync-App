@@ -10,8 +10,5 @@ export function LoginButton (props)
 {
     const { loginWithRedirect } = useAuth0();
 
-    return  (  <SimpleButton onClick={() => loginWithRedirect()} {...props}>
-        Log In
-    </SimpleButton>
-    )
+    return  (  <SimpleButton onClick={() => loginWithRedirect()} Text = 'Log In' {...props}/>)
 }

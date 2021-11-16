@@ -10,8 +10,5 @@ export function LogoutButton (props)
 {
     const { logout } = useAuth0();
 
-    return  (  <SimpleButton onClick={() => logout({ returnTo: window.location.origin })} {...props}>
-        Log Out
-    </SimpleButton>
-    )
+    return  (  <SimpleButton onClick={() => logout({ returnTo: window.location.origin })} Text = 'Log Out' {...props}/>)
 }
