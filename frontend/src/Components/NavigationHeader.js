@@ -17,7 +17,6 @@ export function NavigationHeader ()
             return <p>Loading ...</p>;
           }
         if (isAuthenticated) {
-            console.log(user);
             return (<div className = "InlineDivStyle">
                 <Navbar.Heading>{user.name} </Navbar.Heading>
                 <LogoutButton/>

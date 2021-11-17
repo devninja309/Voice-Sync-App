@@ -3,6 +3,7 @@ import React from "react";
 import {Link } from "react-router-dom";
 import { PageWrapper } from '../Components/PageWrapper';
 import {LinkButton} from '../Elements/LinkButton';
+import { BigLogo } from "../Elements/Logos";
 import logo from '../logo.svg';
 
 export function LandingPage () 
@@ -12,10 +13,8 @@ export function LandingPage ()
     <div className="App">
       <PageWrapper>
     <header className="App-header">
-      <img src={logo} className="App-logo" alt="logo" />
-      <p>
-        This is the Landing Page
-      </p>
+      <BigLogo/>
+      
       <LinkButton Link = '/projects' Text='Projects'/>
     </header>
     </PageWrapper>

@@ -1,4 +1,4 @@
-import mysql from 'mysql';
+import mysql, { createConnection } from 'mysql';
 
 //GetListOfProjects
 export function GetProjects ()
@@ -15,10 +15,37 @@ export function GetProjects ()
     //return ["Project 1", "Project 2", "Project 3"];
 }
 
+export function CreateProject(project)
+{
+  //Check Project
+  if (!project.projectName){
+    //Blow up?
+  }
+  return new Promise( function (resolve, reject) {
+
+    var con = getCon();
+
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+
+    var insert = 'Insert into IA_VoiceSynth.Projects (ProjectName) Values (?)';
+    var values = [project.ProjectName];
+
+    con.query(insert,values, (err, results, fields) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      con.end();
+      project.ID = results.insertId
+      resolve( project);
+    });
+  });
+}
+
 //GetListOfNarrationsByProject
 //GetNarrationByID
     //GetClipsByID
-//CreateProject
 //CreateNarration
 //CreateClip
 

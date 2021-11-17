@@ -1,6 +1,6 @@
 
 import Router from 'koa-router';
-import {GetProjects} from './databasestorage/dataaccess.js';
+import {GetProjects, CreateProject} from './databasestorage/dataaccess.js';
 import jwt from 'koa-jwt';
 
 
@@ -37,14 +37,34 @@ router.get('/test', (ctx) => {
     ctx.body = 'stuff';
   })
 
+  //TODO Move these into a controller specific to the object when this becomes unmanageable
   .get('/projects', async (ctx) => {
     if (!RequirePermission(ctx,['read:projects'])) {
       //TODO: Handle failure more gracefully, possibly via 'nanner nanner boo boo'
-      ctx.body = JSON.stringify([{projectID: "no you!", name: "No You!"}]);
+      ctx.body = JSON.stringify([{projectID: "no you!", ProjectName: "No You!"}]);
       return;
     }
 
     var projectsList = await GetProjects();
     ctx.body = projectsList
-    });
+    })
+    .post('/projects', async (ctx) => {
+      if (!RequirePermission(ctx,['read:projects'])) {
+        //TODO: Handle failure more gracefully, possibly via 'nanner nanner boo boo'
+        ctx.body = JSON.stringify([{projectID: "no you!", ProjectName: "No You!"}]);
+        return;
+      }
+      let project = ctx.request.body;
+      console.log('Request to create project');
+      console.log(ctx.request);
+      console.log(project);
+      if (typeof(project) == "undefined")
+      {
+        ctx.body = JSON.stringify([{projectID: "Bad", ProjectName: "call"}]);
+        return;
+      }
+      var insertProject = await CreateProject(project);
+      ctx.body = insertProject;
+
+    })
 

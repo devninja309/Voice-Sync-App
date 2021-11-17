@@ -2,6 +2,7 @@
 import { router } from './routes.js';
 
 import Koa from 'koa';
+import koaBody from 'koa-body';
 
 import env from 'dotenv'
 import { GetJWTCheck } from './security/tokenManager.js';
@@ -9,7 +10,7 @@ import { GetJWTCheck } from './security/tokenManager.js';
 var result = env.config();
 
 const app = new Koa();
-
+app.use(koaBody());
 const port = 3001
 
 app

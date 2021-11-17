@@ -8,8 +8,6 @@ import ProjectList from '../Components/ProjectList';
 import { BigLogo } from '../Elements/Logos';
 
 const ProjectListPage = (props) => {
-    console.log('AccessToken');
-    console.log(props);
 
     return  (     
         <PageWrapper>

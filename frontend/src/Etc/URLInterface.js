@@ -27,3 +27,18 @@ export function GetProjects(accessToken)
 {
     return getData('projects', accessToken);
 }
+export function CreateProject(accessToken, project)
+{
+    console.log('fetching project create')
+    console.log(project);
+    return fetch(getUrlPath('projects'), {
+        method: 'post',
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type':'application/json', 
+            'Accept': 'application/json',},
+        body: JSON.stringify(project)
+    })
+      .then(response => response.json())
+
+}
