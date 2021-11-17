@@ -5,6 +5,7 @@ import {GetProjects} from '.././Etc/URLInterface'
 import {useState, useEffect} from 'react';
 import { PageWrapper } from '../Components/PageWrapper';
 import ProjectList from '../Components/ProjectList';
+import { BigLogo } from '../Elements/Logos';
 
 const ProjectListPage = (props) => {
     console.log('AccessToken');
@@ -14,9 +15,9 @@ const ProjectListPage = (props) => {
         <PageWrapper>
         <div className="App">
             <header className="App-header">
-            <img src={logo} className="App-logo" alt="logo" />
+            <BigLogo/>
             <p>
-                This is the Project List Page
+                
             </p>
             <ProjectList accessToken = {props.accessToken}/>
             

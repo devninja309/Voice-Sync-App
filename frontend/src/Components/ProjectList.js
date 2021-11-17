@@ -3,6 +3,7 @@
 import {GetProjects} from '.././Etc/URLInterface'
 
 import {useState, useEffect} from 'react';
+import { ProjectListCard } from './ProjectListCard';
 
  export default function ProjectList (props) {
 
@@ -18,7 +19,7 @@ import {useState, useEffect} from 'react';
  function DisplayProjectsList() {
     if (projects)
     {
-        return projects.map(project => (<p key ={project.ID}> {project.ProjectName}</p>))
+        return projects.map(project => (<ProjectListCard key ={project.ID} ProjectID = {project.ID}> {project.ProjectName}</ProjectListCard>))
     }
     else {
         console.log('No projects :(')
