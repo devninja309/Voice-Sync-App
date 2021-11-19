@@ -9,12 +9,13 @@ import { SimpleCard } from "../Elements/SimpleCard";
 
 export function ProjectListCard (props) 
 {
-    const {ProjectID, ...childProps} = props;
-    const LinkAddress = '/projects/' + ProjectID
+    const {project, ...childProps} = props;
+    const LinkAddress = '/projects/' + project.ProjectID
     return (
-        <div className = "ProjectListCard" key = {childProps.key}>
+        <div className = "ProjectListCard" key={project.ID} >
         <Link to={LinkAddress}>
             <SimpleCard  {...childProps}>
+            {project.ProjectName}
             </SimpleCard>
         </Link>
         </div>

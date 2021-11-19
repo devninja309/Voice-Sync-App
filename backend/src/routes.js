@@ -57,7 +57,7 @@ router.get('/test', (ctx) => {
   .get('/projects', async (ctx) => {
     if (!RequirePermission(ctx,['read:projects'])) {
       //TODO: Handle failure more gracefully, possibly via 'nanner nanner boo boo'
-      ctx.body = JSON.stringify([{projectID: "no you!", ProjectName: "No You!"}]);
+      ctx.body = JSON.stringify([{projectID: "0", ProjectName: "No You!"}]);
       return;
     }
 
@@ -67,7 +67,7 @@ router.get('/test', (ctx) => {
     .post('/projects', async (ctx) => {
       if (!RequirePermission(ctx,['read:projects'])) {
         //TODO: Handle failure more gracefully, possibly via 'nanner nanner boo boo'
-        ctx.body = JSON.stringify([{projectID: "no you!", ProjectName: "No You!"}]);
+        ctx.body = JSON.stringify([{projectID: "0", ProjectName: "No You!"}]);
         console.log('Bad Permissions')
         return;
       }

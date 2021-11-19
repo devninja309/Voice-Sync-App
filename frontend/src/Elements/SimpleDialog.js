@@ -7,7 +7,7 @@ export function SimpleDialog (props)
 {
     const {children, ...childProps} = props;
     return  (  
-        <Dialog {...childProps}>
+        <Dialog className="SimpleDialog" {...childProps}>
         {children}       
         </Dialog>
     )

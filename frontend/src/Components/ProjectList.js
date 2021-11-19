@@ -1,7 +1,7 @@
 //List of projects in DB
 import React from 'react';
 
-import {GetProjects, getUrlPath} from '.././Etc/URLInterface'
+import { getUrlPath} from '.././Etc/URLInterface'
 
 import {useState, useEffect} from 'react';
 import { ProjectListCard } from './ProjectListCard';
@@ -14,14 +14,9 @@ import{useAuthTools} from '../Hooks/Auth';
 
 
  const [projects, setProjects] = useState('');
- const {token,fetchWithAuth} = useAuthTools();
+ const {token, fetchWithAuth} = useAuthTools();
  
  useEffect( () => {
-     GetProjects(token).then(
-        data => {
-            //setProjects(data);
-        }
-     )
     var path = getUrlPath('projects')
     fetchWithAuth(path)
     .then(response => response.json())
@@ -30,11 +25,11 @@ import{useAuthTools} from '../Hooks/Auth';
                  setProjects(data);
              })
 
- },[token, fetchWithAuth]);
+ },[token]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
  function DisplayProjectsList() {
     if (projects)
     {
-        return projects.map(project => (<ProjectListCard key ={project.ID} ProjectID = {project.ID}> {project.ProjectName}</ProjectListCard>))
+        return projects.map(project => (<ProjectListCard key={project.ID} project = {project}/>))
     }
     else {
     }

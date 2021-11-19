@@ -9,6 +9,8 @@ import {CreateProject} from '.././Etc/URLInterface'
 import { ButtonGroup } from "@blueprintjs/core";
 import { SimpleTextInput } from "../Elements/SimpleTextEntry";
 
+import{useAuthTools} from '../Hooks/Auth';
+
 
 export function ProjectCreateDialog (props) 
 {
@@ -16,9 +18,11 @@ export function ProjectCreateDialog (props)
     
     const [projectName, setProjectName] = React.useState(false);
 
+    const {token} = useAuthTools();
+
     function AddProject(){
         console.log(projectName);
-        CreateProject(props.accessToken,{"ProjectName":projectName}).then(
+        CreateProject(token,{"ProjectName":projectName}).then(
             data => {
                 console.log(data);
                 navigate('/projects/' + data.ID)
@@ -30,6 +34,7 @@ export function ProjectCreateDialog (props)
         <SimpleDialog {...childProps}>
             <h3>Create a new project</h3>
             <SimpleTextInput placeholder="Enter Project Name" onChange={event => setProjectName(event.target.value)}/>
+            <p/>
             <ButtonGroup>
                 <SimpleButton onClick={AddProject} Text="Create Project"/>
                 <SimpleButton onClick={handleClose} Text="Cancel"/> 

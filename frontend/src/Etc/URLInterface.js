@@ -28,8 +28,6 @@ export function GetProjects(accessToken)
 }
 export function CreateProject(accessToken, project)
 {
-    console.log('fetching project create')
-    console.log(project);
     return fetch(getUrlPath('projects'), {
         method: 'post',
         headers: {
