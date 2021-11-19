@@ -1,8 +1,4 @@
 //List of active projects
-import logo from '../logo.svg';
-import {GetProjects} from '.././Etc/URLInterface'
-
-import {useState, useEffect} from 'react';
 import { PageWrapper } from '../Components/PageWrapper';
 import ProjectList from '../Components/ProjectList';
 import { BigLogo } from '../Elements/Logos';
@@ -17,7 +13,7 @@ const ProjectListPage = (props) => {
             <p>
                 
             </p>
-            <ProjectList accessToken = {props.accessToken}/>
+            <ProjectList/>
             
             </header>
         </div>

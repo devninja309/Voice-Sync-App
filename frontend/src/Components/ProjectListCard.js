@@ -4,7 +4,6 @@ import * as React from "react";
 import { Link } from "react-router-dom";
 
 import { SimpleCard } from "../Elements/SimpleCard";
-import ProjectListPage from "../Pages/ProjectListPage";
 
 
 

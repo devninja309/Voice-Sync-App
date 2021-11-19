@@ -1,27 +1,36 @@
 //List of projects in DB
 import React from 'react';
-import { useNavigate } from "react-router-dom";
 
-import {GetProjects,CreateProject} from '.././Etc/URLInterface'
+import {GetProjects, getUrlPath} from '.././Etc/URLInterface'
 
 import {useState, useEffect} from 'react';
 import { ProjectListCard } from './ProjectListCard';
-import { SimpleButton} from '../Elements/SimpleButton';
 import { ButtonGroup } from '@blueprintjs/core';
+import { ProjectCreateButton } from './ProjectCreateButton';
+
+import{useAuthTools} from '../Hooks/Auth';
 
  export default function ProjectList (props) {
 
-    const navigate = useNavigate();
 
  const [projects, setProjects] = useState('');
+ const {token,fetchWithAuth} = useAuthTools();
  
  useEffect( () => {
-     GetProjects(props.accessToken).then(
+     GetProjects(token).then(
         data => {
-            setProjects(data);
+            //setProjects(data);
         }
      )
- },[props.accessToken]);
+    var path = getUrlPath('projects')
+    fetchWithAuth(path)
+    .then(response => response.json())
+    .then(
+             data => {
+                 setProjects(data);
+             })
+
+ },[token, fetchWithAuth]);
  function DisplayProjectsList() {
     if (projects)
     {
@@ -30,19 +39,10 @@ import { ButtonGroup } from '@blueprintjs/core';
     else {
     }
 }
-function AddProject(){
-    //ToDo wrap this is a modal to get the project name
-    CreateProject(props.accessToken,{"ProjectName":"NewProjectButtonProject"}).then(
-        data => {
-            navigate('/projects/' + data.ID)
-        }
-    );
-    //ToDo Have this redirect to the project page
-}
-    
     return (
         <div className = "ProjectListBox"> 
-        <ButtonGroup><h3>Projects</h3><SimpleButton icon="cube-add" onClick={AddProject}></SimpleButton></ButtonGroup>
+        <ButtonGroup><h3>Projects</h3><ProjectCreateButton/>
+        </ButtonGroup>
         {DisplayProjectsList()}
         </div>
     )

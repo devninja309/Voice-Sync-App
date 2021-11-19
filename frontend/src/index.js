@@ -4,10 +4,12 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Auth0Provider } from "@auth0/auth0-react";
+import {AuthProvider} from './Hooks/Auth'
 
 //CSS Files
 import "@blueprintjs/core/lib/css/blueprint.css";
 import "@blueprintjs/icons/lib/css/blueprint-icons.css"
+import "@blueprintjs/popover2/lib/css/blueprint-popover2.css";
 
 ReactDOM.render(
   <React.StrictMode>
@@ -18,7 +20,9 @@ ReactDOM.render(
     audience="VoiceSynthManagerBackend"
     scope="read:projects edit:projects"
   >
+    <AuthProvider>
     <App />
+    </AuthProvider>
     </Auth0Provider>
   </React.StrictMode>,
   document.getElementById('root')

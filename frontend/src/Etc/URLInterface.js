@@ -1,6 +1,5 @@
 export const isLocal = window.location.hostname === 'localhost'
 
-const projects = ['project 1', 'project 2', 'project 3'];
 export const getUrlPath = (route) => isLocal ? `http://localhost:3001/${route}` : `/v1/${route}`
 
 //Database

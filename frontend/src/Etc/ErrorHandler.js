@@ -17,6 +17,10 @@ function LogErrorMessageToConsole(errorMessage){
     switch (exportMethod) {
         case exportMethods.DEBUG:
             console.log(errorMessage);
+            break;
+        default:
+            console.log('Invalid export Method');
+
     }
 }
 
@@ -25,5 +29,8 @@ export function LogTraceMessage(message)
     switch (exportMethod) {
         case exportMethods.DEBUG:
             console.log(message);
+            break;
+        default:
+            console.log('Invalid export Method');
     }
 }

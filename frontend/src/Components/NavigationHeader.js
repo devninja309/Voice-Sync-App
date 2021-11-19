@@ -1,7 +1,6 @@
 //Basic Navigation Header
 import * as React from "react";
-import {useState, useEffect} from 'react';
-import {ButtonGroup, Divider, Navbar, Alignment} from "@blueprintjs/core";
+import {Navbar, Alignment} from "@blueprintjs/core";
 import { LoginButton } from "./LoginButton";
 import { LogoutButton } from "./LogoutButton";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -10,7 +9,7 @@ import { LinkButton } from "../Elements/LinkButton";
 
 export function NavigationHeader () 
 {
-    const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
+    const { user, isAuthenticated, isLoading } = useAuth0();
 
     const accountGroup = () => {
         if (isLoading) {

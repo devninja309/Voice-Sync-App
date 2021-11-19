@@ -1,4 +1,4 @@
-import { LogError, LogErrorMessage, LogTraceMessage } from "./ErrorHandler";
+import { LogError, LogErrorMessage } from "./ErrorHandler";
 import { useAuth0 } from "@auth0/auth0-react";
 
 const Audience = "VoiceSynthManagerBackend";

@@ -12,12 +12,14 @@ import LoginPage from './Pages/LoginPage'
 import ProjectListPage from './Pages/ProjectListPage'
 
 import {GetUserToken} from './Etc/TokenManagement';
-import { LogError, LogErrorMessage, LogTraceMessage } from './Etc/ErrorHandler';
+import { LogError, LogErrorMessage } from './Etc/ErrorHandler';
+import { useAuthTools } from './Hooks/Auth';
 
 
 function App() {
   const useAuth0Data = useAuth0();
-  const { user, isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0Data;
+  const { isAuthenticated, isLoading } = useAuth0Data;
+  const {setToken} = useAuthTools();
   const [userToken, setUserToken] = useState(null);
 
     useEffect(() => {
@@ -29,6 +31,7 @@ function App() {
       try {
           const accessToken = await GetUserToken(useAuth0Data);
           setUserToken(accessToken);
+          setToken(accessToken);
       } catch (e) {
           LogErrorMessage('failed to get userToken');
           LogError(e);
@@ -36,7 +39,7 @@ function App() {
       };
 
       getUserToken();
-  }, [getAccessTokenSilently, user?.sub]);
+  }, );
 
   return (
     <BrowserRouter>
