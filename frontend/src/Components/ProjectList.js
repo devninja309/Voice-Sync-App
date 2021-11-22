@@ -1,7 +1,7 @@
 //List of projects in DB
 import React from 'react';
 
-import { getUrlPath} from '.././Etc/URLInterface'
+import { getUrlPath} from '../Hooks/URLInterface'
 
 import {useState, useEffect} from 'react';
 import { ProjectListCard } from './ProjectListCard';

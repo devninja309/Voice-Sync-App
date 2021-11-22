@@ -1,6 +1,8 @@
 import React, {useContext, useState, createContext} from 'react';
 import merge from 'deepmerge';
 
+import {UseAPICallsWithAuth} from './URLInterface'
+
 const AuthContext = createContext()
 const useAuthContext = () => useContext(AuthContext)
 
@@ -34,5 +36,7 @@ export const useAuthTools = () => {
     const fetchWithAuth = (resource, init) => {    
         return fetch(resource,merge(authInit(token),init??{}));
     }
-    return { token, setToken, fetchWithAuth}
+
+    const APICalls = UseAPICallsWithAuth(fetchWithAuth)
+    return { token, setToken, fetchWithAuth, APICalls}
 }
