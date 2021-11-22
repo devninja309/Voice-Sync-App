@@ -27,7 +27,8 @@ export const getUrlPath = (route) => isLocal ? `http://localhost:3001/${route}` 
 //Basic Gets
 export function GetProjects(fetchWithAuth)
 {
-    fetchWithAuth(getUrlPath('projects'));
+    return fetchWithAuth(getUrlPath('projects'))
+    .then(response => response.json());
 }
 
 
@@ -53,7 +54,8 @@ export function CreateProject(fetchWithAuth, project)
 
 export const UseAPICallsWithAuth = (fetchWithAuth) => {
     const CreateProjectWithAuth = (project) => CreateProject(fetchWithAuth, project);
+    const GetProjectsWithAuth = () => GetProjects(fetchWithAuth);
 
 
-    return { CreateProject : CreateProjectWithAuth}
+    return { CreateProject : CreateProjectWithAuth, GetProjects: GetProjectsWithAuth}
 }

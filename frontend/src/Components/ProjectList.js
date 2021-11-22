@@ -14,16 +14,15 @@ import{useAuthTools} from '../Hooks/Auth';
 
 
  const [projects, setProjects] = useState('');
- const {token, fetchWithAuth} = useAuthTools();
+ const {token, APICalls} = useAuthTools();
  
  useEffect( () => {
-    var path = getUrlPath('projects')
-    fetchWithAuth(path)
-    .then(response => response.json())
+     console.log(APICalls);
+    APICalls.GetProjects()
     .then(
-             data => {
-                 setProjects(data);
-             })
+        data => {
+            setProjects(data);
+        })
 
  },[token]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
  function DisplayProjectsList() {
