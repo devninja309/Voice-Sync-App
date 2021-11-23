@@ -1,5 +1,4 @@
-Transform: 'AWS::Serverless-2016-10-31'
-
+Transform: AWS::Serverless-2016-10-31
 Globals:
   Function:
     Runtime: nodejs14.x
@@ -7,24 +6,23 @@ Globals:
     MemorySize: 256
     Environment:
       Variables:
-        Env: !Ref Env
+        Env:
+          Ref: Env
   Api:
     EndpointConfiguration: REGIONAL
-    Cors: "'*'"
-
+    Cors: '''*'''
 Parameters:
   Env:
     Type: String
     Default: qa
     AllowedValues:
-      - qa
-      - prod
-
+    - qa
+    - prod
 Resources:
   WebAPILambdaV1:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./.webpack
+      CodeUri: s3://s3-ia-cfg/3abc75c364b34d7d414c566480c01bd0
       Handler: main.handler
       Events:
         ProxyGateway:

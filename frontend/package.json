@@ -9,6 +9,7 @@
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
     "deepmerge": "^4.2.2",
+    "env-cmd": "^10.1.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router-dom": "^6.0.0-beta.8",
@@ -19,7 +20,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build-qa": "react-scripts build",
+    "build-prod": "./node_modules/.bin/env-cmd -e dev,qa,prod react-scripts build",
+    "deploy-qa": "AWS_DEFAULT_REGION=us-west-2 AWS_PROFILE=ia aws s3 sync build/ s3://portal.qa.ia.webfrontend.com",
+    "deploy-prod": "AWS_DEFAULT_REGION=us-west-2 AWS_PROFILE=ia aws s3 sync build/ s3://portal.ia.webfrontend.com"
   },
   "eslintConfig": {
     "extends": [

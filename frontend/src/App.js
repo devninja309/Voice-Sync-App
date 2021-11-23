@@ -10,6 +10,7 @@ import {UglyPage} from './Pages/UglyPage'
 import {LandingPage} from './Pages/LandingPage'
 import LoginPage from './Pages/LoginPage'
 import ProjectListPage from './Pages/ProjectListPage'
+import ProjectDetailsPage from './Pages/ProjectDetailsPage'
 
 import {GetUserToken} from './Etc/TokenManagement';
 import { LogError, LogErrorMessage } from './Etc/ErrorHandler';
@@ -45,10 +46,11 @@ function App() {
     <BrowserRouter>
       <div>
         <Routes>
-          <Route path ="/" element = {<LandingPage></LandingPage>}></Route>
-          <Route path ="/Ugly" element = {<UglyPage></UglyPage>}></Route>
-          <Route path ="/Login" element = {<LoginPage></LoginPage>}></Route>
-          <Route path ="/Projects" element = {<ProjectListPage accessToken = {userToken}></ProjectListPage>}></Route>
+          <Route path ="/" element = {<LandingPage/>}></Route>
+          <Route path ="/Ugly" element = {<UglyPage/>}></Route>
+          <Route path ="/Login" element = {<LoginPage/>}></Route>
+          <Route path ="/Projects" element = {<ProjectListPage accessToken = {userToken}/>}></Route>
+          <Route path ="/Projects/:projectID" element = {<ProjectDetailsPage />}></Route>
         </Routes>
       </div>
     </BrowserRouter>

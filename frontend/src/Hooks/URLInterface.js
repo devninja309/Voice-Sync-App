@@ -30,6 +30,10 @@ export function GetProjects(fetchWithAuth)
     return fetchWithAuth(getUrlPath('projects'))
     .then(response => response.json());
 }
+export function GetScripts(fetchWithAuth, projectID)
+{
+    return [{ID: 1, ScriptText:'blahblahblah', projectID: {projectID}, ScriptName:'Test Script'}];
+}
 
 
 //Put all the Create stuff here

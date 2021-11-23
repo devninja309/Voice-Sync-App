@@ -17,13 +17,13 @@ Resources:
     Type: AWS::RDS::DBCluster
     Properties:
       DeletionProtection: true
-      Engine: aurora
+      Engine: aurora #Make this MySQL!
       EngineMode: serverless
       EngineVersion: '5.6'
       DatabaseName: mmg
       MasterUsername: !Ref MasterUsername
       MasterUserPassword: !Ref MasterUserPassword
-      DBClusterIdentifier: !Sub 'mmg-aurora-cluster-${Env}'
+      DBClusterIdentifier: !Sub 'ia-aurora-cluster-${Env}'
       ScalingConfiguration:
         AutoPause: true
         SecondsUntilAutoPause: 600

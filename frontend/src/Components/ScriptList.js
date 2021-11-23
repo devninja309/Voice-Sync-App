@@ -8,24 +8,24 @@ import { ProjectCreateButton } from './ProjectCreateButton';
 
 import{useAuthTools} from '../Hooks/Auth';
 
- export default function ProjectList (props) {
+ export default function ScriptList (props) {
 
 
- const [projects, setProjects] = useState('');
+ const [scripts, setScripts] = useState('');
  const {token, APICalls} = useAuthTools();
  
  useEffect( () => {
-    APICalls.GetProjects()
+    APICalls.GetScripts()
     .then(
         data => {
-            setProjects(data);
+            setScripts(data);
         })
 
  },[token]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
- function DisplayProjectsList() {
-    if (projects)
+ function DisplayScriptsList() {
+    if (scripts)
     {
-        return projects.map(project => (<ProjectListCard key={project.ID} project = {project}/>))
+        return scripts.map(script => (<ProjectListCard key={script.ID} script = {script}/>))
     }
     else {
     }
@@ -34,7 +34,7 @@ import{useAuthTools} from '../Hooks/Auth';
         <div className = "ProjectListBox"> 
         <ButtonGroup><h3>Projects</h3><ProjectCreateButton/>
         </ButtonGroup>
-        {DisplayProjectsList()}
+        {DisplayScriptsList()}
         </div>
     )
  }

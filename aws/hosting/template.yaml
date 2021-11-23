@@ -1,0 +1,98 @@
+
+# Create an S3 Bucket that hosts a React app
+# Use AWS CLI to execute the file like the below snippet
+# aws cloudformation deploy --template-file ./cloudformation_basic.yml --stack-name basic --parameter-overrides BucketName=<BUCKET_NAME>
+
+#AWSTemplateFormatVersion: 2010-09-09
+Transform: 'AWS::Serverless-2016-10-31'
+
+Parameters: # params passed to "--parameter-overrides" in CLI
+  Subdomain: #prod vs qa
+    Type: String
+    MinLength: 1
+
+  # CertificateArn: #SSL Cert
+  #   Type: String
+  #   MinLength: 1
+
+  APIGatewayURL:
+    Type: String
+    MinLength: 1
+
+Resources:
+  # Create an S3 Bucket that serves a static website (i.e. React app)
+  S3WebFrontend:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Join ['.', [!Ref Subdomain, 'ia.webfrontend', 'com']]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      WebsiteConfiguration: # this makes the S3 Bucket a static website/app
+        IndexDocument: index.html # default object served when visiting S3 domain
+        ErrorDocument: index.html # just send to app, let React handle errors and routing
+
+
+  CloudFrontIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Sub 'Identity to access ${Subdomain}.ia.webfrontend.com from CloudFront'
+
+  CloudfrontS3Policy:
+    Type: AWS::S3::BucketPolicy
+    DependsOn: 
+    - CloudFrontIdentity
+    - S3WebFrontend
+    Properties:
+      Bucket: !Ref S3WebFrontend
+      PolicyDocument:
+        Statement:
+          Action:
+          - s3:GetObject
+          Effect: Allow
+          Principal:
+            CanonicalUser: !GetAtt CloudFrontIdentity.S3CanonicalUserId
+          Resource: !Join ['/', [!GetAtt S3WebFrontend.Arn, '*']]
+
+  CDN:
+    Type: AWS::CloudFront::Distribution
+    DependsOn: 
+    - CloudFrontIdentity
+    - S3WebFrontend
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        DefaultRootObject: index.html
+        HttpVersion: http2
+        PriceClass: PriceClass_100
+        DefaultCacheBehavior:
+          AllowedMethods:
+          - GET
+          - HEAD
+          Compress: true
+          TargetOriginId: S3Origin
+          ForwardedValues:
+            QueryString: true
+            Cookies:
+              Forward: none
+          ViewerProtocolPolicy: redirect-to-https
+        Origins:
+        - Id: S3Origin
+          DomainName: !GetAtt S3WebFrontend.DomainName
+          S3OriginConfig: 
+            OriginAccessIdentity: !Join ['/', ['origin-access-identity/cloudfront', !Ref CloudFrontIdentity]]
+        - Id: APIGateway
+          DomainName: !Ref APIGatewayURL
+          OriginPath: /Prod
+          CustomOriginConfig:
+            OriginProtocolPolicy: https-only
+        CustomErrorResponses:
+        - ErrorCode: 403
+          ResponseCode: 200
+          ResponsePagePath: '/index.html'  
+        - ErrorCode: 404
+          ResponseCode: 200
+          ResponsePagePath: '/index.html'  

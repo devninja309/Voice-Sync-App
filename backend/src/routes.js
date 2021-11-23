@@ -2,6 +2,7 @@
 import Router from 'koa-router';
 import {GetProjects, CreateProject} from './databasestorage/dataaccess.js';
 import jwt from 'koa-jwt';
+import { addTests } from './routes.test.js';
 
 
 export const router = new Router()
@@ -49,10 +50,6 @@ router.get('/test', (ctx) => {
     ctx.body = 'Hello World'
 })
 
-.get('/stuff', (ctx) => {
-    ctx.body = 'stuff';
-  })
-
   //TODO Move these into a controller specific to the object when this becomes unmanageable
   .get('/projects', async (ctx) => {
     if (!RequirePermission(ctx,['read:projects'])) {
@@ -64,6 +61,7 @@ router.get('/test', (ctx) => {
     var projectsList = await GetProjects();
     ctx.body = projectsList
     })
+
     .post('/projects', async (ctx) => {
       if (!RequirePermission(ctx,['read:projects'])) {
         //TODO: Handle failure more gracefully, possibly via 'nanner nanner boo boo'
@@ -84,4 +82,6 @@ router.get('/test', (ctx) => {
       ctx.body = insertProject;
 
     })
+
+    addTests(router);
 
