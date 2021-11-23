@@ -9,13 +9,13 @@ package: clean
 deploy: package
 	AWS_DEFAULT_REGION=us-west-2 AWS_PROFILE=ia \
 	sam deploy \
-	--stack-name ia-aurora \
+	--stack-name ia-mysql \
 	--template-file .template.yaml \
 
 deploy-prod: package
 	AWS_DEFAULT_REGION=us-west-2 AWS_PROFILE=ia \
 	sam deploy \
-	--stack-name ia-prod-aurora \
+	--stack-name ia-prod-mysql \
 	--template-file .template.yaml \
 	--capabilities CAPABILITY_IAM \
 	--parameter-overrides Env=prod \

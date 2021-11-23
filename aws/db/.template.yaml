@@ -1,5 +1,4 @@
-Transform: 'AWS::Serverless-2016-10-31'
-
+Transform: AWS::Serverless-2016-10-31
 Parameters:
   MasterUsername:
     Type: String
@@ -11,17 +10,18 @@ Parameters:
   Env:
     Type: String
     Default: dev
-
 Resources:
   RDSInstance:
     Type: AWS::RDS::DBInstance
     Properties:
       DeletionProtection: true
-      Engine: mysql #Make this MySQL!
+      Engine: mysql
       EngineVersion: '5.6'
       DBName: IA_VoiceSynth
-      MasterUsername: !Ref MasterUsername
-      MasterUserPassword: !Ref MasterUserPassword
+      MasterUsername:
+        Ref: MasterUsername
+      MasterUserPassword:
+        Ref: MasterUserPassword
       AllocatedStorage: '5'
       DBInstanceClass: db.t3.small
     DeletionPolicy: Snapshot
