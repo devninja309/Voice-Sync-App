@@ -7,7 +7,12 @@ import koaBody from 'koa-body';
 import env from 'dotenv'
 import { GetJWTCheck } from './security/tokenManager.js';
 
-var result = env.config();
+
+const deployedEnv = process.env.Env || 'dev'
+
+var result = env.config({ path: '.env.' + deployedEnv });
+
+//TODO check result and fail gracefully
 
 const app = new Koa();
 app.use(koaBody());

@@ -1,4 +1,5 @@
 //Specific details for WellSaid
+import fetch from "node-fetch";
 
 //GetAudioFromWellSaid
 

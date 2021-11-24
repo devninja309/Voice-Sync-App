@@ -1,10 +1,12 @@
 
 import Router from 'koa-router';
 import jwt from 'koa-jwt';
+import fetch from "node-fetch";
 
 import {getClip} from './voicesynthapi/WellSaidLabs.js';
 
 
+const ttsEndPoint = "https://api.wellsaidlabs.com/v1/tts/stream"
 //Non-real test endpoints
 
 export function addTests(router) {
@@ -31,10 +33,10 @@ export function addTests(router) {
         const avatarId = ctx.request.body.avatarId;
         const text = ctx.request.body.text;
       
-        req.on('aborted', () => {
-          // Graceful end of the TTS stream when a client connection is aborted
-          abortController.abort()
-        })
+        // ctx.req.on('close', () => {
+        //   // Graceful end of the TTS stream when a client connection is aborted
+        //   abortController.abort()
+        // })
       
         /**
          * Should this request fail, make sure to check the response headers
@@ -49,7 +51,7 @@ export function addTests(router) {
          * x-rate-limit-reset: 1619635874002
          */
         const ttsResponse = await fetch(ttsEndPoint, {
-          signal: abortController.signal,
+          //signal: abortController.signal,
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -57,14 +59,18 @@ export function addTests(router) {
           },
           body: JSON.stringify({
             speaker_id: avatarId,
-            text,
+            text: text,
           }),
         });
         
         ctx.res.writeHead(ttsResponse.status, ttsResponse.headers.raw());
         ctx.res.flushHeaders();
+
+        console.log('tts Response');
+        console.log(ttsResponse);
+
+        ctx.body = ttsResponse.body;
       
-        ttsResponse.body.pipe(ctx.body)
       });
 
 

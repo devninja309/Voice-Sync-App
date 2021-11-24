@@ -15,6 +15,7 @@ import ProjectDetailsPage from './Pages/ProjectDetailsPage'
 import {GetUserToken} from './Etc/TokenManagement';
 import { LogError, LogErrorMessage } from './Etc/ErrorHandler';
 import { useAuthTools } from './Hooks/Auth';
+import RawAudioTestPage from './Pages/RawAudioTestPage';
 
 
 function App() {
@@ -51,6 +52,7 @@ function App() {
           <Route path ="/Login" element = {<LoginPage/>}></Route>
           <Route path ="/Projects" element = {<ProjectListPage accessToken = {userToken}/>}></Route>
           <Route path ="/Projects/:projectID" element = {<ProjectDetailsPage />}></Route>
+          <Route path ="/AudioTest" element = {<RawAudioTestPage />}></Route>
         </Routes>
       </div>
     </BrowserRouter>

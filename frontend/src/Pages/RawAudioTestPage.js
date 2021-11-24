@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { getUrlPath } from '../Hooks/URLInterface';
 
 const Avatars = [
   { id: 3, name: 'Alana B.' },
@@ -25,7 +26,8 @@ function RawAudioTestPage() {
 
   const getClip = useCallback(async () => {
     setUrl('');
-    const response = await fetch('/stream', { 
+    var path = getUrlPath('stream');
+    const response = await fetch(path, { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
