@@ -12,15 +12,17 @@ import {PlayAudioClip} from "./PlayAudioClip";
 export function ScriptListCard (props) 
 {
     const {script, ...childProps} = props;
-    const LinkAddress = '/projects/' + script.projectID + '/scripts/' + script.ID
+    const LinkAddress = '/projects/' + script.ProjectID + '/scripts/' + script.ID
     return (
         <div className = "ProjectListCard" key={script.ID} >
         <Link to={LinkAddress}>
             <SimpleCard  {...childProps}>
+                <div>
             {script.ScriptName}
+            </div>
             
             <Tooltip
-                        content={<span>Full text of the script goes here!</span>}
+                        content={<span>{script.ScriptText}</span>}
                         openOnTargetFocus={false}
                         usePortal={false}
                     >

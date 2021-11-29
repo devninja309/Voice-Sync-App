@@ -11,6 +11,7 @@ import {LandingPage} from './Pages/LandingPage'
 import LoginPage from './Pages/LoginPage'
 import ProjectListPage from './Pages/ProjectListPage'
 import ProjectDetailsPage from './Pages/ProjectDetailsPage'
+import ScriptDetailsPage from './Pages/ScriptDetailsPage'
 
 import {GetUserToken} from './Etc/TokenManagement';
 import { LogError, LogErrorMessage } from './Etc/ErrorHandler';
@@ -52,6 +53,7 @@ function App() {
           <Route path ="/Login" element = {<LoginPage/>}></Route>
           <Route path ="/Projects" element = {<ProjectListPage accessToken = {userToken}/>}></Route>
           <Route path ="/Projects/:projectID" element = {<ProjectDetailsPage />}></Route>
+          <Route path ="/Projects/:projectID/scripts/:scriptID" element = {<ScriptDetailsPage />}></Route>
           <Route path ="/AudioTest" element = {<RawAudioTestPage />}></Route>
         </Routes>
       </div>

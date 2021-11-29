@@ -32,8 +32,8 @@ import{useAuthTools} from '../Hooks/Auth';
 }
     return (
         <div className = "ProjectListBox"> 
-        <ButtonGroup><h3>Projects</h3><ProjectCreateButton/>
-        </ButtonGroup>
+        <div className = 'info-row'><h3>Projects</h3><ButtonGroup><ProjectCreateButton/>
+        </ButtonGroup></div>
         {DisplayProjectsList()}
         </div>
     )

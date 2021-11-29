@@ -10,6 +10,7 @@ import { PageWrapper } from '../Components/PageWrapper';
 import{useAuthTools} from '../Hooks/Auth';
 
 import ScriptList from '../Components/ScriptList';
+import { BigLogo } from '../Elements/Logos';
 
 //useparams here react-router-dom
 
@@ -33,12 +34,16 @@ const ProjectDetailsPage = (props) => {
         <PageWrapper>
         <div className="App">
             <header className="App-header">
+            <BigLogo/>
+            <div className ="Project-Name-Box">
             <h3>
             {project.ProjectName}
             </h3>
-            <p>
+            <hr width='80%'/>
+            <p  className ="p-Project-Description" >
             Project Description goes here.  A project is conceptually a single class.  It might have many scripts (final output file) underneath it    
             </p>
+            </div>
             <ScriptList projectID = {projectID}></ScriptList>           
             </header>
         </div>

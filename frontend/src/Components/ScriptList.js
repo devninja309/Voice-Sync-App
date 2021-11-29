@@ -33,8 +33,8 @@ import{useAuthTools} from '../Hooks/Auth';
 }
     return (
         <div className = "ProjectListBox"> 
-        <ButtonGroup><h3>Scripts</h3><ScriptCreateButton/>
-        </ButtonGroup>
+        <div className = 'info-row'><h3>Scripts </h3> <ButtonGroup height = '10px'><ScriptCreateButton projectID = {projectID}/>
+        </ButtonGroup></div>
         {DisplayScriptsList()}
         </div>
     )

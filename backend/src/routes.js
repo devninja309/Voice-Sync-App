@@ -1,6 +1,6 @@
 
 import Router from 'koa-router';
-import {GetProjects, GetProjectDetails, CreateProject, GetScripts} from './databasestorage/dataaccess.js';
+import {GetProjects, GetProjectDetails, CreateProject, GetScripts, CreateScript} from './databasestorage/dataaccess.js';
 import jwt from 'koa-jwt';
 import { addTests } from './routes.test.js';
 
@@ -106,6 +106,27 @@ router.get('/test', (ctx) => {
       }
       var insertProject = await CreateProject(project);
       ctx.body = insertProject;
+
+    })
+
+    .post('/scripts', async (ctx) => {
+      if (!RequirePermission(ctx,['read:projects'])) {
+        //TODO: Handle failure more gracefully, possibly via 'nanner nanner boo boo'
+        ctx.body = JSON.stringify([{ID: "0", ProjectName: "No You!"}]);
+        console.log('Bad Permissions')
+        return;
+      }
+      let script = ctx.request.body;
+      console.log('Request to create script');
+      console.log(ctx.request);
+      console.log(script)
+      if (typeof(script) == "undefined")
+      {
+        ctx.body = JSON.stringify([{projectID: "Bad", ProjectName: "call"}]);
+        return;
+      }
+      var insertScript = await CreateScript(script);
+      ctx.body = insertScript;
 
     })
 

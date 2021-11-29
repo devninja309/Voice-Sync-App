@@ -3,6 +3,7 @@ import * as React from "react";
 
 import { ProjectCreateDialog } from "./ProjectCreateDialog";
 import { SimpleButton } from "../Elements/SimpleButton";
+import { IconButton } from "../Elements/IconButton";
 
 export function ProjectCreateButton (props) {
 
@@ -12,7 +13,7 @@ export function ProjectCreateButton (props) {
 
     return (
         <>
-            <SimpleButton icon="cube-add" onClick={handleButtonClick}/>
+            <IconButton icon="cube-add" onClick={handleButtonClick}/>
             <ProjectCreateDialog isOpen = {isOpen} handleClose = {handleClose}/>
         </>
     )

@@ -60,6 +60,14 @@ export function CreateProject(fetchWithAuth, project)
       .then(response => response.json())
 
 }
+export function CreateScript(fetchWithAuth, script)
+{
+    console.log('create script');
+    console.log(script);
+    return fetchWithAuth(getUrlPath('scripts'), PostHeadersForCreate(script))
+      .then(response => response.json())
+
+}
 
 //Put any alternate stuff here
 
@@ -68,11 +76,13 @@ export const UseAPICallsWithAuth = (fetchWithAuth) => {
     const GetProjectsWithAuth = () => GetProjects(fetchWithAuth);
     const GetProjectDetailsWithAuth = (projectID) => GetProjectDetails(fetchWithAuth, projectID);
     const GetScriptsWithAuth = (projectID) => GetScripts(fetchWithAuth, projectID);
+    const CreateScriptWithAuth = (script) => CreateScript(fetchWithAuth, script);
 
 
     return { 
         CreateProject : CreateProjectWithAuth, 
         GetProjects: GetProjectsWithAuth, 
         GetProjectDetails: GetProjectDetailsWithAuth, 
-        GetScripts: GetScriptsWithAuth}
+        GetScripts: GetScriptsWithAuth, 
+        CreateScript: CreateScriptWithAuth}
 }

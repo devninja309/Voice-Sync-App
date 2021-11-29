@@ -67,11 +67,40 @@ export function CreateProject(project)
   });
 }
 
-//GetListOfNarrationsByProject
-//GetNarrationByID
-    //GetClipsByID
-//CreateNarration
-//CreateClip
+export function CreateScript(script)
+{
+  //Check Script
+  var error = false;
+  var errorString = "";
+  if (!script.scriptName){
+    error = true;
+    errorString += "Invalid Script Name\n";
+  }
+  if (!script.projectID){
+    error = true;
+    errorString += "Invalid ProjectID\n";
+  }
+  return new Promise( function (resolve, reject) {
+
+    var con = getCon();
+
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+
+    var insert = 'Insert into IA_VoiceSynth.Scripts (ScriptName,ScriptText, ProjectID) Values (?,?,?)';
+    var values = [script.scriptName, script.scriptText, script.projectID];
+
+    con.query(insert,values, (err, results, fields) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      con.end();
+      script.ID = results.insertId
+      resolve( script);
+    });
+  });
+}
 
 function getCon()
 {
