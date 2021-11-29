@@ -12,16 +12,19 @@ INSERT INTO `IA_VoiceSynth`.`Projects` (`ID`, `ProjectName`) VALUES ('3', 'Proje
 Create Table `IA_VoiceSynth`.`Scripts` (
   `ID` INT NOT NULL AUTO_INCREMENT,
   `ScriptName` VARCHAR(45) NULL,
-  'ProjectID' INT NOT NULL,
-  'ScriptText' VARCHAR(MAX) NULL,
-  FOREIGN KEY ('ProjectID')
-    REFERENCES `IA_VoiceSynth`.`Projects`('ID'),
+  `ProjectID` INT NOT NULL,
+  `ScriptText` LongText NULL,
+  `MergedClip` LongBlob NULL,
+  FOREIGN KEY (`ProjectID`)
+    REFERENCES `IA_VoiceSynth`.`Projects`(`ID`),
   PRIMARY KEY (`ID`));
 
+  
 Create Table `IA_VoiceSynth`.`Clips` (
   `ID` INT NOT NULL AUTO_INCREMENT,
-  'ScriptID' INT NOT NULL,
-  'ScriptText' VARCHAR(MAX) NULL,
-  FOREIGN KEY ('ScriptID')
-    REFERENCES `IA_VoiceSynth`.`Scripts`('ID'),
+  `ScriptID` INT NOT NULL,
+  `ScriptText` LongText NULL,
+  `AudioClip` LongBlob NULL,
+  FOREIGN KEY (`ScriptID`)
+    REFERENCES `IA_VoiceSynth`.`Scripts`(`ID`),
   PRIMARY KEY (`ID`));

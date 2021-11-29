@@ -33,7 +33,10 @@ export function NavigationHeader ()
                     {accountGroup()}
             <Navbar.Divider />
                     {isAuthenticated && 
+                        <div>
                         <LinkButton Link = '/projects' Text='Projects'/>
+                        <LinkButton Link = '/AudioTest' Text='Audio Test Page'/>
+                        </div>
                     }
 
         </Navbar.Group>

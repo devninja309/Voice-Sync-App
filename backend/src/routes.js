@@ -1,6 +1,6 @@
 
 import Router from 'koa-router';
-import {GetProjects, CreateProject} from './databasestorage/dataaccess.js';
+import {GetProjects, GetProjectDetails, CreateProject, GetScripts} from './databasestorage/dataaccess.js';
 import jwt from 'koa-jwt';
 import { addTests } from './routes.test.js';
 
@@ -54,18 +54,44 @@ router.get('/test', (ctx) => {
   .get('/projects', async (ctx) => {
     if (!RequirePermission(ctx,['read:projects'])) {
       //TODO: Handle failure more gracefully, possibly via 'nanner nanner boo boo'
-      ctx.body = JSON.stringify([{projectID: "0", ProjectName: "No You!"}]);
+      ctx.body = JSON.stringify([{ID: "0", ProjectName: "No You!"}]);
       return;
     }
 
     var projectsList = await GetProjects();
     ctx.body = projectsList
-    })
+    })  
+    .get('/projects/:projectID', async (ctx) => {
+      if (!RequirePermission(ctx,['read:projects'])) {
+        //TODO: Handle failure more gracefully, possibly via 'nanner nanner boo boo'
+        console.log('Bad Project Get Permissions')
+        ctx.body = JSON.stringify([{ID: "0", ProjectName: "No You!"}]);
+        return;
+      }
+      console.log('Getting Project Details');
+      console.log(ctx.params.projectID);
+      var project = await GetProjectDetails(ctx.params.projectID);
+      ctx.body = project;
+      })
+    .get('/projects/:projectID/scripts', async (ctx) => {
+      if (!RequirePermission(ctx,['read:projects'])) {
+        console.log('Bad Project Scripts Get Permissions')
+        //TODO: Handle failure more gracefully, possibly via 'nanner nanner boo boo'
+        ctx.body = JSON.stringify([{ID: "0", ScriptName: "No You!"}]);
+        return;
+      }
+  
+      //console.log('Getting Project Script List');
+      //console.log(ctx.params.projectID);
+      var scriptsList = await GetScripts(ctx.params.projectID);
+      ctx.body = scriptsList
+      //console.log(scriptsList);
+      })
 
     .post('/projects', async (ctx) => {
       if (!RequirePermission(ctx,['read:projects'])) {
         //TODO: Handle failure more gracefully, possibly via 'nanner nanner boo boo'
-        ctx.body = JSON.stringify([{projectID: "0", ProjectName: "No You!"}]);
+        ctx.body = JSON.stringify([{ID: "0", ProjectName: "No You!"}]);
         console.log('Bad Permissions')
         return;
       }

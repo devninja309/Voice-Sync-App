@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { PageWrapper } from '../Components/PageWrapper';
 import { getUrlPath } from '../Hooks/URLInterface';
 
 const Avatars = [
@@ -40,6 +41,7 @@ function RawAudioTestPage() {
   }, [currentAvatar, text])
 
   return (
+    <PageWrapper>
     <div className="App App-header">
       <select 
         className="input"
@@ -61,6 +63,7 @@ function RawAudioTestPage() {
       </div>
       <button className="input" onClick={getClip}>Get clip!</button>
     </div>
+        </PageWrapper>
   );
 }
 

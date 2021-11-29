@@ -11,8 +11,32 @@ export function GetProjects ()
     {
         console.error(error)
     }
-    //return "teapot";
-    //return ["Project 1", "Project 2", "Project 3"];
+}
+export function GetProjectDetails(projectID)
+{
+  var query = "SELECT * FROM IA_VoiceSynth.Projects Where ID = ?";
+  var values = [projectID];
+  try{
+  return SQLQuery(query, values);
+  }
+  catch (error)
+  {
+      console.error(error)
+  }
+
+}
+
+export function GetScripts(projectID)
+{
+    var query = "SELECT * FROM IA_VoiceSynth.Scripts Where ProjectID = ?";
+    var values = [projectID];
+    try{
+    return SQLQuery(query, values);
+    }
+    catch (error)
+    {
+        console.error(error)
+    }
 }
 
 export function CreateProject(project)
@@ -59,7 +83,7 @@ function getCon()
       });
 }
 
-function SQLQuery(query)
+function SQLQuery(query, values)
 {
     return new Promise( function (resolve, reject) {
 
@@ -69,7 +93,7 @@ function SQLQuery(query)
     if (err) console.log( err);
   });
   
-  con.query(query, function (error, results, fields) {
+  con.query(query, values, function (error, results, fields) {
     if (error) throw error;
     con.end();
     resolve( JSON.stringify(results));
