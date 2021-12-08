@@ -14,6 +14,7 @@ import { BigLogo } from '../Elements/Logos';
 
 const ChapterDetailsPage = (props) => {
     const ChapterID =useParams().ChapterID;
+    const CourseID =useParams().CourseID;
 
     const [chapter, setChapter] = useState({ChapterName:'Not Loaded'});
     const {token, APICalls} = useAuthTools();
@@ -41,7 +42,7 @@ const ChapterDetailsPage = (props) => {
             </h3>
             <hr width='80%'/>
             </div>
-            <SlideList ChapterID = {ChapterID}></SlideList>           
+            <SlideList CourseID = {CourseID} ChapterID = {ChapterID}></SlideList>           
             </header>
         </div>
         </PageWrapper>

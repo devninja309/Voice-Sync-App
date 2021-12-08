@@ -12,7 +12,7 @@ import {PlayAudioClip} from "./PlayAudioClip";
 export function SlideListCard (props) 
 {
     const {slide, ...childProps} = props;
-    const LinkAddress = '/courses/' + slide.CourseID + '/slide/' + slide.ID
+    const LinkAddress = '/courses/' + slide.CourseID + '/chapters/' + slide.ChapterID + '/slides/' + slide.ID
     return (
         <div className = "courseListCard" key={slide.ID} >
         <Link to={LinkAddress}>

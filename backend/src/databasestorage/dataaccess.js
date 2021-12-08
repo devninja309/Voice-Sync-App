@@ -40,7 +40,8 @@ export async function GetChapterDetails(chapterID)
 
 export function GetSlides(chapterID)
 {
-    let query = "SELECT * FROM IA_VoiceSynth.Slides Where ChapterID = ?";
+    let query = `SELECT Slides.* , Chapters.CourseID as CourseID FROM IA_VoiceSynth.Slides 
+                  Left Join Chapters on Chapters.ID = Slides.ChapterID Where ChapterID = ?`;
     let values = [chapterID];
     try{
     return SQLQuery(query, values)
