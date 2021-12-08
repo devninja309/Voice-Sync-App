@@ -1,103 +1,164 @@
 import mysql, { createConnection } from 'mysql';
 
-//GetListOfProjects
-export function GetProjects ()
+//GetListOfcourses
+export function GetCourses ()
 {
-    var query = "SELECT * FROM IA_VoiceSynth.Projects";
-    try{
+    let query = "SELECT * FROM IA_VoiceSynth.Courses";
     return SQLQuery(query);
-    }
-    catch (error)
-    {
-        console.error(error)
-    }
 }
-export function GetProjectDetails(projectID)
+export function GetCourseDetails(courseID)
 {
-  var query = "SELECT * FROM IA_VoiceSynth.Projects Where ID = ?";
-  var values = [projectID];
-  try{
+  let query = "SELECT * FROM IA_VoiceSynth.Courses Where ID = ?";
+  let values = [courseID];
+  
   return SQLQuery(query, values);
-  }
-  catch (error)
-  {
-      console.error(error)
-  }
-
 }
 
-export function GetScripts(projectID)
+export function GetChapters(courseID)
 {
-    var query = "SELECT * FROM IA_VoiceSynth.Scripts Where ProjectID = ?";
-    var values = [projectID];
+    let query = `SELECT Chapters.*, Count(Slides.ID) as SlideCount FROM IA_VoiceSynth.Chapters 
+              left join IA_VoiceSynth.Slides 
+              on Chapters.ID = Slides.ChapterID 
+              Where CourseID = ?
+              group by Chapters.ID `;
+    let values = [courseID];
     try{
-    return SQLQuery(query, values);
+    return SQLQuery(query, values)
     }
     catch (error)
     {
         console.error(error)
     }
 }
-
-export function CreateProject(project)
+export async function GetChapterDetails(chapterID)
 {
-  //Check Project
-  if (!project.projectName){
+  let query = "SELECT * FROM IA_VoiceSynth.Chapters Where ID = ?";
+  let values = [chapterID];
+  
+  return SQLQuery(query, values);
+}
+
+export function GetSlides(chapterID)
+{
+    let query = "SELECT * FROM IA_VoiceSynth.Slides Where ChapterID = ?";
+    let values = [chapterID];
+    try{
+    return SQLQuery(query, values)
+    }
+    catch (error)
+    {
+        console.error(error)
+    }
+}
+export async function GetSlideDetails(slideID)
+{
+  let promises = [];
+  let querySlides = `SELECT * FROM IA_VoiceSynth.Slides as Slides Where Slides.ID = ?`;
+  let valuesSlides = [slideID];
+  let slides = await SQLQuery(querySlides, valuesSlides);
+  
+  slides.forEach(slide => {
+    
+      let queryClips = `Select * from Clips where Clips.SlideID = ?`;
+
+      promises.push(SQLQuery(queryClips, valuesSlides).then(clips => {
+        slide.Clips = clips
+      }));
+  })
+  await Promise.all(promises);
+  return slides;
+}
+
+export function CreateCourse(course)
+{
+  //Check course
+  if (!course.CourseName){
     //Blow up?
   }
   return new Promise( function (resolve, reject) {
 
-    var con = getCon();
+    let con = getCon();
 
     con.connect(function(err) {
       if (err) console.log( err);
     });
 
-    var insert = 'Insert into IA_VoiceSynth.Projects (ProjectName) Values (?)';
-    var values = [project.ProjectName];
+    let insert = 'Insert into IA_VoiceSynth.Courses (CourseName) Values (?)';
+    let values = [course.CourseName];
 
     con.query(insert,values, (err, results, fields) => {
       if (err) {
         return console.error(err.message);
       }
       con.end();
-      project.ID = results.insertId
-      resolve( project);
+      course.ID = results.insertId
+      resolve( course);
+    });
+  });
+}
+export function CreateChapter(chapter)
+{
+  //Check chapter
+  if (!chapter.ChapterName){
+    //Blow up?
+  }
+  if (!chapter.CourseID){
+    error = true;
+    errorString += "Invalid ChapterID\n";
+  }
+  return new Promise( function (resolve, reject) {
+
+    let con = getCon();
+
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+
+    let insert = 'Insert into IA_VoiceSynth.Chapters (ChapterName, CourseID) Values (?,?)';
+    let values = [chapter.ChapterName, chapter.CourseID];
+
+    con.query(insert,values, (err, results, fields) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      con.end();
+      chapter.ID = results.insertId
+      resolve( chapter);
     });
   });
 }
 
-export function CreateScript(script)
+export function CreateSlide(slide)
 {
-  //Check Script
-  var error = false;
-  var errorString = "";
-  if (!script.scriptName){
+  //Check Slide
+  let error = false;
+  let errorString = "";
+  if (!slide.SlideName){
     error = true;
-    errorString += "Invalid Script Name\n";
+    errorString += "Invalid Slide Name\n";
   }
-  if (!script.projectID){
+  if (!slide.ChapterID){
     error = true;
-    errorString += "Invalid ProjectID\n";
+    errorString += "Invalid ChapterID\n";
   }
   return new Promise( function (resolve, reject) {
 
-    var con = getCon();
+    let con = getCon();
 
     con.connect(function(err) {
       if (err) console.log( err);
     });
 
-    var insert = 'Insert into IA_VoiceSynth.Scripts (ScriptName,ScriptText, ProjectID) Values (?,?,?)';
-    var values = [script.scriptName, script.scriptText, script.projectID];
+    let insert = 'Insert into IA_VoiceSynth.Slides (SlideName,SlideText, ChapterID) Values (?,?,?)';
+    let values = [slide.SlideName, slide.SlideText, slide.ChapterID];
 
     con.query(insert,values, (err, results, fields) => {
       if (err) {
         return console.error(err.message);
       }
       con.end();
-      script.ID = results.insertId
-      resolve( script);
+      slide.ID = results.insertId
+      resolve( slide);
     });
   });
 }
@@ -114,19 +175,25 @@ function getCon()
 
 function SQLQuery(query, values)
 {
-    return new Promise( function (resolve, reject) {
+    try {
+      return new Promise( function (resolve, reject) {
 
-  var con = getCon();
+    let con = getCon();
 
-  con.connect(function(err) {
-    if (err) console.log( err);
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+    
+    con.query(query, values, function (error, results, fields) {
+      if (error) throw error;
+      con.end();
+      resolve( results);
+    });
+    
   });
-  
-  con.query(query, values, function (error, results, fields) {
-    if (error) throw error;
-    con.end();
-    resolve( JSON.stringify(results));
-  });
-   
-});
+  }
+  catch (error)
+  {
+      console.error(error)
+  }
 }

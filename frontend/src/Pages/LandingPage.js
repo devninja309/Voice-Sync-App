@@ -13,7 +13,7 @@ export function LandingPage ()
     <header className="App-header">
       <BigLogo/>
       
-      <LinkButton Link = '/projects' Text='Projects'/>
+      <LinkButton Link = '/courses' Text='Courses'/>
 
     </header>
     </PageWrapper>

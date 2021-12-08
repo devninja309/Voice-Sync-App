@@ -15,7 +15,7 @@ const LoginPage = () => {
         <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-            This is the Project Login Page
+            This is the course Login Page
         </p>
         <LoginButton/>
         </header>

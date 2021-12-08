@@ -1,7 +1,7 @@
 import React, {useContext, useState, createContext} from 'react';
 import merge from 'deepmerge';
 
-import {UseAPICallsWithAuth} from './URLInterface'
+import {UseAPICallsWithAuth} from './APICalls'
 
 const AuthContext = createContext()
 const useAuthContext = () => useContext(AuthContext)

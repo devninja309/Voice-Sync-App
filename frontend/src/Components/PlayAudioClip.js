@@ -5,7 +5,7 @@ export function PlayAudioClip(props) {
 var file = props.audiofile;
 if (!file) {
     return (
-        <p>No Audio</p>
+        <p className="p-no-audio">No Audio</p>
     )
 }
     return (

@@ -13,7 +13,7 @@ export const GetUserToken = async (useAuth0Data) => {
   try {
     const accessToken = await getAccessTokenSilently({
       audience: Audience,
-      scope: "read:projects edit:projects",
+      scope: "read:courses edit:courses",
     });
     return accessToken;
     }catch (e) {

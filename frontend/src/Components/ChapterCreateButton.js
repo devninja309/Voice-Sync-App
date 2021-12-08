@@ -1,11 +1,11 @@
 
 import * as React from "react";
 
-import { ProjectCreateDialog } from "./ProjectCreateDialog";
-import { SimpleButton } from "../Elements/SimpleButton";
+import { ChapterCreateDialog } from "./ChapterCreateDialog";
 import { IconButton } from "../Elements/IconButton";
 
-export function ProjectCreateButton (props) {
+export function ChapterCreateButton (props) {
+    var CourseID = props.CourseID;
 
     const [isOpen, setIsOpen] = React.useState(false);
     const handleButtonClick = React.useCallback(() => setIsOpen(!isOpen), [isOpen]);
@@ -14,7 +14,7 @@ export function ProjectCreateButton (props) {
     return (
         <>
             <IconButton icon="cube-add" onClick={handleButtonClick}/>
-            <ProjectCreateDialog isOpen = {isOpen} handleClose = {handleClose}/>
+            <ChapterCreateDialog isOpen = {isOpen} handleClose = {handleClose} CourseID = {CourseID}/>
         </>
     )
 

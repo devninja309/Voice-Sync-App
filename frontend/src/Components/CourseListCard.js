@@ -1,4 +1,3 @@
-//Simple button, base class for other buttons
 
 import * as React from "react";
 import { Link } from "react-router-dom";
@@ -7,15 +6,15 @@ import { SimpleCard } from "../Elements/SimpleCard";
 
 
 
-export function ProjectListCard (props) 
+export function CourseListCard (props) 
 {
-    const {project, ...childProps} = props;
-    const LinkAddress = '/projects/' + project.ID
+    const {course, ...childProps} = props;
+    const LinkAddress = '/courses/' + course.ID
     return (
-        <div className = "ProjectListCard" key={project.ID} >
+        <div className = "courseListCard" key={course.ID} >
         <Link to={LinkAddress}>
             <SimpleCard  {...childProps}>
-            {project.ProjectName}
+            {course.CourseName}
             </SimpleCard>
         </Link>
         </div>

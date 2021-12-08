@@ -29,10 +29,10 @@ const external_mysql_namespaceObject = require("mysql");
 ;// CONCATENATED MODULE: ./src/databasestorage/dataaccess.js
 
 
-//GetListOfProjects
-function GetProjects ()
+//GetListOfcourses
+function Getcourses ()
 {
-    var query = "SELECT * FROM IA_VoiceSynth.Projects";
+    var query = "SELECT * FROM IA_VoiceSynth.courses";
     try{
     return SQLQuery(query);
     }
@@ -41,13 +41,13 @@ function GetProjects ()
         console.error(error)
     }
     //return "teapot";
-    //return ["Project 1", "Project 2", "Project 3"];
+    //return ["course 1", "course 2", "course 3"];
 }
 
-function CreateProject(project)
+function Createcourse(course)
 {
-  //Check Project
-  if (!project.projectName){
+  //Check course
+  if (!course.courseName){
     //Blow up?
   }
   return new Promise( function (resolve, reject) {
@@ -58,21 +58,21 @@ function CreateProject(project)
       if (err) console.log( err);
     });
 
-    var insert = 'Insert into IA_VoiceSynth.Projects (ProjectName) Values (?)';
-    var values = [project.ProjectName];
+    var insert = 'Insert into IA_VoiceSynth.courses (courseName) Values (?)';
+    var values = [course.courseName];
 
     con.query(insert,values, (err, results, fields) => {
       if (err) {
         return console.error(err.message);
       }
       con.end();
-      project.ID = results.insertId
-      resolve( project);
+      course.ID = results.insertId
+      resolve( course);
     });
   });
 }
 
-//GetListOfNarrationsByProject
+//GetListOfNarrationsBycourse
 //GetNarrationByID
     //GetClipsByID
 //CreateNarration
@@ -255,35 +255,35 @@ router.get('/test', (ctx) => {
 })
 
   //TODO Move these into a controller specific to the object when this becomes unmanageable
-  .get('/projects', async (ctx) => {
-    if (!RequirePermission(ctx,['read:projects'])) {
-      //TODO: Handle failure more gracefully, possibly via 'nanner nanner boo boo'
-      ctx.body = JSON.stringify([{projectID: "0", ProjectName: "No You!"}]);
+  .get('/courses', async (ctx) => {
+    if (!RequirePermission(ctx,['read:courses'])) {
+      //TODO: Handle failure more gracefully
+      ctx.body = JSON.stringify([{CourseID: "0", courseName: "No You!"}]);
       return;
     }
 
-    var projectsList = await GetProjects();
-    ctx.body = projectsList
+    var coursesList = await Getcourses();
+    ctx.body = coursesList
     })
 
-    .post('/projects', async (ctx) => {
-      if (!RequirePermission(ctx,['read:projects'])) {
-        //TODO: Handle failure more gracefully, possibly via 'nanner nanner boo boo'
-        ctx.body = JSON.stringify([{projectID: "0", ProjectName: "No You!"}]);
+    .post('/courses', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        //TODO: Handle failure more gracefully
+        ctx.body = JSON.stringify([{CourseID: "0", courseName: "No You!"}]);
         console.log('Bad Permissions')
         return;
       }
-      let project = ctx.request.body;
-      console.log('Request to create project');
+      let course = ctx.request.body;
+      console.log('Request to create course');
       console.log(ctx.request);
-      console.log(project);
-      if (typeof(project) == "undefined")
+      console.log(course);
+      if (typeof(course) == "undefined")
       {
-        ctx.body = JSON.stringify([{projectID: "Bad", ProjectName: "call"}]);
+        ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
         return;
       }
-      var insertProject = await CreateProject(project);
-      ctx.body = insertProject;
+      var insertcourse = await Createcourse(course);
+      ctx.body = insertcourse;
 
     })
 

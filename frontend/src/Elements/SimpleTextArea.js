@@ -7,7 +7,6 @@ import { TextArea } from "@blueprintjs/core";
 
 export function SimpleTextArea (props) 
 {
-    const {...childProps} = props;
-    return  (  <TextArea {...childProps}/>
+    return  (  <TextArea growVertically={true} fill={true} {...props}/>
     )
 }

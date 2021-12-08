@@ -1,9 +1,9 @@
-//List of active projects
+//List of active courses
 import { PageWrapper } from '../Components/PageWrapper';
-import ProjectList from '../Components/ProjectList';
+import CourseList from '../Components/CourseList';
 import { BigLogo } from '../Elements/Logos';
 
-const ProjectListPage = (props) => {
+const CourseListPage = (props) => {
 
     return  (     
         <PageWrapper>
@@ -13,11 +13,11 @@ const ProjectListPage = (props) => {
             <p>
                 
             </p>
-            <ProjectList/>
+            <CourseList/>
             
             </header>
         </div>
         </PageWrapper>
     )
 }
-export default ProjectListPage;
+export default CourseListPage;

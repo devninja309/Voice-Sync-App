@@ -1,7 +1,6 @@
 
 import Router from 'koa-router';
-import {GetProjects, GetProjectDetails, CreateProject, GetScripts, CreateScript} from './databasestorage/dataaccess.js';
-import jwt from 'koa-jwt';
+import {GetCourses, GetCourseDetails, CreateCourse, GetChapters, GetChapterDetails, CreateChapter, GetSlides, CreateSlide, GetSlideDetails} from './databasestorage/dataaccess.js';
 import { addTests } from './routes.test.js';
 
 
@@ -12,19 +11,16 @@ function RequirePermission(ctx,permissions){
   if (!ctx.state )
   {
       console.log('Invalid ctx.state')
-      console.log(ctx);
       return false;
   }
   if (!ctx.state.user)
   {
       console.log('Invalid ctx.state.user')
-      console.log(ctx.state);
       return false;
   }
   if (!ctx.state.user.permissions)
   {
       console.log('Invalid ctx.state.user.permissions')
-      console.log(ctx.state.user);
       return false;
   }
   try{
@@ -51,82 +47,182 @@ router.get('/test', (ctx) => {
 })
 
   //TODO Move these into a controller specific to the object when this becomes unmanageable
-  .get('/projects', async (ctx) => {
-    if (!RequirePermission(ctx,['read:projects'])) {
-      //TODO: Handle failure more gracefully, possibly via 'nanner nanner boo boo'
-      ctx.body = JSON.stringify([{ID: "0", ProjectName: "No You!"}]);
+  /*************************************
+   * 
+   *  COURSES
+   * 
+   *************************************/
+  .get('/courses', async (ctx) => {
+    if (!RequirePermission(ctx,['read:courses'])) {
+      //TODO: Handle failure more gracefully
+      ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
       return;
     }
 
-    var projectsList = await GetProjects();
-    ctx.body = projectsList
+    let coursesList = await GetCourses();
+    ctx.body = JSON.stringify(coursesList);
     })  
-    .get('/projects/:projectID', async (ctx) => {
-      if (!RequirePermission(ctx,['read:projects'])) {
-        //TODO: Handle failure more gracefully, possibly via 'nanner nanner boo boo'
-        console.log('Bad Project Get Permissions')
-        ctx.body = JSON.stringify([{ID: "0", ProjectName: "No You!"}]);
+
+
+    .get('/courses/:CourseID', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        //TODO: Handle failure more gracefully
+        console.log('Bad course Get Permissions')
+        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
         return;
       }
-      console.log('Getting Project Details');
-      console.log(ctx.params.projectID);
-      var project = await GetProjectDetails(ctx.params.projectID);
-      ctx.body = project;
-      })
-    .get('/projects/:projectID/scripts', async (ctx) => {
-      if (!RequirePermission(ctx,['read:projects'])) {
-        console.log('Bad Project Scripts Get Permissions')
-        //TODO: Handle failure more gracefully, possibly via 'nanner nanner boo boo'
-        ctx.body = JSON.stringify([{ID: "0", ScriptName: "No You!"}]);
-        return;
-      }
-  
-      //console.log('Getting Project Script List');
-      //console.log(ctx.params.projectID);
-      var scriptsList = await GetScripts(ctx.params.projectID);
-      ctx.body = scriptsList
-      //console.log(scriptsList);
+      console.log('Getting course Details');
+      console.log(ctx.params.CourseID);
+      let course = await GetCourseDetails(ctx.params.CourseID);
+      ctx.body = JSON.stringify(course);
       })
 
-    .post('/projects', async (ctx) => {
-      if (!RequirePermission(ctx,['read:projects'])) {
-        //TODO: Handle failure more gracefully, possibly via 'nanner nanner boo boo'
-        ctx.body = JSON.stringify([{ID: "0", ProjectName: "No You!"}]);
+
+      .post('/courses', async (ctx) => {
+        if (!RequirePermission(ctx,['read:courses'])) {
+          //TODO: Handle failure more gracefully
+          ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+          console.log('Bad Permissions')
+          return;
+        }
+        let course = ctx.request.body;
+        console.log('Request to create course');
+        console.log(ctx.request);
+        console.log(course);
+        if (typeof(course) == "undefined")
+        {
+          ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
+          return;
+        }
+        var insertcourse = await CreateCourse(course);
+        ctx.body = JSON.stringify(insertcourse);
+  
+      })
+
+      /*************************************
+       * 
+       * CHAPTERS
+       * 
+       *************************************/
+
+      .get('/courses/:CourseID/chapters', async (ctx) => {
+        if (!RequirePermission(ctx,['read:courses'])) {
+          console.log('Bad course Slides Get Permissions')
+          //TODO: Handle failure more gracefully
+          ctx.body = JSON.stringify([{ID: "0", SlideName: "No You!"}]);
+          return;
+        }
+        let chaptersList = await GetChapters(ctx.params.CourseID);
+        ctx.body = JSON.stringify(chaptersList)
+        })
+
+        .get('/chapters/:chapterID', async (ctx) => {
+          if (!RequirePermission(ctx,['read:courses'])) {
+            //TODO: Handle failure more gracefully
+            console.log('Bad Chapter Get Permissions')
+            ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+            return;
+          }
+          console.log('Getting Chapter Details');
+          console.log(ctx.params.chapterID);
+          let chapter = await GetChapterDetails(ctx.params.chapterID);
+          console.log(chapter);
+          ctx.body = JSON.stringify(chapter);
+          })
+  
+
+        .post('/chapters', async (ctx) => {
+          if (!RequirePermission(ctx,['read:courses'])) {
+            //TODO: Handle failure more gracefully
+            ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+            console.log('Bad Permissions')
+            return;
+          }
+          let chapter = ctx.request.body;
+          console.log('Request to create chapter');
+          console.log(ctx.request);
+          console.log(chapter)
+          if (typeof(chapter) == "undefined")
+          {
+            ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
+            return;
+          }
+          var insertChapter = await CreateChapter(chapter);
+          ctx.body = JSON.stringify(insertChapter);
+    
+        })
+
+      /*************************************
+       * 
+       * SLIDES
+       * 
+       *************************************/
+      .get('/chapters/:chapterID/slides', async (ctx) => {
+        if (!RequirePermission(ctx,['read:courses'])) {
+          console.log('Bad course Slides Get Permissions')
+          //TODO: Handle failure more gracefully
+          ctx.body = JSON.stringify([{ID: "0", SlideName: "No You!"}]);
+          return;
+        }
+        let slidesList = await GetSlides(ctx.params.chapterID);
+        ctx.body = JSON.stringify(slidesList)
+        })
+
+    .post('/slides', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        //TODO: Handle failure more gracefully
+        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
         console.log('Bad Permissions')
         return;
       }
-      let project = ctx.request.body;
-      console.log('Request to create project');
+      let slide = ctx.request.body;
+      console.log('Request to create slide');
       console.log(ctx.request);
-      console.log(project);
-      if (typeof(project) == "undefined")
+      console.log(slide)
+      if (typeof(slide) == "undefined")
       {
-        ctx.body = JSON.stringify([{projectID: "Bad", ProjectName: "call"}]);
+        ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
         return;
       }
-      var insertProject = await CreateProject(project);
-      ctx.body = insertProject;
+      var insertSlide = await CreateSlide(slide);
+      ctx.body = JSON.stringify(insertSlide);
 
     })
 
-    .post('/scripts', async (ctx) => {
-      if (!RequirePermission(ctx,['read:projects'])) {
-        //TODO: Handle failure more gracefully, possibly via 'nanner nanner boo boo'
-        ctx.body = JSON.stringify([{ID: "0", ProjectName: "No You!"}]);
+
+      .get('/slides/:slideID', async (ctx) => {
+        if (!RequirePermission(ctx,['read:courses'])) {
+          //TODO: Handle failure more gracefully
+          console.log('Bad Slide Get Permissions')
+          ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+          return;
+        }
+        console.log('Getting Slide Details');
+        console.log(ctx.params.slideID);
+        let slide = await GetSlideDetails(ctx.params.slideID);
+        console.log(slide);
+        ctx.body = JSON.stringify(slide);
+        })
+
+
+    .post('/slides', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        //TODO: Handle failure more gracefully
+        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
         console.log('Bad Permissions')
         return;
       }
-      let script = ctx.request.body;
-      console.log('Request to create script');
+      let slide = ctx.request.body;
+      console.log('Request to create slide');
       console.log(ctx.request);
-      console.log(script)
-      if (typeof(script) == "undefined")
+      console.log(slide)
+      if (typeof(slide) == "undefined")
       {
-        ctx.body = JSON.stringify([{projectID: "Bad", ProjectName: "call"}]);
+        ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
         return;
       }
-      var insertScript = await CreateScript(script);
-      ctx.body = insertScript;
+      var insertSlide = await CreateSlide(slide);
+      ctx.body = JSON.stringify(insertSlide);
 
     })
 

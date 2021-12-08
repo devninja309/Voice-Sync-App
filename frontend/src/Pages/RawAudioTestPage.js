@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { PageWrapper } from '../Components/PageWrapper';
-import { getUrlPath } from '../Hooks/URLInterface';
+import { getUrlPath } from '../Hooks/APICalls';
 
 const Avatars = [
   { id: 3, name: 'Alana B.' },

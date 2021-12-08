@@ -34,7 +34,7 @@ export function NavigationHeader ()
             <Navbar.Divider />
                     {isAuthenticated && 
                         <div>
-                        <LinkButton Link = '/projects' Text='Projects'/>
+                        <LinkButton Link = '/courses' Text='Courses'/>
                         <LinkButton Link = '/AudioTest' Text='Audio Test Page'/>
                         </div>
                     }

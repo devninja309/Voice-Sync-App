@@ -9,9 +9,10 @@ import { useAuth0 } from "@auth0/auth0-react";
 import {UglyPage} from './Pages/UglyPage'
 import {LandingPage} from './Pages/LandingPage'
 import LoginPage from './Pages/LoginPage'
-import ProjectListPage from './Pages/ProjectListPage'
-import ProjectDetailsPage from './Pages/ProjectDetailsPage'
-import ScriptDetailsPage from './Pages/ScriptDetailsPage'
+import CourseListPage from './Pages/CourseListPage'
+import CourseDetailsPage from './Pages/CourseDetailsPage'
+import ChapterDetailsPage from './Pages/ChapterDetailsPage'
+import SlideDetailsPage from './Pages/SlideDetailsPage'
 
 import {GetUserToken} from './Etc/TokenManagement';
 import { LogError, LogErrorMessage } from './Etc/ErrorHandler';
@@ -51,9 +52,10 @@ function App() {
           <Route path ="/" element = {<LandingPage/>}></Route>
           <Route path ="/Ugly" element = {<UglyPage/>}></Route>
           <Route path ="/Login" element = {<LoginPage/>}></Route>
-          <Route path ="/Projects" element = {<ProjectListPage accessToken = {userToken}/>}></Route>
-          <Route path ="/Projects/:projectID" element = {<ProjectDetailsPage />}></Route>
-          <Route path ="/Projects/:projectID/scripts/:scriptID" element = {<ScriptDetailsPage />}></Route>
+          <Route path ="/courses" element = {<CourseListPage accessToken = {userToken}/>}></Route>
+          <Route path ="/courses/:CourseID" element = {<CourseDetailsPage />}></Route>
+          <Route path ="/courses/:CourseID/chapters/:ChapterID" element = {<ChapterDetailsPage />}></Route>
+          <Route path ="/courses/:CourseID/chapters/:ChapterID/slides/:slideID" element = {<SlideDetailsPage />}></Route>
           <Route path ="/AudioTest" element = {<RawAudioTestPage />}></Route>
         </Routes>
       </div>

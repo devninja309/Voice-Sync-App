@@ -1,30 +1,35 @@
 CREATE SCHEMA `IA_VoiceSynth` ;
 
-CREATE TABLE `IA_VoiceSynth`.`Projects` (
+CREATE TABLE `IA_VoiceSynth`.`Courses` (
   `ID` INT NOT NULL AUTO_INCREMENT,
-  `ProjectName` VARCHAR(45) NULL,
+  `CourseName` VARCHAR(45) NULL,
+  `CourseDescription` LongText Null,
   PRIMARY KEY (`ID`));
 
-INSERT INTO `IA_VoiceSynth`.`Projects` (`ID`, `ProjectName`) VALUES ('1', 'Project 1');
-INSERT INTO `IA_VoiceSynth`.`Projects` (`ID`, `ProjectName`) VALUES ('2', 'Project 2');
-INSERT INTO `IA_VoiceSynth`.`Projects` (`ID`, `ProjectName`) VALUES ('3', 'Project 3');
-
-Create Table `IA_VoiceSynth`.`Scripts` (
+CREATE TABLE `IA_VoiceSynth`.`Chapters` (
   `ID` INT NOT NULL AUTO_INCREMENT,
-  `ScriptName` VARCHAR(45) NULL,
-  `ProjectID` INT NOT NULL,
-  `ScriptText` LongText NULL,
+  `ChapterName` VARCHAR(45) NULL,
+  `CourseID` INT NOT NULL,
+  FOREIGN KEY (`CourseID`)
+    REFERENCES `IA_VoiceSynth`.`Courses`(`ID`),
+  PRIMARY KEY (`ID`));
+
+Create Table `IA_VoiceSynth`.`Slides` (
+  `ID` INT NOT NULL AUTO_INCREMENT,
+  `SlideName` VARCHAR(45) NULL,
+  `ChapterID` INT NOT NULL,
+  `SlideText` LongText NULL,
   `MergedClip` LongBlob NULL,
-  FOREIGN KEY (`ProjectID`)
-    REFERENCES `IA_VoiceSynth`.`Projects`(`ID`),
+  FOREIGN KEY (`ChapterID`)
+    REFERENCES `IA_VoiceSynth`.`Chapters`(`ID`),
   PRIMARY KEY (`ID`));
 
   
 Create Table `IA_VoiceSynth`.`Clips` (
   `ID` INT NOT NULL AUTO_INCREMENT,
-  `ScriptID` INT NOT NULL,
-  `ScriptText` LongText NULL,
+  `SlideID` INT NOT NULL,
+  `ClipText` LongText NULL,
   `AudioClip` LongBlob NULL,
-  FOREIGN KEY (`ScriptID`)
-    REFERENCES `IA_VoiceSynth`.`Scripts`(`ID`),
+  FOREIGN KEY (`SlideID`)
+    REFERENCES `IA_VoiceSynth`.`Slides`(`ID`),
   PRIMARY KEY (`ID`));

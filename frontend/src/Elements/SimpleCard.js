@@ -10,7 +10,7 @@ class SimpleCard  extends Component
 {
     render() {
     return (
-    <div className = "SimpleCardDiv">
+    <div class = "SimpleCardDiv">
         <Card interactive={this.props.interactive} elevation={this.props.elevation} > 
         {this.props.children}
         </Card>

@@ -9,26 +9,26 @@ import {PlayAudioClip} from "./PlayAudioClip";
 
 
 
-export function ScriptListCard (props) 
+export function SlideListCard (props) 
 {
-    const {script, ...childProps} = props;
-    const LinkAddress = '/projects/' + script.ProjectID + '/scripts/' + script.ID
+    const {slide, ...childProps} = props;
+    const LinkAddress = '/courses/' + slide.CourseID + '/slide/' + slide.ID
     return (
-        <div className = "ProjectListCard" key={script.ID} >
+        <div className = "courseListCard" key={slide.ID} >
         <Link to={LinkAddress}>
             <SimpleCard  {...childProps}>
                 <div>
-            {script.ScriptName}
+            {slide.SlideName}
             </div>
             
             <Tooltip
-                        content={<span>{script.ScriptText}</span>}
+                        content={<span>{slide.SlideText}</span>}
                         openOnTargetFocus={false}
                         usePortal={false}
                     >
                         ...
             </Tooltip>
-            <PlayAudioClip audiofile = {script.MergedClip} />
+            <PlayAudioClip audiofile = {slide.MergedClip} />
             </SimpleCard>
         </Link>
         </div>
