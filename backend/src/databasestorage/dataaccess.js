@@ -142,6 +142,10 @@ export function CreateSlide(slide)
     error = true;
     errorString += "Invalid ChapterID\n";
   }
+  if (!slide.VoiceID) {
+    error = true;
+    errorString += "Invalid VoiceID\n";
+  }
   return new Promise( function (resolve, reject) {
 
     let con = getCon();
@@ -150,8 +154,8 @@ export function CreateSlide(slide)
       if (err) console.log( err);
     });
 
-    let insert = 'Insert into IA_VoiceSynth.Slides (SlideName,SlideText, ChapterID) Values (?,?,?)';
-    let values = [slide.SlideName, slide.SlideText, slide.ChapterID];
+    let insert = 'Insert into IA_VoiceSynth.Slides (SlideName,SlideText, VoiceID, ChapterID) Values (?,?,?,?)';
+    let values = [slide.SlideName, slide.SlideText,slide.VoiceID, slide.ChapterID];
 
     con.query(insert,values, (err, results, fields) => {
       if (err) {
@@ -164,6 +168,42 @@ export function CreateSlide(slide)
   });
 }
 
+export function CreateClip(clip)
+{
+  //Check Clip
+  let error = false;
+  let errorString = "";
+  if (!clip.SlideID){
+    error = true;
+    errorString += "Invalid SlideID\n";
+  }
+  if (!clip.VoiceID) {
+    error = true;
+    errorString += "Invalid VoiceID\n";
+  }
+  return new Promise( function (resolve, reject) {
+
+    let con = getCon();
+
+    let voiceID = clip.VoiceID || 3
+
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+
+    let insert = 'Insert into IA_VoiceSynth.Clips (SlideID,ClipText, VoiceID) Values (?,?,?)';
+    let values = [clip.SlideID, clip.ClipText, voiceID];
+
+    con.query(insert,values, (err, results, fields) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      con.end();
+      clip.ID = results.insertId
+      resolve( clip);
+    });
+  });
+}
 function getCon()
 {
     return mysql.createConnection({

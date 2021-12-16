@@ -1,6 +1,6 @@
 
 import Router from 'koa-router';
-import {GetCourses, GetCourseDetails, CreateCourse, GetChapters, GetChapterDetails, CreateChapter, GetSlides, CreateSlide, GetSlideDetails} from './databasestorage/dataaccess.js';
+import {GetCourses, GetCourseDetails, CreateCourse, GetChapters, GetChapterDetails, CreateChapter, GetSlides, CreateSlide, CreateClip, GetSlideDetails} from './databasestorage/dataaccess.js';
 import { addTests } from './routes.test.js';
 
 
@@ -223,6 +223,27 @@ router.get('/test', (ctx) => {
       }
       var insertSlide = await CreateSlide(slide);
       ctx.body = JSON.stringify(insertSlide);
+
+    })
+
+    .post('/clips', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        //TODO: Handle failure more gracefully
+        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+        console.log('Bad Permissions')
+        return;
+      }
+      let clip = ctx.request.body;
+      console.log('Request to create clip');
+      console.log(ctx.request);
+      console.log(clip)
+      if (typeof(clip) == "undefined")
+      {
+        ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
+        return;
+      }
+      var insertClip = await CreateClip(clip);
+      ctx.body = JSON.stringify(insertClip);
 
     })
 

@@ -33,3 +33,9 @@ Create Table `IA_VoiceSynth`.`Clips` (
   FOREIGN KEY (`SlideID`)
     REFERENCES `IA_VoiceSynth`.`Slides`(`ID`),
   PRIMARY KEY (`ID`));
+
+  Alter Table  `IA_VoiceSynth`.`Slides` 
+    ADD COLUMN VoiceID int null default 3
+
+  Alter Table  `IA_VoiceSynth`.`Clips` 
+    ADD COLUMN VoiceID int null default 3

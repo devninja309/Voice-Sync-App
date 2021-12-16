@@ -18,6 +18,7 @@ import { SimpleTextArea } from '../Elements/SimpleTextArea';
 import { useAuthTools } from '../Hooks/Auth';
 import { BigLogo } from '../Elements/Logos';
 import { getUrlPath } from '../Hooks/APICalls';
+import { SimpleButton } from '../Elements/SimpleButton';
 
 const SlideDetailsPage = (props) => {
 
@@ -74,11 +75,35 @@ const SlideDetailsPage = (props) => {
         ClipText: "Dummy Text"
     }];
     function DisplayClipsList() {
-        if (dummyClipList)
+        if (dummyClipList && false)
         {
             return dummyClipList.map(clip => (<ClipListCard key={clip.ID} clip = {clip} setSelectedClip={setSelectedClip}/>))
         }
         else {
+            if (slide.Clips){
+                console.log (slide);
+                return slide.Clips.map(clip => (<ClipListCard key={clip.ID} clip = {clip} setSelectedClip={setSelectedClip}/>))
+            }
+        }
+    }
+    function TextEditArea() {
+        if (selectedClip === null) {
+        return <SimpleTextArea 
+                        value={slide.SlideText} 
+                        disabled= {true}
+                        placeholder="Enter Slide Text" 
+                        onChange={event => setSlide({...slide, SlideText: event.target.value})}
+                        />
+        }
+        else {
+            return <div>
+                        <SimpleTextArea
+                            value={selectedClip.ClipText}
+                            onChange={event => setSelectedClip({...selectedClip, ClipText: event.target.value})}
+                            />
+                        <SimpleButton onClick={() => setSelectedClip(null)} Text="Full Text"/>
+
+                    </div>
         }
     }
 
@@ -107,11 +132,7 @@ const SlideDetailsPage = (props) => {
             <div class = "div-Slide-Details-Container">
                 <div class = "div-Slide-Details-Container-Slide">
                     <div class ="div-Slide-Details-Container-TextArea">
-                    <SimpleTextArea 
-                        value={slide.SlideText} 
-                        placeholder="Enter Slide Text" 
-                        onChange={event => setSlide({...slide, SlideText: event.target.value})}
-                        />
+                        {TextEditArea()}
                     </div>
                     <PlayAudioClip audiofile = {slide.MergedClip} />
                     <button className="input" onClick={getClip}>Merge all clips</button>

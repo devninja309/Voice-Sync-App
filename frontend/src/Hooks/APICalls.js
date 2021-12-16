@@ -83,9 +83,14 @@ export function CreateChapter(fetchWithAuth, chapter)
       .then(response => response.json())
 }
 
-export function CreateSlide(fetchWithAuth, script)
+export function CreateSlide(fetchWithAuth, slide)
 {
-    return fetchWithAuth(getUrlPath('slides'), PostHeadersForCreate(script))
+    return fetchWithAuth(getUrlPath('slides'), PostHeadersForCreate(slide))
+      .then(response => response.json())
+}
+export function CreateClip(fetchWithAuth, clip)
+{
+    return fetchWithAuth(getUrlPath('clips'), PostHeadersForCreate(clip))
       .then(response => response.json())
 }
 
@@ -101,5 +106,6 @@ export const UseAPICallsWithAuth = (fetchWithAuth) => {
         CreateChapter: (chapter) => CreateChapter(fetchWithAuth, chapter),
         GetSlides: (ChapterID) => GetSlides(fetchWithAuth, ChapterID), 
         CreateSlide: (slide) => CreateSlide(fetchWithAuth, slide),
+        CreateClip: (clip) => CreateClip(fetchWithAuth, clip),
         GetSlideDetails: (slideID) => GetSlideDetails(fetchWithAuth, slideID)}
 }

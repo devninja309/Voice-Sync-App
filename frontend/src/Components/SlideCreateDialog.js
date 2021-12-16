@@ -9,6 +9,8 @@ import { ButtonGroup } from "@blueprintjs/core";
 import { SimpleTextInput } from "../Elements/SimpleTextEntry";
 import { SimpleTextArea } from "../Elements/SimpleTextArea";
 
+import {ImportNewSlideText} from "../Etc/TextManagement";
+
 import{useAuthTools} from '../Hooks/Auth';
 
 
@@ -24,7 +26,8 @@ export function SlideCreateDialog (props)
     const {token,APICalls} = useAuthTools();
 
     function AddSlide(){
-        APICalls.CreateSlide({"SlideName":slideName, "SlideText": slideText, "ChapterID": ChapterID}).then(
+        //defaultSlideName, defaultVoice, text, APICalls
+        ImportNewSlideText(ChapterID, slideName, 3, slideText,APICalls).then(
             data => {
                 navigate(`/courses/${CourseID}/chapters/${ChapterID}/slides/` + data.ID)
             }
