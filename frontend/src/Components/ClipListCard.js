@@ -17,7 +17,7 @@ export function ClipListCard (props)
             <SimpleCard  {...childProps} className="SimpleCard-ClipListCard">
                 <div class="div-Slide-Details-Container">
                     <p class = "p-clip-card-text">
-                        Clip: {clip.ID}
+                        Clip: {clip.OrdinalValue}
                     </p>
                                            
                     <PlayAudioClip audiofile = {clip.AudioClip} />  

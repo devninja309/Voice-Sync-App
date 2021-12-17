@@ -78,7 +78,7 @@ const SlideDetailsPage = (props) => {
         ClipText: "Dummy Text"
     }];
     function sortByOrdinalValue(a,b) {
-        return a.OrdinalValue < b.OrdinalValue;
+        return a.OrdinalValue - b.OrdinalValue;
     }
     function DisplayClipsList() {
         if (dummyClipList && false)

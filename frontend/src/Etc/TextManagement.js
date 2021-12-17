@@ -38,7 +38,6 @@ export function ImportNewSlideText(chapterID, defaultSlideName, defaultVoice, te
             var promiseArray = [];
             console.log(slides);
             Array.from(slides).forEach(slide => {
-                debugger;
                 let name = slide.getAttribute('name') || defaultSlideName;
                 console.log(slide.getAttribute('name') )
                 let voice = parseInt(slide.getAttribute('voiceid'))|| defaultVoice;
@@ -69,7 +68,6 @@ export function CreateSlide(chapterID, slideName, slideVoice, slideDom, text, AP
     APICalls.CreateSlide({ChapterID:chapterID, SlideName:slideName, DefaultVoice: slideVoice, SlideText: text}).then(slide => {
 
         try {
-            debugger;
             //<Voice VoiceID="1"></Slide>
             //Start by splitting on voices.
             if (slideDom == null || slideDom.getElementsByTagName('Voice').length === 0 )
@@ -92,7 +90,8 @@ export function CreateSlide(chapterID, slideName, slideVoice, slideDom, text, AP
                     console.log('decoded voice: ' + voiceString);
                     let voiceID = parseInt(voice.getAttribute("voiceid")) || slideVoice;
                     promiseArray.push(SplitVoiceIntoClips( slide, voiceID, voice.childNodes[0].nodeValue, APICalls,ordinalValue));  //.childNodes[0].nodeValue seems wrong?)
-                    ordinalValue += SplitTextIntoSentences(voices.InternalText).length;
+                    debugger;
+                    ordinalValue += SplitTextIntoSentences(voice.textContent).length;
                 })
                 Promise.all(promiseArray).then(()=>resolve(slide));
             }
@@ -131,8 +130,8 @@ export function SplitTextIntoSentences( text ) {
         const doc = nlp.readDoc( text );
         // Place every sentence in a new row of the table by using .markup() api.
         console.log('splitting sentences');
-        let sentenceList = doc.sentences().out().filter(function (el) {
-            return (el != null) && (el.trim != "");
+        let sentenceList = doc.sentences().out().filter((el) => {
+            return (el != null) && (el.trim() != "");
           });;
         console.log(sentenceList);
         return sentenceList;
