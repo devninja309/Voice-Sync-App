@@ -13,16 +13,22 @@ export function ImportNewSlideText(chapterID, defaultSlideName, defaultVoice, te
 
     let dom = "";
     try {
-        let xmlText = "<document>" + text + "</document>"
+        let xmlText = "<document>" + text.replace(/”/g, '"') + "</document>"
         let parser = new DOMParser();
-        dom = parser.parseFromString(xmlText, "text/html");
+        dom = parser.parseFromString(xmlText, "text/xml");
+        console.log (dom);
+        const errorNode = dom.querySelector('parsererror');
+        if (errorNode) {
+          throw 'Bad XML'
+        } 
         let slides = dom.getElementsByTagName('Slide');
         if (slides.length === 0 )
         {
             console.log('Single Slide File');
             // There are no slide labels, this is all one slide
             return new Promise((resolve, reject) => {
-                CreateSlide(chapterID, defaultSlideName, defaultVoice, text, APICalls).then(result => {resolve(result)});
+                console.log('Parsing as sngle string');
+                CreateSlide(chapterID, defaultSlideName, defaultVoice, null, text, APICalls).then(result => {resolve(result)});
             })
         }
         else
@@ -30,11 +36,15 @@ export function ImportNewSlideText(chapterID, defaultSlideName, defaultVoice, te
             //multiple slides found
             // Wrap this in a promise.all(), but only resolve as the first one
             var promiseArray = [];
-            slides.forEach(slide => {
-                let name = slide.getAttribute("Name") || defaultSlideName;
-                let voice = slide.getAttribute("VoiceID") || defaultVoice;
+            console.log(slides);
+            Array.from(slides).forEach(slide => {
+                debugger;
+                let name = slide.getAttribute('name') || defaultSlideName;
+                console.log(slide.getAttribute('name') )
+                let voice = parseInt(slide.getAttribute('voiceid'))|| defaultVoice;
+                console.log(slide.getAttribute('voiceid') )
                 promiseArray.push( new Promise((resolve, reject) => {
-                    CreateSlide(chapterID, name, voice, slide.childNodes[0].nodeValue, APICalls)
+                    CreateSlide(chapterID, name, voice, slide, slide.textContent, APICalls)
                         .then(result => {resolve(result)}); //.childNodes[0].nodeValue seems wrong?)
                 }
             ))});
@@ -52,21 +62,17 @@ export function ImportNewSlideText(chapterID, defaultSlideName, defaultVoice, te
 }
 
 //Does not parse slide tags
-export function CreateSlide(chapterID, slideName, slideVoice, text, APICalls)
+export function CreateSlide(chapterID, slideName, slideVoice, slideDom, text, APICalls)
 {
     return new Promise((resolve, reject) => {
     
     APICalls.CreateSlide({ChapterID:chapterID, SlideName:slideName, DefaultVoice: slideVoice, SlideText: text}).then(slide => {
 
-        let dom = "";
         try {
+            debugger;
             //<Voice VoiceID="1"></Slide>
-            let xmlText = "<document>" + text + "</document>"
-            let parser = new DOMParser();
-            dom = parser.parseFromString(xmlText, "text/html");
             //Start by splitting on voices.
-            let voices = dom.getElementsByTagName('Voice');
-            if (voices.length === 0 )
+            if (slideDom == null || slideDom.getElementsByTagName('Voice').length === 0 )
             {
                 console.log('slide has one voice');
                 // There are no voice labels, so this is all one voice
@@ -78,9 +84,12 @@ export function CreateSlide(chapterID, slideName, slideVoice, text, APICalls)
                 //multiple voices found.  either everything has a voice, or it's the default voice, that's a rule
                 //TODO Check for content that isn't wrapped in a voice
                 // Wrap this in a promise.all()
+                const voices = slideDom.getElementsByTagName('Voice');
                 var promiseArray = [];
-                voices.forEach(voice => {
-                    let voiceID = slide.getAttribute("VoiceID") || slideVoice;
+                Array.from(voices).forEach(voice => {
+                    let voiceString = parseInt(voice.getAttribute("voiceid"));
+                    console.log('decoded voice: ' + voiceString);
+                    let voiceID = parseInt(voice.getAttribute("voiceid")) || slideVoice;
                     promiseArray.push(SplitVoiceIntoClips( slide, voiceID, voice.childNodes[0].nodeValue, APICalls));  //.childNodes[0].nodeValue seems wrong?)
                 })
                 Promise.all(promiseArray).then(()=>resolve(slide));

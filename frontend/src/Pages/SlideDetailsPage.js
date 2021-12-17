@@ -19,6 +19,9 @@ import { useAuthTools } from '../Hooks/Auth';
 import { BigLogo } from '../Elements/Logos';
 import { getUrlPath } from '../Hooks/APICalls';
 import { SimpleButton } from '../Elements/SimpleButton';
+import { IconButton } from '../Elements/IconButton';
+import { ButtonGroup, Icon } from '@blueprintjs/core';
+import {Tooltip} from "@blueprintjs/core";
 
 const SlideDetailsPage = (props) => {
 
@@ -88,7 +91,7 @@ const SlideDetailsPage = (props) => {
     }
     function TextEditArea() {
         if (selectedClip === null) {
-        return <SimpleTextArea 
+        return <SimpleTextArea className="simpleTextArea-largebox"
                         value={slide.SlideText} 
                         disabled= {true}
                         placeholder="Enter Slide Text" 
@@ -97,11 +100,17 @@ const SlideDetailsPage = (props) => {
         }
         else {
             return <div>
-                        <SimpleTextArea
+                        <SimpleTextArea className="simpleTextArea-largebox"
                             value={selectedClip.ClipText}
                             onChange={event => setSelectedClip({...selectedClip, ClipText: event.target.value})}
                             />
-                        <SimpleButton onClick={() => setSelectedClip(null)} Text="Full Text"/>
+                        <SimpleButton onClick={() => setSelectedClip(null)} Text="Deselect Clip"/>
+                        <SimpleTextArea className="simpleTextArea-largebox"
+                        value={slide.SlideText} 
+                        disabled= {true}
+                        placeholder="Enter Slide Text" 
+                        onChange={event => setSlide({...slide, SlideText: event.target.value})}
+                        />
 
                     </div>
         }
@@ -138,8 +147,28 @@ const SlideDetailsPage = (props) => {
                     <button className="input" onClick={getClip}>Merge all clips</button>
                     <button className="input" onClick={() =>console.log(slide)}>Debug</button>
                 </div>
-                <div class = "div-Slide-Details-ClipsList">
+                <div class = "div-Slide-Details-ClipsList-Column">
+                    <ButtonGroup>
+                
+                <Tooltip
+                            content={<span>Add New Clip</span>}
+                            openOnTargetFocus={false}
+                            usePortal={false}
+                        >
+                        <IconButton icon="plus"/>
+                </Tooltip>
+                <p> </p>
+                <Tooltip
+                            content={<span>Submit all unsubmitted clips</span>}
+                            openOnTargetFocus={false}
+                            usePortal={false}
+                        >
+                        <IconButton icon="refresh"/>
+                </Tooltip>
+                    </ButtonGroup>
+                    <div class = "div-Slide-Details-ClipsList">
                     {DisplayClipsList() }
+                    </div>
                 </div>
             </div>
             </header>
