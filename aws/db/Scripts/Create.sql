@@ -39,3 +39,6 @@ Create Table `IA_VoiceSynth`.`Clips` (
 
   Alter Table  `IA_VoiceSynth`.`Clips` 
     ADD COLUMN VoiceID int null default 3
+
+  Alter Table  `IA_VoiceSynth`.`Clips` 
+    ADD COLUMN OrdinalValue int null default null

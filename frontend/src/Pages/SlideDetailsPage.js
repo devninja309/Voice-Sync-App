@@ -77,6 +77,9 @@ const SlideDetailsPage = (props) => {
         ID: 4,
         ClipText: "Dummy Text"
     }];
+    function sortByOrdinalValue(a,b) {
+        return a.OrdinalValue < b.OrdinalValue;
+    }
     function DisplayClipsList() {
         if (dummyClipList && false)
         {
@@ -85,7 +88,7 @@ const SlideDetailsPage = (props) => {
         else {
             if (slide.Clips){
                 console.log (slide);
-                return slide.Clips.map(clip => (<ClipListCard key={clip.ID} clip = {clip} setSelectedClip={setSelectedClip}/>))
+                return slide.Clips.sort(sortByOrdinalValue).map(clip => (<ClipListCard key={clip.ID} clip = {clip} setSelectedClip={setSelectedClip}/>))
             }
         }
     }

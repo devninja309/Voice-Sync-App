@@ -191,8 +191,8 @@ export function CreateClip(clip)
       if (err) console.log( err);
     });
 
-    let insert = 'Insert into IA_VoiceSynth.Clips (SlideID,ClipText, VoiceID) Values (?,?,?)';
-    let values = [clip.SlideID, clip.ClipText, voiceID];
+    let insert = 'Insert into IA_VoiceSynth.Clips (SlideID,ClipText, VoiceID, OrdinalValue) Values (?,?,?,?)';
+    let values = [clip.SlideID, clip.ClipText, voiceID,clip.OrdinalValue];
 
     con.query(insert,values, (err, results, fields) => {
       if (err) {

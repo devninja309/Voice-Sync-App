@@ -77,7 +77,7 @@ export function CreateSlide(chapterID, slideName, slideVoice, slideDom, text, AP
                 console.log('slide has one voice');
                 // There are no voice labels, so this is all one voice
                 // Wrap this in a promise
-                SplitVoiceIntoClips(slide, slideVoice, text, APICalls).then(resolve(slide))
+                SplitVoiceIntoClips(slide, slideVoice, text, APICalls,0).then(resolve(slide))
             }
             else
             {
@@ -86,11 +86,13 @@ export function CreateSlide(chapterID, slideName, slideVoice, slideDom, text, AP
                 // Wrap this in a promise.all()
                 const voices = slideDom.getElementsByTagName('Voice');
                 var promiseArray = [];
+                let ordinalValue = 1;
                 Array.from(voices).forEach(voice => {
                     let voiceString = parseInt(voice.getAttribute("voiceid"));
                     console.log('decoded voice: ' + voiceString);
                     let voiceID = parseInt(voice.getAttribute("voiceid")) || slideVoice;
-                    promiseArray.push(SplitVoiceIntoClips( slide, voiceID, voice.childNodes[0].nodeValue, APICalls));  //.childNodes[0].nodeValue seems wrong?)
+                    promiseArray.push(SplitVoiceIntoClips( slide, voiceID, voice.childNodes[0].nodeValue, APICalls,ordinalValue));  //.childNodes[0].nodeValue seems wrong?)
+                    ordinalValue += SplitTextIntoSentences(voices.InternalText).length;
                 })
                 Promise.all(promiseArray).then(()=>resolve(slide));
             }
@@ -104,7 +106,7 @@ export function CreateSlide(chapterID, slideName, slideVoice, slideDom, text, AP
 }
 
 //Only called for a subset of text in a single voice
-export function SplitVoiceIntoClips(slide, voice, text, APICalls ) {
+export function SplitVoiceIntoClips(slide, voice, text, APICalls ,ordinalValue) {
     console.log('single voice')
     console.log(text);
 
@@ -114,7 +116,7 @@ export function SplitVoiceIntoClips(slide, voice, text, APICalls ) {
 
     clips.forEach(clipText => {
         promiseArray.push(new Promise((resolve, reject) => {
-            const clip = {SlideID:slide.ID, ClipText:clipText, VoiceID: voice}
+            const clip = {SlideID:slide.ID, ClipText:clipText, VoiceID: voice, OrdinalValue: ordinalValue++}
             APICalls.CreateClip(clip,voice).then(()=>resolve())
         }))
     })
@@ -129,7 +131,9 @@ export function SplitTextIntoSentences( text ) {
         const doc = nlp.readDoc( text );
         // Place every sentence in a new row of the table by using .markup() api.
         console.log('splitting sentences');
-        let sentenceList = doc.sentences().out();
+        let sentenceList = doc.sentences().out().filter(function (el) {
+            return (el != null) && (el.trim != "");
+          });;
         console.log(sentenceList);
         return sentenceList;
 }
