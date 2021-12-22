@@ -6,6 +6,10 @@ const nlp  = winkNLP( model )
 const its = nlp.its;
 const as = nlp.as;
 
+export function UpdateSlideText(slide)
+{
+}
+
 //Imports a slide text file, creates 1-many slides and returns a promise that resolves with the first slide
 export function ImportNewSlideText(chapterID, defaultSlideName, defaultVoice, text, APICalls)
 {
@@ -72,7 +76,6 @@ export function CreateSlide(chapterID, slideName, slideVoice, slideDom, text, AP
             //Start by splitting on voices.
             if (slideDom == null || slideDom.getElementsByTagName('Voice').length === 0 )
             {
-                console.log('slide has one voice');
                 // There are no voice labels, so this is all one voice
                 // Wrap this in a promise
                 SplitVoiceIntoClips(slide, slideVoice, text, APICalls,0).then(resolve(slide))
@@ -87,7 +90,6 @@ export function CreateSlide(chapterID, slideName, slideVoice, slideDom, text, AP
                 let ordinalValue = 1;
                 Array.from(voices).forEach(voice => {
                     let voiceString = parseInt(voice.getAttribute("voiceid"));
-                    console.log('decoded voice: ' + voiceString);
                     let voiceID = parseInt(voice.getAttribute("voiceid")) || slideVoice;
                     promiseArray.push(SplitVoiceIntoClips( slide, voiceID, voice.childNodes[0].nodeValue, APICalls,ordinalValue));  //.childNodes[0].nodeValue seems wrong?)
                     debugger;

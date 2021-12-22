@@ -93,7 +93,12 @@ export function CreateClip(fetchWithAuth, clip)
     return fetchWithAuth(getUrlPath('clips'), PostHeadersForCreate(clip))
       .then(response => response.json())
 }
+export function UpdateClipAudio(fetchWithAuth, clipID)
+{
+    return fetchWithAuth(getUrlPath(`clips/${clipID}/audio`))
+    .then(response => response.json());
 
+}
 //Put any alternate stuff here
 
 export const UseAPICallsWithAuth = (fetchWithAuth) => {
@@ -107,5 +112,6 @@ export const UseAPICallsWithAuth = (fetchWithAuth) => {
         GetSlides: (ChapterID) => GetSlides(fetchWithAuth, ChapterID), 
         CreateSlide: (slide) => CreateSlide(fetchWithAuth, slide),
         CreateClip: (clip) => CreateClip(fetchWithAuth, clip),
+        UpdateClipAudio: (clipID) => UpdateClipAudio(fetchWithAuth, clipID),
         GetSlideDetails: (slideID) => GetSlideDetails(fetchWithAuth, slideID)}
 }

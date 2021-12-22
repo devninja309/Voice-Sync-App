@@ -88,7 +88,10 @@ const SlideDetailsPage = (props) => {
         else {
             if (slide.Clips){
                 console.log (slide);
-                return slide.Clips.sort(sortByOrdinalValue).map(clip => (<ClipListCard key={clip.ID} clip = {clip} setSelectedClip={setSelectedClip}/>))
+                return slide.Clips.sort(sortByOrdinalValue).map(clip => (
+                    //TODO insert a spinner here for when updating.  What's the pattern for that?  Set the clip to null?
+                    <ClipListCard key={clip.ID} clip = {clip} setSelectedClip={setSelectedClip} updateClipAudio={UpdateClipAudio}/>
+                ))
             }
         }
     }
@@ -117,6 +120,10 @@ const SlideDetailsPage = (props) => {
 
                     </div>
         }
+    }
+    function UpdateClipAudio(clipID)
+    {
+        APICalls.UpdateClipAudio(clipID).then(clip => slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clipID)] = clip);
     }
 
 

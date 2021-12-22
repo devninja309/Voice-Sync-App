@@ -10,7 +10,7 @@ import { IconButton } from '../Elements/IconButton';
 
 export function ClipListCard (props) 
 {
-    const {clip, setSelectedClip, ...childProps} = props;
+    const {clip, setSelectedClip, updateClipAudio, ...childProps} = props;
     //const LinkAddress = '/courses/' + script.CourseID + '/scripts/' + script.ID
     return (
         <div className = "div-ClipListCard" key={clip.ID} onClick={()=>setSelectedClip(clip)}>
@@ -21,7 +21,7 @@ export function ClipListCard (props)
                     </p>
                                            
                     <PlayAudioClip audiofile = {clip.AudioClip} />  
-                    <IconButton icon="refresh"/>
+                    <IconButton icon="refresh" onClick={()=>updateClipAudio(clip.ID)}/>
                 </div>
                 <p class = "p-clip-card-text">
                     Voice: {clip.VoiceID}
