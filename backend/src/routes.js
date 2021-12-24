@@ -1,7 +1,14 @@
 
 import Router from 'koa-router';
-import {GetCourses, GetCourseDetails, CreateCourse, GetChapters, GetChapterDetails, CreateChapter, GetSlides, CreateSlide, CreateClip, GetSlideDetails} from './databasestorage/dataaccess.js';
+//TODO this is dumb, fix it
+import {GetCourses, GetCourseDetails, CreateCourse, GetChapters, GetChapterDetails, CreateChapter, GetSlides, CreateSlide, CreateClip, GetSlideDetails, GetClipDetails, UpdateClip} from './databasestorage/dataaccess.js';
 import { addTests } from './routes.test.js';
+import fetch from "node-fetch";
+import Response from "node-fetch";
+import streamToBlob from 'stream-to-blob';
+
+//TODO I should be a parameter
+const ttsEndPoint = "https://api.wellsaidlabs.com/v1/tts/stream"
 
 
 export const router = new Router()
@@ -72,7 +79,6 @@ router.get('/test', (ctx) => {
         return;
       }
       console.log('Getting course Details');
-      console.log(ctx.params.CourseID);
       let course = await GetCourseDetails(ctx.params.CourseID);
       ctx.body = JSON.stringify(course);
       })
@@ -87,8 +93,6 @@ router.get('/test', (ctx) => {
         }
         let course = ctx.request.body;
         console.log('Request to create course');
-        console.log(ctx.request);
-        console.log(course);
         if (typeof(course) == "undefined")
         {
           ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
@@ -177,8 +181,6 @@ router.get('/test', (ctx) => {
       }
       let slide = ctx.request.body;
       console.log('Request to create slide');
-      console.log(ctx.request);
-      console.log(slide)
       if (typeof(slide) == "undefined")
       {
         ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
@@ -198,33 +200,114 @@ router.get('/test', (ctx) => {
           return;
         }
         console.log('Getting Slide Details');
-        console.log(ctx.params.slideID);
         let slide = await GetSlideDetails(ctx.params.slideID);
-        console.log(slide);
         ctx.body = JSON.stringify(slide);
         })
 
-
-    .post('/slides', async (ctx) => {
+      .post('/slides', async (ctx) => {
+        if (!RequirePermission(ctx,['read:courses'])) {
+          //TODO: Handle failure more gracefully
+          ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+          console.log('Bad Permissions')
+          return;
+        }
+        let slide = ctx.request.body;
+        console.log('Request to create slide');
+        if (typeof(slide) == "undefined")
+        {
+          ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
+          return;
+        }
+        var insertSlide = await CreateSlide(slide);
+        ctx.body = JSON.stringify(insertSlide);
+  
+      })
+        
+    //This is just pseudo code for now and needs to be implemented.
+    .get('/slides/:slideID/audio/', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
         //TODO: Handle failure more gracefully
+        console.log('Bad Slide Get Permissions')
         ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-        console.log('Bad Permissions')
         return;
       }
-      let slide = ctx.request.body;
-      console.log('Request to create slide');
-      console.log(ctx.request);
-      console.log(slide)
-      if (typeof(slide) == "undefined")
-      {
-        ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
-        return;
-      }
-      var insertSlide = await CreateSlide(slide);
-      ctx.body = JSON.stringify(insertSlide);
+      console.log('Request to merge clip audio files');
+      //Check each clip to ensure there is audio, else error
+      //Load all audio clips
+      //Merge all audio clips with parameters (part of slide?  do we need another input?)  This includes 'white space' between clips and speed up factor
+      //Save audio file to slide
+      //return audio file (or the full slide?)
+      ctx.body = JSON.stringify(slide);
+      })
 
-    })
+
+    .get('/clips/:clipID/audio', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        //TODO: Handle failure more gracefully
+        console.log('Bad Clip Audio Generate Get Permissions')
+        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+        return;
+      }
+      console.log('Updating Clip Audio file')
+
+      console.log('-Getting Clip Details');
+      let clip = await GetClipDetails(ctx.params.clipID);
+
+
+      const abortController = new AbortController();
+      const avatarId = clip.VoiceID;
+      const text = clip.ClipText;
+    
+      /**
+       * Should this request fail, make sure to check the response headers
+       * to try to find a root cause.
+       * 
+       * Rate-limiting headers:
+       * x-quota-limit: 200
+       * x-quota-remaining: 191
+       * x-quota-reset: 1622226323630
+       * x-rate-limit-limit: 5
+       * x-rate-limit-remaining: 4
+       * x-rate-limit-reset: 1619635874002
+       */
+
+      const ttsResponse = await fetch(ttsEndPoint, {
+        //signal: abortController.signal,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Api-Key': process.env.WELLSAID_API_KEY,
+        },
+        body: JSON.stringify({
+          speaker_id: avatarId,
+          text: text,
+        }),
+      });
+
+      let status = ttsResponse.status;
+      //TODO handle invalid responses here
+      if (status != 200)
+      {
+        console.log('tts Response Status was invalid');
+        console.log(ttsResponse.status);
+      }
+
+      //Nico, This is the problem.  body is a Stream, but it needs to be a blob
+      clip.AudioClip = ttsResponse.body;
+
+      //This library works on the browser, but doesn't work locally.
+      //clip.AudioClip = await streamToBlob(ttsResponse.body);
+
+      //https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
+      //var response = await Response(ttsResponse.body);
+      clip.AudioClip = await ttsResponse.body.blob();
+
+
+
+      var updateClip = await UpdateClip(clip, false);
+      
+      ctx.body = JSON.stringify(updateClip);
+      })
 
     .post('/clips', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
@@ -235,8 +318,6 @@ router.get('/test', (ctx) => {
       }
       let clip = ctx.request.body;
       console.log('Request to create clip');
-      console.log(ctx.request);
-      console.log(clip)
       if (typeof(clip) == "undefined")
       {
         ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
@@ -244,6 +325,26 @@ router.get('/test', (ctx) => {
       }
       var insertClip = await CreateClip(clip);
       ctx.body = JSON.stringify(insertClip);
+
+    })
+
+    //This has not been implemented on the front end, or tested
+    .put('/clips/:clipID', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        //TODO: Handle failure more gracefully
+        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+        console.log('Bad Permissions')
+        return;
+      }
+      let clip = ctx.request.body;
+      console.log('Request to update clip');
+      if (typeof(clip) == "undefined")
+      {
+        ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
+        return;
+      }
+      var updateClip = await UpdateClip(clip);
+      ctx.body = JSON.stringify(updateClip);
 
     })
 

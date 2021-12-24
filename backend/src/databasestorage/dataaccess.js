@@ -168,6 +168,16 @@ export function CreateSlide(slide)
   });
 }
 
+export async function GetClipDetails(clipID)
+{
+  let promises = [];
+  let querySlides = `SELECT * FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
+  let valuesSlides = [clipID];
+  let clips = await SQLQuery(querySlides, valuesSlides);
+  
+  return clips[0];
+}
+
 export function CreateClip(clip)
 {
   //Check Clip
@@ -204,6 +214,58 @@ export function CreateClip(clip)
     });
   });
 }
+
+export function UpdateClip(clip, resetAudio = true)
+{
+  //Check Clip
+  let error = false;
+  let errorString = "";
+  if (!clip.SlideID){
+    error = true;
+    errorString += "Invalid SlideID\n";
+  }
+  if (!clip.VoiceID) {
+    error = true;
+    errorString += "Invalid VoiceID\n";
+  }
+  if (!clip.ClipID) {
+    error = true;
+    errorString += "Invalid ClipID\n";
+  }
+  return new Promise( function (resolve, reject) {
+
+    let con = getCon();
+
+    let voiceID = clip.VoiceID || 3
+
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+
+    const audioClip = resetAudio ? null : clip.AudioClip
+
+    //Generic Internet code
+    // var query = "INSERT INTO files SET ?",
+    // values = {
+    //     file_type: 'img',
+    //     file_size: buffer.length,
+    //     file: buffer
+    // };
+
+    let insert = 'Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, AudioClip = BINARY(?) Where ID = ?';
+    let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, audioClip, clip.ClipID];
+
+    con.query(insert,values, (err, results, fields) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      con.end();
+      clip.ID = results.insertId
+      resolve( clip);
+    });
+  });
+}
+
 function getCon()
 {
     return mysql.createConnection({
