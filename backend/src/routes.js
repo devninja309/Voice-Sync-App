@@ -6,6 +6,7 @@ import { addTests } from './routes.test.js';
 import fetch from "node-fetch";
 import Response from "node-fetch";
 import streamToBlob from 'stream-to-blob';
+import {Blob} from 'node:buffer';
 
 //TODO I should be a parameter
 const ttsEndPoint = "https://api.wellsaidlabs.com/v1/tts/stream"
@@ -224,7 +225,7 @@ router.get('/test', (ctx) => {
       })
         
     //This is just pseudo code for now and needs to be implemented.
-    .get('/slides/:slideID/audio/', async (ctx) => {
+    .get('/slides/:slideID/generateaudio/', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
         //TODO: Handle failure more gracefully
         console.log('Bad Slide Get Permissions')
@@ -240,8 +241,21 @@ router.get('/test', (ctx) => {
       ctx.body = JSON.stringify(slide);
       })
 
-
     .get('/clips/:clipID/audio', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        //TODO: Handle failure more gracefully
+        console.log('Bad Clip Audio Generate Get Permissions')
+        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+        return;
+      }
+      console.log('Getting Audio')
+      let clip = await GetClipDetails(ctx.params.clipID);
+
+      ctx.body = clip.AudioClip;
+    })
+
+
+    .get('/clips/:clipID/generateaudio', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
         //TODO: Handle failure more gracefully
         console.log('Bad Clip Audio Generate Get Permissions')
@@ -292,19 +306,16 @@ router.get('/test', (ctx) => {
         console.log(ttsResponse.status);
       }
 
-      //Nico, This is the problem.  body is a Stream, but it needs to be a blob
-      clip.AudioClip = ttsResponse.body;
-
-      //This library works on the browser, but doesn't work locally.
-      //clip.AudioClip = await streamToBlob(ttsResponse.body);
-
       //https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
-      //var response = await Response(ttsResponse.body);
-      clip.AudioClip = await ttsResponse.body.blob();
+      const responseBlob = await ttsResponse.blob()
+      const responseArray = await responseBlob.arrayBuffer();
+      const buffer = await Buffer.from(responseArray);
+      clip.AudioClip = buffer;
 
-
-
+      console.log('-Updating Clip based on audio file');
       var updateClip = await UpdateClip(clip, false);
+      console.log('-Finished updating clip');
+
       
       ctx.body = JSON.stringify(updateClip);
       })

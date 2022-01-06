@@ -123,7 +123,10 @@ const SlideDetailsPage = (props) => {
     }
     function UpdateClipAudio(clipID)
     {
-        APICalls.UpdateClipAudio(clipID).then(clip => slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clipID)] = clip);
+        APICalls.UpdateClipAudio(clipID).then(clip => {
+            //TODO this isn't redrawing the ClipListCard Control, and it should
+            slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clipID)] = clip;
+        });
     }
 
 

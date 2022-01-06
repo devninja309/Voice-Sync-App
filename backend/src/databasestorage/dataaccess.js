@@ -174,8 +174,14 @@ export async function GetClipDetails(clipID)
   let querySlides = `SELECT * FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
   let valuesSlides = [clipID];
   let clips = await SQLQuery(querySlides, valuesSlides);
-  
-  return clips[0];
+
+  let clip = clips[0];
+  if (clip.AudioClip !== null)
+  {
+    //const buffer =  Buffer.from(clip.AudioClip, "binary");
+    //clip.AudioClip = buffer;
+  }
+  return clip;
 }
 
 export function CreateClip(clip)
@@ -244,16 +250,8 @@ export function UpdateClip(clip, resetAudio = true)
 
     const audioClip = resetAudio ? null : clip.AudioClip
 
-    //Generic Internet code
-    // var query = "INSERT INTO files SET ?",
-    // values = {
-    //     file_type: 'img',
-    //     file_size: buffer.length,
-    //     file: buffer
-    // };
-
-    let insert = 'Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, AudioClip = BINARY(?) Where ID = ?';
-    let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, audioClip, clip.ClipID];
+     let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, AudioClip = ? Where ID = ?`;
+     let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, audioClip, clip.ID];
 
     con.query(insert,values, (err, results, fields) => {
       if (err) {
