@@ -9,19 +9,26 @@ import { useAuthTools } from '../Hooks/Auth';
 import { SimpleCard } from "../Elements/SimpleCard";
 import {PlayAudioClip} from "./PlayAudioClip";
 import { IconButton } from '../Elements/IconButton'; 
+import {LoadingSpinner} from "../Elements/LoadingSpinner";
 
 export function ClipListCard (props) 
 {
-    const {clip, setSelectedClip, updateClipAudio, ...childProps} = props;
+    const {clip: propClip, setSelectedClip, updateClip, ...childProps} = props;
     const {token, APICalls} = useAuthTools();
     const [url, setUrl] = useState(null);
-    let objectURL = null;
+    const [clip, setClip] = useState(null);
+    const [updating, setUpdating] = useState(false);
     useEffect( () => {
-        if (clip.AudioClip != null)
+        setClip(propClip);
+        LoadClipAudio(propClip);
+    
+     },[propClip]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
+    function LoadClipAudio(audioClip) //from database
+    {
+        setUrl(null);
+        if (audioClip.AudioClip != null)
         {
-            console.log('ClipListCard audio conversion');
-
-            APICalls.GetClipAudio(clip.ID)
+        APICalls.GetClipAudio(audioClip.ID)
             .then(
                 data => {
                     console.log('Got clip audio')
@@ -30,13 +37,28 @@ export function ClipListCard (props)
                         setUrl(objectURL);
                     })
 
-                })
+            })
         }
-    
-     },[clip]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
-    
+    }
+     function UpdateClipAudio(clipID)
+     {
+         setUpdating(true);
+         APICalls.UpdateClipAudio(clipID).then(returnClip => {
+             //setClip(returnClip);
+             updateClip(returnClip); //This should trigger a redraw of this component.
+             setUpdating(false);
+         });
+     }
+    if (clip === null){
 
-    //const LinkAddress = '/courses/' + script.CourseID + '/scripts/' + script.ID
+        return ( 
+            <div className = "div-ClipListCard" key="Loading" onClick={()=>setSelectedClip(clip)}>
+                <SimpleCard  {...childProps} className="SimpleCard-ClipListCard">
+                    <LoadingSpinner/>
+                </SimpleCard>
+            </div>)
+    }
+
     return (
         <div className = "div-ClipListCard" key={clip.ID} onClick={()=>setSelectedClip(clip)}>
             <SimpleCard  {...childProps} className="SimpleCard-ClipListCard">
@@ -45,10 +67,10 @@ export function ClipListCard (props)
                         Clip: {clip.OrdinalValue}
                     </p>
                                            
-                    <IconButton icon="refresh" onClick={()=>updateClipAudio(clip.ID)}/>
+                    <IconButton icon="refresh" onClick={()=>UpdateClipAudio(clip.ID)}/>
                 </div>
                 <div class="div-Slide-Details-Container">
-                    <PlayAudioClip audiofile = {url} />  
+                    <PlayAudioClip audiofile = {url} updating={updating}/>  
                 </div>
                 <p class = "p-clip-card-text">
                     Voice: {clip.VoiceID}

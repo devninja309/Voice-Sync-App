@@ -1,7 +1,8 @@
 
 import Router from 'koa-router';
 //TODO this is dumb, fix it
-import {GetCourses, GetCourseDetails, CreateCourse, GetChapters, GetChapterDetails, CreateChapter, GetSlides, CreateSlide, CreateClip, GetSlideDetails, GetClipDetails, UpdateClip} from './databasestorage/dataaccess.js';
+import {GetCourses, GetCourseDetails, CreateCourse, GetChapters, GetChapterDetails, CreateChapter, 
+  GetSlides, CreateSlide, CreateClip, GetSlideDetails, GetClipDetails, UpdateClip, UpdateSlide} from './databasestorage/dataaccess.js';
 import { addTests } from './routes.test.js';
 import fetch from "node-fetch";
 import Response from "node-fetch";
@@ -223,6 +224,42 @@ router.get('/test', (ctx) => {
         ctx.body = JSON.stringify(insertSlide);
   
       })
+      .put('/slides/:slideID', async (ctx) => {
+        if (!RequirePermission(ctx,['read:courses'])) {
+          //TODO: Handle failure more gracefully
+          ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+          console.log('Bad Permissions')
+          return;
+        }
+        let slide = ctx.request.body;
+        console.log('Request to update slide');
+        if (typeof(slide) == "undefined")
+        {
+          ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
+          return;
+        }
+        var updateSlide = await UpdateSlide(slide);
+        ctx.body = JSON.stringify(updateSlide);
+  
+      })
+      .put('/slides/:slideID', async (ctx) => {
+        if (!RequirePermission(ctx,['read:courses'])) {
+          //TODO: Handle failure more gracefully
+          ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+          console.log('Bad Permissions')
+          return;
+        }
+        let slide = ctx.request.body;
+        console.log('Request to update clip');
+        if (typeof(clip) == "undefined")
+        {
+          ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
+          return;
+        }
+        var updateSlide = await UpdateSlide(slide);
+        ctx.body = JSON.stringify(updateSlide);
+  
+      })
         
     //This is just pseudo code for now and needs to be implemented.
     .get('/slides/:slideID/generateaudio/', async (ctx) => {
@@ -339,7 +376,6 @@ router.get('/test', (ctx) => {
 
     })
 
-    //This has not been implemented on the front end, or tested
     .put('/clips/:clipID', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
         //TODO: Handle failure more gracefully
@@ -358,6 +394,7 @@ router.get('/test', (ctx) => {
       ctx.body = JSON.stringify(updateClip);
 
     })
+
 
     addTests(router);
 

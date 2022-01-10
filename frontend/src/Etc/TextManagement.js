@@ -8,6 +8,11 @@ const as = nlp.as;
 
 export function UpdateSlideText(slide)
 {
+    console.log(slide);
+    const clips = slide.Clips;
+    const sentences = clips.map(clip => clip.ClipText);
+    const newSlide = {...slide, SlideText: sentences.join(' ')};
+    return newSlide;
 }
 
 //Imports a slide text file, creates 1-many slides and returns a promise that resolves with the first slide

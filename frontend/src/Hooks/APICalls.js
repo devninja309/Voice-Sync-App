@@ -71,6 +71,16 @@ const PostHeadersForCreate = (object) => {
         body: JSON.stringify(object)
     }
 }
+const PutHeadersForUpdate = (object) => {
+    return {
+        method: 'put',
+        headers: {
+            'Content-Type':'application/json', 
+            'Accept': 'application/json',},
+        body: JSON.stringify(object)
+    }
+}
+
 
 export function CreateCourse(fetchWithAuth, course)
 {
@@ -91,6 +101,16 @@ export function CreateSlide(fetchWithAuth, slide)
 export function CreateClip(fetchWithAuth, clip)
 {
     return fetchWithAuth(getUrlPath('clips'), PostHeadersForCreate(clip))
+      .then(response => response.json())
+}
+export function UpdateSlide(fetchWithAuth, slide)
+{
+    return fetchWithAuth(getUrlPath(`slides/${slide.ID}`), PutHeadersForUpdate(slide))
+      .then(response => response.json())
+}
+export function UpdateClip(fetchWithAuth, clip)
+{
+    return fetchWithAuth(getUrlPath(`clips/${clip.ID}`), PutHeadersForUpdate(clip))
       .then(response => response.json())
 }
 export function UpdateClipAudio(fetchWithAuth, clipID)
@@ -117,7 +137,9 @@ export const UseAPICallsWithAuth = (fetchWithAuth) => {
         CreateChapter: (chapter) => CreateChapter(fetchWithAuth, chapter),
         GetSlides: (ChapterID) => GetSlides(fetchWithAuth, ChapterID), 
         CreateSlide: (slide) => CreateSlide(fetchWithAuth, slide),
+        UpdateSlide: (slide) => UpdateSlide(fetchWithAuth, slide),
         CreateClip: (clip) => CreateClip(fetchWithAuth, clip),
+        UpdateClip: (clip) => UpdateClip(fetchWithAuth, clip),
         UpdateClipAudio: (clipID) => UpdateClipAudio(fetchWithAuth, clipID),
         GetClipAudio: (clipID) => GetClipAudio(fetchWithAuth, clipID),
         GetSlideDetails: (slideID) => GetSlideDetails(fetchWithAuth, slideID)}

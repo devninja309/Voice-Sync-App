@@ -22,6 +22,7 @@ import { SimpleButton } from '../Elements/SimpleButton';
 import { IconButton } from '../Elements/IconButton';
 import { ButtonGroup, Icon } from '@blueprintjs/core';
 import {Tooltip} from "@blueprintjs/core";
+import {UpdateSlideText} from '../Etc/TextManagement';
 
 const SlideDetailsPage = (props) => {
 
@@ -30,6 +31,7 @@ const SlideDetailsPage = (props) => {
 
     const [slide, setSlide] = useState('');
     const [selectedClip, setSelectedClip] = useState(null);
+    const [selectedClipEdited, setSelectedClipEdited] = useState(false);
     const {token, APICalls} = useAuthTools();
     const [audioclipfile, setaudioclipfile] = useState(null);
     
@@ -38,15 +40,36 @@ const SlideDetailsPage = (props) => {
         .then(
             data => {
                 setSlide(data[0]); //TODO Query organization doesn't support single responses.  Do we care?
-
             })
     
      },[token, CourseID, slideID]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
     
+     const changeSelectedClip = (clip) =>
+     {
+         setSelectedClipEdited(false);
+         setSelectedClip(clip);
+     }
+     const selectedClipModified = (event) => {
 
-     const getClip = useCallback(async () => {
-        console.log ('Slide def');
-        console.log(slide); 
+        const updatedClip = {...selectedClip, ClipText: event.target.value}
+        setSelectedClipEdited(true);
+
+        setSelectedClip(updatedClip)
+
+        console.log(selectedClipEdited);
+
+     }
+     const pushChangedClip = (clip) => {
+         APICalls.UpdateClip(clip)
+         clip.AudioClip = null;
+         setSelectedClipEdited(false);
+         slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = clip;
+         const newSlide = UpdateSlideText(slide);
+         setSlide(newSlide);
+         APICalls.UpdateSlide(newSlide);
+     }
+
+     const getSlideClip = useCallback(async () => {
        setSlide({...slide, SlideClip: null})
        const path = getUrlPath('stream');
        const slideText = slide.SlideText
@@ -64,37 +87,19 @@ const SlideDetailsPage = (props) => {
        setaudioclipfile(objectURL)
      }, [ slide])
 
-     const dummyClipList = [{
-         ID: 1,
-         ClipText: "Dummy Text"
-     },{
-        ID: 2,
-        ClipText: "Dummy Text"
-    },{
-        ID: 3,
-        ClipText: "Dummy Text"
-    },{
-        ID: 4,
-        ClipText: "Dummy Text"
-    }];
     function sortByOrdinalValue(a,b) {
         return a.OrdinalValue - b.OrdinalValue;
     }
+
     function DisplayClipsList() {
-        if (dummyClipList && false)
-        {
-            return dummyClipList.map(clip => (<ClipListCard key={clip.ID} clip = {clip} setSelectedClip={setSelectedClip}/>))
-        }
-        else {
-            if (slide.Clips){
-                console.log (slide);
-                return slide.Clips.sort(sortByOrdinalValue).map(clip => (
-                    //TODO insert a spinner here for when updating.  What's the pattern for that?  Set the clip to null?
-                    <ClipListCard key={clip.ID} clip = {clip} setSelectedClip={setSelectedClip} updateClipAudio={UpdateClipAudio}/>
-                ))
-            }
-        }
+        if (slide.Clips){
+            console.log (slide);
+            return slide.Clips.sort(sortByOrdinalValue).map(clip => (
+                <ClipListCard key={clip.ID} clip = {clip} setSelectedClip={changeSelectedClip} updateClip={UpdateClip}/>
+            ))
+        }      
     }
+
     function TextEditArea() {
         if (selectedClip === null) {
         return <SimpleTextArea className="simpleTextArea-largebox"
@@ -108,9 +113,10 @@ const SlideDetailsPage = (props) => {
             return <div>
                         <SimpleTextArea className="simpleTextArea-largebox"
                             value={selectedClip.ClipText}
-                            onChange={event => setSelectedClip({...selectedClip, ClipText: event.target.value})}
+                            onChange={event => selectedClipModified(event)}
                             />
-                        <SimpleButton onClick={() => setSelectedClip(null)} Text="Deselect Clip"/>
+                        {selectedClipEdited && <SimpleButton onClick= {()=> pushChangedClip(selectedClip)} Text="Save Changes" />}
+                        <SimpleButton onClick={() => changeSelectedClip(null)} Text="Deselect Clip"/>
                         <SimpleTextArea className="simpleTextArea-largebox"
                         value={slide.SlideText} 
                         disabled= {true}
@@ -121,15 +127,13 @@ const SlideDetailsPage = (props) => {
                     </div>
         }
     }
-    function UpdateClipAudio(clipID)
+    function UpdateClip(clip)
     {
-        APICalls.UpdateClipAudio(clipID).then(clip => {
-            //TODO this isn't redrawing the ClipListCard Control, and it should
-            slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clipID)] = clip;
-        });
+        console.log('Updating Slide based on clip change');
+        slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = clip;
+
+        setSlide({...slide});
     }
-
-
 
     return  (     
         <PageWrapper>
@@ -157,7 +161,7 @@ const SlideDetailsPage = (props) => {
                         {TextEditArea()}
                     </div>
                     <PlayAudioClip audiofile = {slide.MergedClip} />
-                    <button className="input" onClick={getClip}>Merge all clips</button>
+                    <button className="input" onClick={getSlideClip}>Merge all clips</button>
                     <button className="input" onClick={() =>console.log(slide)}>Debug</button>
                 </div>
                 <div class = "div-Slide-Details-ClipsList-Column">

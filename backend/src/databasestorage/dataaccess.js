@@ -168,6 +168,48 @@ export function CreateSlide(slide)
   });
 }
 
+export function UpdateSlide(slide, resetAudio = true)
+{
+  //Check Clip
+  let error = false;
+  let errorString = "";
+  if (!slide.SlideName){
+    error = true;
+    errorString += "Invalid Slide Name\n";
+  }
+  if (!slide.ChapterID){
+    error = true;
+    errorString += "Invalid ChapterID\n";
+  }
+  if (!slide.VoiceID) {
+    error = true;
+    errorString += "Invalid VoiceID\n";
+  }
+  return new Promise( function (resolve, reject) {
+
+    let con = getCon();
+
+    let voiceID = slide.VoiceID || 3
+
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+
+      console.log('Updating Slide');
+      console.log (slide)
+     let update = 'Update  IA_VoiceSynth.Slides set SlideName = ?,SlideText = ?, VoiceID = ?, ChapterID = ? Where ID = ?';
+     let values = [slide.SlideName, slide.SlideText,slide.VoiceID, slide.ChapterID, slide.ID];
+ 
+     con.query(update,values, (err, results, fields) => {
+       if (err) {
+         return console.error(err.message);
+       }
+       con.end();
+       resolve(slide);
+     });
+    });
+}
+
 export async function GetClipDetails(clipID)
 {
   let promises = [];
@@ -258,7 +300,6 @@ export function UpdateClip(clip, resetAudio = true)
         return console.error(err.message);
       }
       con.end();
-      clip.ID = results.insertId
       resolve( clip);
     });
   });
