@@ -1,8 +1,10 @@
 export const isLocal = window.location.hostname === 'localhost'
 
-export const getUrlPath = (route) => isLocal ? `http://localhost:3001/${route}` : `/v1/${route}`
+export const getUrlPath = (route) => isLocal ? `http://localhost:3001/${route}` : `/V1/${route}`
+//export const getUrlPath = (route) => isLocal ? `http://localhost:3001/${route}` : `https://d333dqbzp50nvv.cloudfront.net/${route}`
+//export const getUrlPath = (route) => isLocal ? `http://localhost:3001/${route}` : `https://ffo9tmh1jh.execute-api.us-west-2.amazonaws.com/Prod/${route}`
 
-//Database
+//Database  
 
 //TODO: Handle 'not logged in' on the front end.
 // function getData(path, accessToken) 
@@ -22,7 +24,6 @@ export const getUrlPath = (route) => isLocal ? `http://localhost:3001/${route}` 
 //             .then(response => response.json())
 //     }
 // } 
-
 
 //Basic Gets
 export function GetCourses(fetchWithAuth)

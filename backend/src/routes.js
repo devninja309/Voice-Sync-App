@@ -3,17 +3,18 @@ import Router from 'koa-router';
 //TODO this is dumb, fix it
 import {GetCourses, GetCourseDetails, CreateCourse, GetChapters, GetChapterDetails, CreateChapter, 
   GetSlides, CreateSlide, CreateClip, GetSlideDetails, GetClipDetails, UpdateClip, UpdateSlide} from './databasestorage/dataaccess.js';
+import {GetTestInfo} from './databasestorage/dataaccess.js';
 import { addTests } from './routes.test.js';
 import fetch from "node-fetch";
 import Response from "node-fetch";
-import streamToBlob from 'stream-to-blob';
-import {Blob} from 'node:buffer';
 
 //TODO I should be a parameter
 const ttsEndPoint = "https://api.wellsaidlabs.com/v1/tts/stream"
 
 
-export const router = new Router()
+export const router = new Router({
+  prefix: '/v1'
+})
 
 // TODO: This function is dumb and should be replaced with whatever a standard method is
 function RequirePermission(ctx,permissions){
@@ -52,9 +53,22 @@ function RequirePermission(ctx,permissions){
 }
 
 router.get('/test', (ctx) => {
-    ctx.body = 'Hello World'
+  ctx.body = 'Hello World Updated orig 3'
 })
-
+.get('/v1/test', (ctx) => {
+    ctx.body = 'Hello World Updated test'
+})
+.get('/dbtest', async (ctx) => {
+  try {
+    let test = await GetTestInfo();
+    ctx.body = JSON.stringify(test);
+  }
+  catch (err)
+  {
+    ctx.body = err.message;
+    ctx.body = 'There was a problem'
+  }
+})
   //TODO Move these into a controller specific to the object when this becomes unmanageable
   /*************************************
    * 

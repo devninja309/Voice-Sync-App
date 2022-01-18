@@ -7,11 +7,6 @@ module.exports = {
   entry: './src/lambda-index.js',
   target: 'node',
   mode: 'production',
-  externals: [
-    nodeExternals({
-      modulesFromFile: true
-    }),
-  ],
   optimization: {
     // We no not want to minimize our code.
     minimize: false

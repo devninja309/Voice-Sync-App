@@ -1,5 +1,8 @@
 CREATE SCHEMA `IA_VoiceSynth` ;
 
+CREATE USER 'VoiceSynthUser'@'sg-04915abf5725a81d2' IDENTIFIED BY '3ntranc3';
+GRANT SELECT, INSERT, UPDATE, DELETE ON IA_VoiceSynth.* TO 'VoiceSynthUser'@'sg-04915abf5725a81d2';
+
 CREATE TABLE `IA_VoiceSynth`.`Courses` (
   `ID` INT NOT NULL AUTO_INCREMENT,
   `CourseName` VARCHAR(45) NULL,

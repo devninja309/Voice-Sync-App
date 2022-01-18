@@ -1,5 +1,12 @@
 import mysql, { createConnection } from 'mysql';
 
+//Test functions
+export function GetTestInfo()
+{
+    let query = "select count(*) as NumCourses FROM IA_VoiceSynth.Courses"; 
+    return SQLQuery(query);
+}
+
 //GetListOfcourses
 export function GetCourses ()
 {
@@ -136,7 +143,7 @@ export function CreateSlide(slide)
   let errorString = "";
   if (!slide.SlideName){
     error = true;
-    errorString += "Invalid Slide Name\n";
+    errorString += "Invalid Slide Name2\n";
   }
   if (!slide.ChapterID){
     error = true;

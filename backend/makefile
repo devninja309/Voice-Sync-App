@@ -10,6 +10,7 @@ clean:
 build: clean
 	@echo "🛠Building"
 	yarn webpack
+	@echo skipping "cp -R ./node_modules/ ./.webpack/node_modules"
 	@echo "🛠Building✅"
 
 package: build
@@ -24,7 +25,8 @@ deploy: package
 	sam deploy \
 	--stack-name ia-api-qa \
 	--template-file .template.yaml \
-	--capabilities CAPABILITY_IAM
+	--parameter-overrides Env=qa \
+	--capabilities CAPABILITY_IAM 
 	@echo "🏗Deploying✅"
 
 deploy-prod: package
@@ -33,7 +35,7 @@ deploy-prod: package
 	AWS_DEFAULT_REGION=us-west-2 AWS_PROFILE=ia \
 	sam deploy \
 	--stack-name ia-api-prod \
-	--template-file .template.yaml \
-	--capabilities CAPABILITY_IAM \
-	--parameter-overrides Env=prod 
+	--template-file .template.y \
+	--parameter-overrides Env=prod \
+	--capabilities CAPABILITY_IAM 
 	@echo "🏗Deploying✅"
