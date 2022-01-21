@@ -3,7 +3,7 @@
 import jwt from 'koa-jwt';
 import jwks from 'jwks-rsa';
 
-export function GetJWTCheck(ctx){
+export function GetJWTCheck(){
   const secret = jwks.koaJwtSecret({
     cache: true,
     rateLimit: true,
@@ -17,5 +17,13 @@ var jwtCheck = jwt({
   //algorithms: ['RS256'],
   passthrough: true,
 });
-return jwtCheck;
+
+//return jwtCheck;
+
+let retFunc = (ctx, next) => {
+  //console.log('Deep in the middleware')
+  //console.log(ctx);
+  return jwtCheck(ctx, next);
+}
+return retFunc
 }

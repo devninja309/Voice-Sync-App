@@ -15,6 +15,10 @@ import{useAuthTools} from '../Hooks/Auth';
  const {token, APICalls} = useAuthTools();
  
  useEffect( () => {
+     APICalls.DBTestCall().then(
+         data => {
+             console.log(data)
+         });
     APICalls.GetCourses()
     .then(
         data => {

@@ -8,6 +8,16 @@ Globals:
     Environment:
       Variables:
         Env: !Ref Env
+        SQL_Host: ir1u4exjv62zcvp.cgljbdlc6j4o.us-west-2.rds.amazonaws.com
+        SQL_Schema: IA_VoiceSynth
+        SQL_User: VoiceSynthUser
+        SQL_PWD: 3ntranc3
+
+        AUTH0_Audience: VoiceSynthManagerBackend
+        AUTH0_Issuer: https://dev-l3ao-nin.us.auth0.com/
+        AUTH0_Algorithm: 'RS256'
+
+        WELLSAID_API_KEY: b8c9f415-6d67-40ba-88fe-4602d700198d
   Api:
     EndpointConfiguration: REGIONAL
     Cors: "'*'"

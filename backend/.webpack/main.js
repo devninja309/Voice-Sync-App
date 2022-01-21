@@ -57301,8 +57301,16 @@ var mysql = __webpack_require__(4426);
 //Test functions
 function GetTestInfo()
 {
+  try {
     let query = "select count(*) as NumCourses FROM IA_VoiceSynth.Courses"; 
+    console.log(query);
     return SQLQuery(query);
+  }
+  catch (err)
+  {
+    console.log(err);
+    return err.message;
+  }
 }
 
 //GetListOfcourses
@@ -57609,15 +57617,22 @@ function UpdateClip(clip, resetAudio = true)
     });
   });
 }
+function getConObj()
+{
+  return {
+    host: process.env.SQL_Host,
+    user: process.env.SQL_User,
+    password: process.env.SQL_PWD,
+    database: process.env.SQL_Schema
+  };
+
+}
 
 function getCon()
 {
-    return mysql.createConnection({
-        host: process.env.SQL_Host,
-        user: process.env.SQL_User,
-        password: process.env.SQL_PWD,
-        database: process.env.SQL_Schema
-      });
+    const conObj = getConObj();
+    console.log(conObj);
+    return mysql.createConnection(conObj);
 }
 
 function SQLQuery(query, values)
@@ -57628,20 +57643,30 @@ function SQLQuery(query, values)
     let con = getCon();
 
     con.connect(function(err) {
-      if (err) console.log( err);
-    });
+      if (err) {
+        console.log( err);
+        resolve(error.message);
+      }
+    
     
     con.query(query, values, function (error, results, fields) {
-      if (error) throw error;
+      if (error) {
+        console.log('Query Error');
+        console.log(error)
+        resolve(error.message);
+      }
       con.end();
       resolve( results);
     });
+
+  });
     
   });
   }
   catch (error)
   {
       console.error(error)
+      resolve(error.message);
   }
 }
 
@@ -59685,13 +59710,13 @@ const routes_test_ttsEndPoint = "https://api.wellsaidlabs.com/v1/tts/stream"
 
 function addTests(router) {
     router.post('/testAudio', async (ctx) => {
-            const abortController = new AbortController();
+            //const abortController = new AbortController();
             const avatarId = ctx.request.avatarId;
             const text = ctx.request.text;
           
             ctx.request.on('aborted', () => {
               // Graceful end of the TTS stream when a client connection is aborted
-              abortController.abort()
+              //abortController.abort()
             })
         console.log('Request to create test audio');
         console.log(ctx.request);
@@ -59703,7 +59728,7 @@ function addTests(router) {
   
       })
       router.post('/stream', async (ctx) => {
-        const abortController = new AbortController();
+        //const abortController = new AbortController();
         const avatarId = ctx.request.body.avatarId;
         const text = ctx.request.body.text;
       
@@ -59737,13 +59762,21 @@ function addTests(router) {
           }),
         });
         
-        ctx.res.writeHead(ttsResponse.status, ttsResponse.headers.raw());
-        ctx.res.flushHeaders();
+        //ctx.res.writeHead(ttsResponse.status, ttsResponse.headers.raw());
+        //ctx.res.flushHeaders();
 
         console.log('tts Response');
-        console.log(ttsResponse);
+        //console.log(ttsResponse);
 
-        ctx.body = ttsResponse.body;
+        //await new Promise(fulfill => ttsResponse.body.on("finish", fulfill));
+        const responseBlob = await ttsResponse.blob()
+        const responseArray = await responseBlob.arrayBuffer();
+        const buffer = await Buffer.from(responseArray);
+        ctx.body = buffer;
+        ctx.set('Content-Type', 'audio/mpeg');
+
+        console.log('headers');
+        console.log(ctx.res);
       
       });
 
@@ -59762,7 +59795,7 @@ function addTests(router) {
 
 //TODO I should be a parameter
 const routes_ttsEndPoint = "https://api.wellsaidlabs.com/v1/tts/stream"
-
+const auth0EndPoint = "https://dev-l3ao-nin.us.auth0.com/.well-known/jwks.json"
 
 const routes_router = new router({
   prefix: '/v1'
@@ -59778,6 +59811,7 @@ function RequirePermission(ctx,permissions){
   if (!ctx.state.user)
   {
       console.log('Invalid ctx.state.user')
+      console.log(ctx.state)
       return false;
   }
   if (!ctx.state.user.permissions)
@@ -59811,14 +59845,28 @@ routes_router.get('/test', (ctx) => {
     ctx.body = 'Hello World Updated test'
 })
 .get('/dbtest', async (ctx) => {
+
+  let getKey = async () => {
+    console.log('Fetching');
+    var result = await fetch(auth0EndPoint, {
+      method: 'GET',
+    });
+    console.log('fetched');
+    return result;
+  }
+
   try {
+    var key = await getKey();
+    console.log('printingKey');
+    console.log(key);
     let test = await GetTestInfo();
     ctx.body = JSON.stringify(test);
   }
   catch (err)
   {
-    ctx.body = err.message;
+    //ctx.body = err.message;
     ctx.body = 'There was a problem'
+    ctx.status = 200;
   }
 })
   //TODO Move these into a controller specific to the object when this becomes unmanageable
@@ -59828,10 +59876,13 @@ routes_router.get('/test', (ctx) => {
    * 
    *************************************/
   .get('/courses', async (ctx) => {
+    console.log('Getting Courses List');
     if (!RequirePermission(ctx,['read:courses'])) {
       //TODO: Handle failure more gracefully
-      ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-      return;
+      //ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+      //return;
+
+      //Cutting this out to test independently
     }
 
     let coursesList = await GetCourses();
@@ -60048,13 +60099,21 @@ routes_router.get('/test', (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
         //TODO: Handle failure more gracefully
         console.log('Bad Clip Audio Generate Get Permissions')
-        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-        return;
+        //ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+        //return;
       }
       console.log('Getting Audio')
       let clip = await GetClipDetails(ctx.params.clipID);
 
+      //'body': base64.b64encode(image).decode('utf-8'),
+      ctx.isBase64Encoded = true;   
+
+      //Amazon encoding code
       ctx.body = clip.AudioClip;
+      //ctx.body =  Buffer.from(clip.AudioClip).toString('base64');
+      ctx.set('Content-Type', 'audio/mpeg');
+      //ctx.set('Content-Disposition', 'attachment; filename=clip.mp3')
+
     })
 
 
@@ -60071,7 +60130,7 @@ routes_router.get('/test', (ctx) => {
       let clip = await GetClipDetails(ctx.params.clipID);
 
 
-      const abortController = new AbortController();
+      //const abortController = new AbortController();
       const avatarId = clip.VoiceID;
       const text = clip.ClipText;
     
@@ -60186,7 +60245,7 @@ var src = __webpack_require__(6064);
 
 
 
-function GetJWTCheck(ctx){
+function GetJWTCheck(){
   const secret = src.koaJwtSecret({
     cache: true,
     rateLimit: true,
@@ -60200,7 +60259,15 @@ var jwtCheck = lib({
   //algorithms: ['RS256'],
   passthrough: true,
 });
-return jwtCheck;
+
+//return jwtCheck;
+
+let retFunc = (ctx, next) => {
+  //console.log('Deep in the middleware')
+  //console.log(ctx);
+  return jwtCheck(ctx, next);
+}
+return retFunc
 }
 
 ;// CONCATENATED MODULE: ./src/app.js
@@ -60217,6 +60284,7 @@ return jwtCheck;
 const deployedEnv = process.env.Env || 'dev'
 
 var result = main.config({ path: '.env.' + deployedEnv });
+//var result = env.config({ path: '.env.' + 'qa' });
 
 //TODO check result and fail gracefully
 
@@ -60225,8 +60293,8 @@ app.use(koa_body());
 
 app
   .use(async (ctx, next) => {
-    //ctx.set('Access-Control-Allow-Origin', 'http://localhost:3000');
-    ctx.set('Access-Control-Allow-Origin', '*');
+        ctx.set('Access-Control-Allow-Origin', 'http://localhost:3000');
+        ctx.set('Access-Control-Allow-Origin', '*');
         ctx.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
         ctx.set('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
         await next();
@@ -60240,10 +60308,14 @@ app
 
 
 
-const handler = serverless_http(src_app)
+const handler = serverless_http(src_app,{
+  binary: ['audio/mpeg']
+})
 
 // Lambda can't consume ES6 exports
 module.exports.handler = async (evt, ctx) => {
+  ctx.callbackWaitsForEmptyEventLoop = false; 
+  console.log('Request');
   console.log(evt)
   
   //return evt; //I return whatever is passed in when the lambda is called straight.
@@ -60252,6 +60324,7 @@ module.exports.handler = async (evt, ctx) => {
 
   const res = await handler(evt, ctx)
 
+  console.log('Response')
   console.log(res)
 
   return res

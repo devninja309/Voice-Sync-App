@@ -10,7 +10,7 @@ import Response from "node-fetch";
 
 //TODO I should be a parameter
 const ttsEndPoint = "https://api.wellsaidlabs.com/v1/tts/stream"
-
+const auth0EndPoint = "https://dev-l3ao-nin.us.auth0.com/.well-known/jwks.json"
 
 export const router = new Router({
   prefix: '/v1'
@@ -26,6 +26,7 @@ function RequirePermission(ctx,permissions){
   if (!ctx.state.user)
   {
       console.log('Invalid ctx.state.user')
+      console.log(ctx.state)
       return false;
   }
   if (!ctx.state.user.permissions)
@@ -59,14 +60,28 @@ router.get('/test', (ctx) => {
     ctx.body = 'Hello World Updated test'
 })
 .get('/dbtest', async (ctx) => {
+
+  let getKey = async () => {
+    console.log('Fetching');
+    var result = await fetch(auth0EndPoint, {
+      method: 'GET',
+    });
+    console.log('fetched');
+    return result;
+  }
+
   try {
+    var key = await getKey();
+    console.log('printingKey');
+    console.log(key);
     let test = await GetTestInfo();
     ctx.body = JSON.stringify(test);
   }
   catch (err)
   {
-    ctx.body = err.message;
+    //ctx.body = err.message;
     ctx.body = 'There was a problem'
+    ctx.status = 200;
   }
 })
   //TODO Move these into a controller specific to the object when this becomes unmanageable
@@ -76,10 +91,13 @@ router.get('/test', (ctx) => {
    * 
    *************************************/
   .get('/courses', async (ctx) => {
+    console.log('Getting Courses List');
     if (!RequirePermission(ctx,['read:courses'])) {
       //TODO: Handle failure more gracefully
-      ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-      return;
+      //ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+      //return;
+
+      //Cutting this out to test independently
     }
 
     let coursesList = await GetCourses();
@@ -296,13 +314,21 @@ router.get('/test', (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
         //TODO: Handle failure more gracefully
         console.log('Bad Clip Audio Generate Get Permissions')
-        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-        return;
+        //ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+        //return;
       }
       console.log('Getting Audio')
       let clip = await GetClipDetails(ctx.params.clipID);
 
+      //'body': base64.b64encode(image).decode('utf-8'),
+      ctx.isBase64Encoded = true;   
+
+      //Amazon encoding code
       ctx.body = clip.AudioClip;
+      //ctx.body =  Buffer.from(clip.AudioClip).toString('base64');
+      ctx.set('Content-Type', 'audio/mpeg');
+      //ctx.set('Content-Disposition', 'attachment; filename=clip.mp3')
+
     })
 
 
@@ -319,7 +345,7 @@ router.get('/test', (ctx) => {
       let clip = await GetClipDetails(ctx.params.clipID);
 
 
-      const abortController = new AbortController();
+      //const abortController = new AbortController();
       const avatarId = clip.VoiceID;
       const text = clip.ClipText;
     

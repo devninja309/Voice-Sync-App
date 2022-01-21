@@ -8,6 +8,14 @@ Globals:
       Variables:
         Env:
           Ref: Env
+        SQL_Host: ir1u4exjv62zcvp.cgljbdlc6j4o.us-west-2.rds.amazonaws.com
+        SQL_Schema: IA_VoiceSynth
+        SQL_User: VoiceSynthUser
+        SQL_PWD: 3ntranc3
+        AUTH0_Audience: VoiceSynthManagerBackend
+        AUTH0_Issuer: https://dev-l3ao-nin.us.auth0.com/
+        AUTH0_Algorithm: RS256
+        WELLSAID_API_KEY: b8c9f415-6d67-40ba-88fe-4602d700198d
   Api:
     EndpointConfiguration: REGIONAL
     Cors: '''*'''
@@ -22,7 +30,7 @@ Resources:
   WebAPILambdaV1:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://s3-ia-cfg/46eb1a2366262588a4b055b7913d8798
+      CodeUri: s3://s3-ia-cfg/8db59f2d86e8b503118c822aadaba73b
       Handler: main.handler
       Events:
         ProxyGateway:

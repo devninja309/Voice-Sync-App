@@ -34,6 +34,7 @@ export const useAuthTools = () => {
 
     //TODO I should probably be defined outside this function
     const fetchWithAuth = (resource, init) => {    
+        console.log(resource);
         return fetch(resource,merge(authInit(token),init??{}));
     }
 

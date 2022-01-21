@@ -3,8 +3,16 @@ import mysql, { createConnection } from 'mysql';
 //Test functions
 export function GetTestInfo()
 {
+  try {
     let query = "select count(*) as NumCourses FROM IA_VoiceSynth.Courses"; 
+    console.log(query);
     return SQLQuery(query);
+  }
+  catch (err)
+  {
+    console.log(err);
+    return err.message;
+  }
 }
 
 //GetListOfcourses
@@ -311,15 +319,22 @@ export function UpdateClip(clip, resetAudio = true)
     });
   });
 }
+function getConObj()
+{
+  return {
+    host: process.env.SQL_Host,
+    user: process.env.SQL_User,
+    password: process.env.SQL_PWD,
+    database: process.env.SQL_Schema
+  };
+
+}
 
 function getCon()
 {
-    return mysql.createConnection({
-        host: process.env.SQL_Host,
-        user: process.env.SQL_User,
-        password: process.env.SQL_PWD,
-        database: process.env.SQL_Schema
-      });
+    const conObj = getConObj();
+    console.log(conObj);
+    return mysql.createConnection(conObj);
 }
 
 function SQLQuery(query, values)
@@ -330,19 +345,29 @@ function SQLQuery(query, values)
     let con = getCon();
 
     con.connect(function(err) {
-      if (err) console.log( err);
-    });
+      if (err) {
+        console.log( err);
+        resolve(error.message);
+      }
+    
     
     con.query(query, values, function (error, results, fields) {
-      if (error) throw error;
+      if (error) {
+        console.log('Query Error');
+        console.log(error)
+        resolve(error.message);
+      }
       con.end();
       resolve( results);
     });
+
+  });
     
   });
   }
   catch (error)
   {
       console.error(error)
+      resolve(error.message);
   }
 }

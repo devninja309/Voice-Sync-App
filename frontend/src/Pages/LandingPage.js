@@ -3,6 +3,7 @@ import React from "react";
 import { PageWrapper } from '../Components/PageWrapper';
 import {LinkButton} from '../Elements/LinkButton';
 import { BigLogo } from "../Elements/Logos";
+import { DBTest } from "../Elements/DBTest";
 
 export function LandingPage () 
 {
@@ -12,6 +13,7 @@ export function LandingPage ()
       <PageWrapper>
     <header className="App-header">
       <BigLogo/>
+      <DBTest/>
       
       <LinkButton Link = '/courses' Text='Courses'/>
 

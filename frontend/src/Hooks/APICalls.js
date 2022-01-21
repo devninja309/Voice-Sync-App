@@ -1,6 +1,6 @@
 export const isLocal = window.location.hostname === 'localhost'
 
-export const getUrlPath = (route) => isLocal ? `http://localhost:3001/${route}` : `/V1/${route}`
+export const getUrlPath = (route) => isLocal ? `http://localhost:3001/v1/${route}` : `/v1/${route}`
 //export const getUrlPath = (route) => isLocal ? `http://localhost:3001/${route}` : `https://d333dqbzp50nvv.cloudfront.net/${route}`
 //export const getUrlPath = (route) => isLocal ? `http://localhost:3001/${route}` : `https://ffo9tmh1jh.execute-api.us-west-2.amazonaws.com/Prod/${route}`
 
@@ -24,6 +24,13 @@ export const getUrlPath = (route) => isLocal ? `http://localhost:3001/${route}` 
 //             .then(response => response.json())
 //     }
 // } 
+
+//Tests
+export function DBTestCall(fetchWithAuth)
+{
+    return fetchWithAuth(getUrlPath('dbtest'))
+        .then(response => response.json());
+}
 
 //Basic Gets
 export function GetCourses(fetchWithAuth)
@@ -60,6 +67,15 @@ export function GetSlideDetails(fetchWithAuth, slideID)
     return fetchWithAuth(getUrlPath(`slides/${slideID}`))
     .then(response => response.json());
 }
+const GetHeadersForMP3 = (object) => {
+    return {
+        method: 'get',
+        headers: {
+            'Content-Type':'application/json', 
+            'Accept': 'audio/mpeg'}
+        }
+        
+    }
 
 
 //Put all the Create stuff here
@@ -122,7 +138,7 @@ export function UpdateClipAudio(fetchWithAuth, clipID)
 }
 export function GetClipAudio(fetchWithAuth, clipID)
 {
-    return fetchWithAuth(getUrlPath(`clips/${clipID}/audio`))
+    return fetchWithAuth(getUrlPath(`clips/${clipID}/audio`), GetHeadersForMP3())
     .then(response => response); //Not JSON
 
 }
@@ -130,6 +146,7 @@ export function GetClipAudio(fetchWithAuth, clipID)
 
 export const UseAPICallsWithAuth = (fetchWithAuth) => {
     return { 
+        DBTestCall : () => DBTestCall(fetchWithAuth),
         Createcourse : (course) => CreateCourse(fetchWithAuth, course), 
         GetCourses: () => GetCourses(fetchWithAuth), 
         GetCourseDetails: (CourseID) => GetCourseDetails(fetchWithAuth, CourseID), 

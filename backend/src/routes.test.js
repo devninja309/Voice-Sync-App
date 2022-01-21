@@ -11,13 +11,13 @@ const ttsEndPoint = "https://api.wellsaidlabs.com/v1/tts/stream"
 
 export function addTests(router) {
     router.post('/testAudio', async (ctx) => {
-            const abortController = new AbortController();
+            //const abortController = new AbortController();
             const avatarId = ctx.request.avatarId;
             const text = ctx.request.text;
           
             ctx.request.on('aborted', () => {
               // Graceful end of the TTS stream when a client connection is aborted
-              abortController.abort()
+              //abortController.abort()
             })
         console.log('Request to create test audio');
         console.log(ctx.request);
@@ -29,7 +29,7 @@ export function addTests(router) {
   
       })
       router.post('/stream', async (ctx) => {
-        const abortController = new AbortController();
+        //const abortController = new AbortController();
         const avatarId = ctx.request.body.avatarId;
         const text = ctx.request.body.text;
       
@@ -63,13 +63,21 @@ export function addTests(router) {
           }),
         });
         
-        ctx.res.writeHead(ttsResponse.status, ttsResponse.headers.raw());
-        ctx.res.flushHeaders();
+        //ctx.res.writeHead(ttsResponse.status, ttsResponse.headers.raw());
+        //ctx.res.flushHeaders();
 
         console.log('tts Response');
-        console.log(ttsResponse);
+        //console.log(ttsResponse);
 
-        ctx.body = ttsResponse.body;
+        //await new Promise(fulfill => ttsResponse.body.on("finish", fulfill));
+        const responseBlob = await ttsResponse.blob()
+        const responseArray = await responseBlob.arrayBuffer();
+        const buffer = await Buffer.from(responseArray);
+        ctx.body = buffer;
+        ctx.set('Content-Type', 'audio/mpeg');
+
+        console.log('headers');
+        console.log(ctx.res);
       
       });
 
