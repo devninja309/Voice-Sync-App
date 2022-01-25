@@ -5,6 +5,7 @@ import { LoginButton } from "./LoginButton";
 import { LogoutButton } from "./LogoutButton";
 import { useAuth0 } from "@auth0/auth0-react";
 import { LinkButton } from "../Elements/LinkButton";
+import { BackButton } from "./BackButton";
 
 
 export function NavigationHeader () 
@@ -38,6 +39,8 @@ export function NavigationHeader ()
                         <LinkButton Link = '/AudioTest' Text='Audio Test Page'/>
                         </div>
                     }
+            <Navbar.Divider />
+                    <BackButton/>
 
         </Navbar.Group>
     </Navbar>
