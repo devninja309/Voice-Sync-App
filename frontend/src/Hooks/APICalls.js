@@ -97,6 +97,15 @@ const PutHeadersForUpdate = (object) => {
         body: JSON.stringify(object)
     }
 }
+const DeleteHeadersForDelete = (object) => {
+    return {
+        method: 'DELETE',
+        headers: {
+            'Content-Type':'application/json', 
+            'Accept': 'application/json',},
+        body: JSON.stringify(object)
+    }
+}
 
 
 export function CreateCourse(fetchWithAuth, course)
@@ -139,7 +148,31 @@ export function UpdateClipAudio(fetchWithAuth, clipID)
 export function GetClipAudio(fetchWithAuth, clipID)
 {
     return fetchWithAuth(getUrlPath(`clips/${clipID}/audio`), GetHeadersForMP3())
-    .then(response => response); //Not JSON
+    .then(response => response); 
+
+}
+export function DeleteClip(fetchWithAuth, clipID)
+{
+    return fetchWithAuth(getUrlPath(`clips/${clipID}`), DeleteHeadersForDelete())
+    .then(response => response.json()); 
+
+}
+export function DeleteSlide(fetchWithAuth, slideID)
+{
+    return fetchWithAuth(getUrlPath(`slides/${slideID}`), DeleteHeadersForDelete())
+    .then(response => response.json()); 
+
+}
+export function DeleteChapter(fetchWithAuth, chapterID)
+{
+    return fetchWithAuth(getUrlPath(`chapters/${chapterID}`), DeleteHeadersForDelete())
+    .then(response => response.json());
+
+}
+export function DeleteCourse(fetchWithAuth, courseID)
+{
+    return fetchWithAuth(getUrlPath(`courses/${courseID}`), DeleteHeadersForDelete())
+    .then(response => response.json()); 
 
 }
 //Put any alternate stuff here
@@ -160,5 +193,10 @@ export const UseAPICallsWithAuth = (fetchWithAuth) => {
         UpdateClip: (clip) => UpdateClip(fetchWithAuth, clip),
         UpdateClipAudio: (clipID) => UpdateClipAudio(fetchWithAuth, clipID),
         GetClipAudio: (clipID) => GetClipAudio(fetchWithAuth, clipID),
-        GetSlideDetails: (slideID) => GetSlideDetails(fetchWithAuth, slideID)}
+        GetSlideDetails: (slideID) => GetSlideDetails(fetchWithAuth, slideID),
+        DeleteClip: (clipID) => DeleteClip(fetchWithAuth, clipID), 
+        DeleteSlide: (slideID) => DeleteSlide(fetchWithAuth, slideID), 
+        DeleteChapter: (chapterID) => DeleteChapter(fetchWithAuth, chapterID), 
+        DeleteCourse: (courseID) => DeleteCourse(fetchWithAuth, courseID), 
+    }
 }

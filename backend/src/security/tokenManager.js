@@ -21,8 +21,6 @@ var jwtCheck = jwt({
 //return jwtCheck;
 
 let retFunc = (ctx, next) => {
-  //console.log('Deep in the middleware')
-  //console.log(ctx);
   return jwtCheck(ctx, next);
 }
 return retFunc

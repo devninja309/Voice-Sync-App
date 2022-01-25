@@ -2,7 +2,8 @@
 import Router from 'koa-router';
 //TODO this is dumb, fix it
 import {GetCourses, GetCourseDetails, CreateCourse, GetChapters, GetChapterDetails, CreateChapter, 
-  GetSlides, CreateSlide, CreateClip, GetSlideDetails, GetClipDetails, UpdateClip, UpdateSlide} from './databasestorage/dataaccess.js';
+  GetSlides, CreateSlide, CreateClip, GetSlideDetails, GetClipDetails, UpdateClip, UpdateSlide,
+  DeleteClip, DeleteSlide, DeleteChapter, DeleteCourse} from './databasestorage/dataaccess.js';
 import {GetTestInfo} from './databasestorage/dataaccess.js';
 import { addTests } from './routes.test.js';
 import fetch from "node-fetch";
@@ -20,18 +21,18 @@ export const router = new Router({
 function RequirePermission(ctx,permissions){
   if (!ctx.state )
   {
-      console.log('Invalid ctx.state')
+      //console.log('Invalid ctx.state')
       return false;
   }
   if (!ctx.state.user)
   {
-      console.log('Invalid ctx.state.user')
-      console.log(ctx.state)
+      //console.log('Invalid ctx.state.user')
+      //console.log(ctx.state)
       return false;
   }
   if (!ctx.state.user.permissions)
   {
-      console.log('Invalid ctx.state.user.permissions')
+      //console.log('Invalid ctx.state.user.permissions')
       return false;
   }
   try{
@@ -45,11 +46,11 @@ function RequirePermission(ctx,permissions){
     console.log(error)
     return false;
   }
-  console.log('Permission Failure');
-  console.log('Want');
-  console.log(permissions);
-  console.log('Have');
-  console.log(ctx.state.user.permissions);
+  // console.log('Permission Failure');
+  // console.log('Want');
+  // console.log(permissions);
+  // console.log('Have');
+  // console.log(ctx.state.user.permissions);
   return false;
 }
 
@@ -136,6 +137,17 @@ router.get('/test', (ctx) => {
         ctx.body = JSON.stringify(insertcourse);
   
       })
+      .del('/courses/:courseID', async (ctx) => {
+        if (!RequirePermission(ctx,['read:courses'])) {
+          //TODO: Handle failure more gracefully
+          console.log('Bad Permissions')
+          ctx.status = 500
+          return;
+        }
+        var result = await DeleteCourse(ctx.params.courseID);
+        ctx.body = JSON.stringify(result);
+  
+      })
 
       /*************************************
        * 
@@ -177,9 +189,6 @@ router.get('/test', (ctx) => {
             return;
           }
           let chapter = ctx.request.body;
-          console.log('Request to create chapter');
-          console.log(ctx.request);
-          console.log(chapter)
           if (typeof(chapter) == "undefined")
           {
             ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
@@ -187,6 +196,17 @@ router.get('/test', (ctx) => {
           }
           var insertChapter = await CreateChapter(chapter);
           ctx.body = JSON.stringify(insertChapter);
+    
+        })
+        .del('/chapters/:chapterID', async (ctx) => {
+          if (!RequirePermission(ctx,['read:courses'])) {
+            //TODO: Handle failure more gracefully
+            console.log('Bad Permissions')
+            ctx.status = 500
+            return;
+          }
+          var result = await DeleteChapter(ctx.params.chapterID);
+          ctx.body = JSON.stringify(result);
     
         })
 
@@ -233,7 +253,6 @@ router.get('/test', (ctx) => {
           ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
           return;
         }
-        console.log('Getting Slide Details');
         let slide = await GetSlideDetails(ctx.params.slideID);
         ctx.body = JSON.stringify(slide);
         })
@@ -246,7 +265,6 @@ router.get('/test', (ctx) => {
           return;
         }
         let slide = ctx.request.body;
-        console.log('Request to create slide');
         if (typeof(slide) == "undefined")
         {
           ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
@@ -264,7 +282,6 @@ router.get('/test', (ctx) => {
           return;
         }
         let slide = ctx.request.body;
-        console.log('Request to update slide');
         if (typeof(slide) == "undefined")
         {
           ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
@@ -308,6 +325,17 @@ router.get('/test', (ctx) => {
       //Save audio file to slide
       //return audio file (or the full slide?)
       ctx.body = JSON.stringify(slide);
+      })
+      .del('/slides/:slideID', async (ctx) => {
+        if (!RequirePermission(ctx,['read:courses'])) {
+          //TODO: Handle failure more gracefully
+          console.log('Bad Permissions')
+          ctx.status = 500
+          return;
+        }
+        var result = await DeleteSlide(ctx.params.slideID);
+        ctx.body = JSON.stringify(result);
+  
       })
 
     .get('/clips/:clipID/audio', async (ctx) => {
@@ -432,6 +460,17 @@ router.get('/test', (ctx) => {
       }
       var updateClip = await UpdateClip(clip);
       ctx.body = JSON.stringify(updateClip);
+
+    })
+    .del('/clips/:clipID', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        //TODO: Handle failure more gracefully
+        console.log('Bad Permissions')
+        ctx.status = 500
+        return;
+      }
+      var result = await DeleteClip(ctx.params.clipID);
+      ctx.body = JSON.stringify(result);
 
     })
 

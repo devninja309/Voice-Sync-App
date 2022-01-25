@@ -5,11 +5,13 @@ import {Tooltip} from "@blueprintjs/core";
 import { ButtonGroup, Icon } from '@blueprintjs/core';
 import { useState, useEffect,useCallback } from 'react';
 import { useAuthTools } from '../Hooks/Auth';
+import { useLocation} from "react-router-dom";
 
 import { SimpleCard } from "../Elements/SimpleCard";
 import {PlayAudioClip} from "./PlayAudioClip";
 import { IconButton } from '../Elements/IconButton'; 
 import {LoadingSpinner} from "../Elements/LoadingSpinner";
+import {ClipDeleteButton} from "./ClipDeleteButton";
 
 export function ClipListCard (props) 
 {
@@ -18,8 +20,11 @@ export function ClipListCard (props)
     const [url, setUrl] = useState(null);
     const [clip, setClip] = useState(null);
     const [updating, setUpdating] = useState(false);
+    const currentLocation = useLocation();
+
     useEffect( () => {
         setClip(propClip);
+        console.log(propClip);
         LoadClipAudio(propClip);
     
      },[propClip]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
@@ -83,6 +88,11 @@ export function ClipListCard (props)
                         >
                             ...
                 </Tooltip>
+                <ClipDeleteButton 
+                        ItemID = {clip.ID}
+                        SlideID = {clip.SlideID}
+                        Redirect = {currentLocation.pathname}
+                        />
                 
             </SimpleCard>
         </div>

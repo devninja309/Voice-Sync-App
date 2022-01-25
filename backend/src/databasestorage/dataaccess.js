@@ -5,7 +5,6 @@ export function GetTestInfo()
 {
   try {
     let query = "select count(*) as NumCourses FROM IA_VoiceSynth.Courses"; 
-    console.log(query);
     return SQLQuery(query);
   }
   catch (err)
@@ -278,7 +277,7 @@ export function CreateClip(clip)
   });
 }
 
-export function UpdateClip(clip, resetAudio = true)
+export async function UpdateClip(clip, resetAudio = true)
 {
   //Check Clip
   let error = false;
@@ -318,6 +317,59 @@ export function UpdateClip(clip, resetAudio = true)
       resolve( clip);
     });
   });
+}
+//Delete functions
+export async function DeleteClip(clipID)
+{
+  let query = `Delete FROM IA_VoiceSynth.Clips Where Clips.ID = ?`;
+  let values = [clipID];
+  await SQLQuery(query, values);
+
+  return "success";
+}
+export async function DeleteSlide(slideID)
+{
+  let deleteChildren = `Delete From IA_VoiceSynth.Clips where Clips.SlideID = ?`;
+  let values = [slideID];
+  await SQLQuery(deleteChildren, values);
+  
+  let query = `Delete FROM IA_VoiceSynth.Slides Where Slides.ID = ?`;
+  await SQLQuery(query, values);
+
+  return "success";
+}
+export async function DeleteChapter(chapterID)
+{
+  console.log('Deleting Chapter');
+  let checkChildren = `Select Count (*) as slidesCount from IA_VoiceSynth.Slides where Slides.ChapterID = ?`
+  let values = [chapterID];
+  const count = await SQLQuery(checkChildren, values);
+  if (count[0].slidesCount > 0)
+  {
+    return "Cannot Delete, Existing Slides";
+  }
+  console.log('OK to delete')
+  console.log(count);
+  console.log(count[0].slidesCount);
+  let query = `Delete FROM IA_VoiceSynth.Chapters Where Chapters.ID = ?`;
+  await SQLQuery(query, values);
+  
+  return "success";
+}
+export async function DeleteCourse(courseID)
+{
+  let checkChildren = `Select Count (*) as chaptersCount from IA_VoiceSynth.Chapters where Chapters.CourseID = ?`
+  let values = [courseID];
+  const count = await SQLQuery(checkChildren, values);
+  if (count[0].chaptersCount > 0)
+  {
+    return "Cannot Delete, Existing Chapters";
+  }
+
+  let query = `Delete FROM IA_VoiceSynth.Courses Where Courses.ID = ?`;
+  await SQLQuery(query, values);
+  
+  return "success";
 }
 function getConObj()
 {

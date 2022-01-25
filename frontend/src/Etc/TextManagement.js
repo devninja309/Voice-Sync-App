@@ -6,6 +6,7 @@ const nlp  = winkNLP( model )
 const its = nlp.its;
 const as = nlp.as;
 
+//Updates the display slide text.  Should this be moved to the server and fired when needed from there?
 export function UpdateSlideText(slide)
 {
     console.log(slide);
@@ -13,6 +14,26 @@ export function UpdateSlideText(slide)
     const sentences = clips.map(clip => clip.ClipText);
     const newSlide = {...slide, SlideText: sentences.join(' ')};
     return newSlide;
+}
+
+//Async gets the slide from the server, updates the text based on existing clips, and pushes the changes.
+export async function UpdateSlideTextOnServer(APICalls, slideID) {
+    try {
+        console.log('UpdateSlideTextOnServer')
+        const results = await APICalls.GetSlideDetails(slideID);
+        console.log(results);
+        const slide = results[0]
+        console.log(slide);
+        const newSlide = UpdateSlideText(slide);
+        await APICalls.UpdateSlide(newSlide);
+        return true;
+    }
+    catch (err)
+    {
+        console.log('Error in UpdateSlideTextOnServer')
+        console.log(err);
+    }
+    return false
 }
 
 //Imports a slide text file, creates 1-many slides and returns a promise that resolves with the first slide
