@@ -1,8 +1,10 @@
 //Simple button to play an audio button.  Grey if no clip.  Yellow if clip is stale.
+import { Icon } from '@blueprintjs/core';
 import { useCallback, useEffect, useState } from 'react';
-import {LoadingSpinner} from "../Elements/LoadingSpinner";
+import {LoadingSpinner} from "./LoadingSpinner";
+import {IconButton} from "./IconButton";
 
-export function PlayAudioClip(props) {
+export function SimpleAudioPlayer(props) {
     const [url, setUrl] = useState('');
 
 
@@ -16,9 +18,16 @@ if (!file) {
         <p className="p-no-audio">No Audio</p>
     )
 }
+function PlayAudio() {
+    const audio = new Audio(file);
+    audio.play();
+}
 console.log('url')
+//<audio controls src={props.audiofile} />
 console.log(props.audiofile)
     return (
-    <audio controls src={props.audiofile} />
+        <div>
+            <IconButton icon='play' onClick={PlayAudio}/>
+        </div>
     )
 }

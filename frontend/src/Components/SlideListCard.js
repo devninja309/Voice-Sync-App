@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import {Tooltip} from "@blueprintjs/core";
 
 import { SimpleCard } from "../Elements/SimpleCard";
-import {PlayAudioClip} from "./PlayAudioClip";
+import {SimpleAudioPlayer} from "../Elements/SimpleAudioPlayer";
 
 import {SlideDeleteButton} from "./SlideDeleteButton";
 
@@ -31,7 +31,7 @@ export function SlideListCard (props)
                                 ...
                     </Tooltip>
                 </Link>
-                <PlayAudioClip audiofile = {slide.MergedClip} />
+                <SimpleAudioPlayer audiofile = {slide.MergedClip} />
 
                 <SlideDeleteButton 
                         ItemID = {slide.ID}

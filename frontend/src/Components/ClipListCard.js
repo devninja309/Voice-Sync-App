@@ -8,7 +8,7 @@ import { useAuthTools } from '../Hooks/Auth';
 import { useLocation} from "react-router-dom";
 
 import { SimpleCard } from "../Elements/SimpleCard";
-import {PlayAudioClip} from "./PlayAudioClip";
+import {SimpleAudioPlayer} from "../Elements/SimpleAudioPlayer";
 import { IconButton } from '../Elements/IconButton'; 
 import {LoadingSpinner} from "../Elements/LoadingSpinner";
 import {ClipDeleteButton} from "./ClipDeleteButton";
@@ -75,7 +75,7 @@ export function ClipListCard (props)
                     <IconButton icon="refresh" onClick={()=>UpdateClipAudio(clip.ID)}/>
                 </div>
                 <div class="div-Slide-Details-Container">
-                    <PlayAudioClip audiofile = {url} updating={updating}/>  
+                    <SimpleAudioPlayer audiofile = {url} updating={updating}/>  
                 </div>
                 <p class = "p-clip-card-text">
                     Voice: {clip.VoiceID}

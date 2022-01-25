@@ -13,7 +13,7 @@ import { useState, useEffect,useCallback } from 'react';
 import { useParams } from 'react-router';
 import { PageWrapper } from '../Components/PageWrapper';
 import { ClipListCard } from '../Components/ClipListCard';
-import { PlayAudioClip } from '../Components/PlayAudioClip';
+import { SimpleAudioPlayer } from '../Elements/SimpleAudioPlayer';
 import { SimpleTextArea } from '../Elements/SimpleTextArea';
 import { useAuthTools } from '../Hooks/Auth';
 import { BigLogo } from '../Elements/Logos';
@@ -160,7 +160,7 @@ const SlideDetailsPage = (props) => {
                     <div class ="div-Slide-Details-Container-TextArea">
                         {TextEditArea()}
                     </div>
-                    <PlayAudioClip audiofile = {slide.MergedClip} />
+                    <SimpleAudioPlayer audiofile = {slide.MergedClip} />
                     <button className="input" onClick={getSlideClip}>Merge all clips</button>
                     <button className="input" onClick={() =>console.log(slide)}>Debug</button>
                 </div>
