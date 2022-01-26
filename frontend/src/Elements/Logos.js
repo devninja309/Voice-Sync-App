@@ -6,20 +6,22 @@ const logo = '/ia_logo_trans.png';
 export function SmallLogo () 
 {
     return  (   
-      <img src={logo} className="App-logo.small" alt="logo" />
+      <img src={logo} className="App-logo-small" alt="logo" />
     )
 }
 export function MidLogo () 
 {
     return  (   
-      <img src={logo} className="App-logo.mid" alt="logo" />
+      <div className="App-logo-background">
+        <img src={logo} className="App-logo-mid" alt="logo" />
+      </div> 
     )
 }
 export function BigLogo () 
 {
     return  (  
         <div className="App-logo-background">
-            <img src={logo} className="App-logo.big" alt="logo" />
+            <img src={logo} className="App-logo-big" alt="logo" />
       </div> 
     )
 }

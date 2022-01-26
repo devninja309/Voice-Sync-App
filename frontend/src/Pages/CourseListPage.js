@@ -1,7 +1,7 @@
 //List of active courses
 import { PageWrapper } from '../Components/PageWrapper';
 import CourseList from '../Components/CourseList';
-import { BigLogo } from '../Elements/Logos';
+import { BigLogo, MidLogo } from '../Elements/Logos';
 
 const CourseListPage = (props) => {
 
@@ -9,7 +9,7 @@ const CourseListPage = (props) => {
         <PageWrapper>
         <div className="App">
             <header className="App-header">
-            <BigLogo/>
+            <MidLogo/>
             <p>
                 
             </p>
