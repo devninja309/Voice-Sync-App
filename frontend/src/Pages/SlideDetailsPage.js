@@ -16,7 +16,7 @@ import { ClipListCard } from '../Components/ClipListCard';
 import { SimpleAudioPlayer } from '../Elements/SimpleAudioPlayer';
 import { SimpleTextArea } from '../Elements/SimpleTextArea';
 import { useAuthTools } from '../Hooks/Auth';
-import { BigLogo } from '../Elements/Logos';
+import { MidLogo } from '../Elements/Logos';
 import { getUrlPath } from '../Hooks/APICalls';
 import { SimpleButton } from '../Elements/SimpleButton';
 import { IconButton } from '../Elements/IconButton';
@@ -139,7 +139,7 @@ const SlideDetailsPage = (props) => {
         <PageWrapper>
         <div className="App">
             <header className="App-header">
-            <BigLogo/>
+            <MidLogo/>
             <div className ="course-Name-Box">
             <h3>
             {slide.SlideName}

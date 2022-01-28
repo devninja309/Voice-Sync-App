@@ -13,6 +13,7 @@ import CourseListPage from './Pages/CourseListPage'
 import CourseDetailsPage from './Pages/CourseDetailsPage'
 import ChapterDetailsPage from './Pages/ChapterDetailsPage'
 import SlideDetailsPage from './Pages/SlideDetailsPage'
+import EventLogPage from './Pages/EventLogPage'
 
 import {GetUserToken} from './Etc/TokenManagement';
 import { LogError, LogErrorMessage } from './Etc/ErrorHandler';
@@ -53,6 +54,7 @@ function App() {
           <Route path ="/Ugly" element = {<UglyPage/>}></Route>
           <Route path ="/Login" element = {<LoginPage/>}></Route>
           <Route path ="/courses" element = {<CourseListPage accessToken = {userToken}/>}></Route>
+          <Route path ="/logs" element = {<EventLogPage/>}></Route>
           <Route path ="/courses/:CourseID" element = {<CourseDetailsPage />}></Route>
           <Route path ="/courses/:CourseID/chapters/:ChapterID" element = {<ChapterDetailsPage />}></Route>
           <Route path ="/courses/:CourseID/chapters/:ChapterID/slides/:slideID" element = {<SlideDetailsPage />}></Route>

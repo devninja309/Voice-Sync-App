@@ -371,6 +371,55 @@ export async function DeleteCourse(courseID)
   
   return "success";
 }
+
+const LogTypes = {
+  Error: 0,
+  ClipGenerated: 1,
+}
+
+export function LogClipGeneration(User, Text) {
+  return CreateLogEntry(LogTypes.ClipGenerated, User, Text);
+}
+export function LogError(Err) {
+  return LogErrorMessage(Err.message)
+}
+export function LogErrorMessage(Message) {
+  return CreateLogEntry(LogTypes.Error, `Unknown`, Message);
+}
+
+function CreateLogEntry(LogType, User, Message) {
+
+  return new Promise( function (resolve, reject) {
+
+    let con = getCon();
+
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+
+    let insert = 'Insert into IA_VoiceSynth.LogEntry (ID, User, LogType, Message) Values (UUID_TO_BIN(UUID()),?,?,?)';
+    let values = [User, LogType, Message];
+
+    con.query(insert,values, (err, results, fields) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      con.end();
+      resolve( );
+    });
+  });
+}
+export async function GetClipLog()
+{
+  let today = new Date();
+    //defaulting to 1 week.  TODO: Make this whole thing more stepwise
+    let select = 'Select TimeStamp, User, Message from IA_VoiceSynth.LogEntry where LogType = 1 and TimeStamp > ?'
+    let values = [new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7)]
+    let logs = await SQLQuery(select, values);
+     return logs;
+}
+
+
 function getConObj()
 {
   return {
@@ -385,7 +434,6 @@ function getConObj()
 function getCon()
 {
     const conObj = getConObj();
-    console.log(conObj);
     return mysql.createConnection(conObj);
 }
 

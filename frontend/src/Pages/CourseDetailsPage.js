@@ -10,7 +10,7 @@ import { PageWrapper } from '../Components/PageWrapper';
 import{useAuthTools} from '../Hooks/Auth';
 
 import ChapterList from '../Components/ChapterList';
-import { BigLogo } from '../Elements/Logos';
+import { MidLogo } from '../Elements/Logos';
 
 //useparams here react-router-dom
 
@@ -35,7 +35,7 @@ const CourseDetailsPage = (props) => {
         <PageWrapper>
         <div className="App">
             <header className="App-header">
-            <BigLogo/>
+            <MidLogo/>
             <div className ="course-Name-Box">
             <h3>
             {course.CourseName}

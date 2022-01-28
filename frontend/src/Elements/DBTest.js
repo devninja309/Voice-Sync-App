@@ -18,7 +18,7 @@ import{useAuthTools} from '../Hooks/Auth';
              console.log(data)
          })});
     return (
-        <p> Hello World!</p>
+        <p> This is a DB Test Control to verify DB access</p>
     );
         
 }

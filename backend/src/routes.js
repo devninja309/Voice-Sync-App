@@ -1,9 +1,11 @@
 
 import Router from 'koa-router';
 //TODO this is dumb, fix it
-import {GetCourses, GetCourseDetails, CreateCourse, GetChapters, GetChapterDetails, CreateChapter, 
-  GetSlides, CreateSlide, CreateClip, GetSlideDetails, GetClipDetails, UpdateClip, UpdateSlide,
-  DeleteClip, DeleteSlide, DeleteChapter, DeleteCourse} from './databasestorage/dataaccess.js';
+import {GetCourses, GetCourseDetails, CreateCourse, GetChapters, GetChapterDetails, GetSlides,
+  CreateChapter, CreateSlide, CreateClip, GetSlideDetails, GetClipDetails, 
+  UpdateClip, UpdateSlide,
+  DeleteClip, DeleteSlide, DeleteChapter, DeleteCourse, 
+  LogClipGeneration, GetClipLog} from './databasestorage/dataaccess.js';
 import {GetTestInfo} from './databasestorage/dataaccess.js';
 import { addTests } from './routes.test.js';
 import fetch from "node-fetch";
@@ -12,6 +14,7 @@ import Response from "node-fetch";
 //TODO I should be a parameter
 const ttsEndPoint = "https://api.wellsaidlabs.com/v1/tts/stream"
 const auth0EndPoint = "https://dev-l3ao-nin.us.auth0.com/.well-known/jwks.json"
+const auth0NameSpace = "https://industryacademy.com/"
 
 export const router = new Router({
   prefix: '/v1'
@@ -53,6 +56,12 @@ function RequirePermission(ctx,permissions){
   // console.log(ctx.state.user.permissions);
   return false;
 }
+function GetUserName(ctx) {
+  const user = ctx.state.user
+  const email = user[auth0NameSpace +'email']
+  return email;
+
+}
 
 router.get('/test', (ctx) => {
   ctx.body = 'Hello World Updated orig 3'
@@ -85,6 +94,13 @@ router.get('/test', (ctx) => {
     ctx.status = 200;
   }
 })
+.get('/whoami', async (ctx) => {
+    const userName = GetUserName(ctx);
+    console.log('WhoAmI');
+    console.log(email);
+    ctx.body = email;
+
+})
   //TODO Move these into a controller specific to the object when this becomes unmanageable
   /*************************************
    * 
@@ -95,10 +111,9 @@ router.get('/test', (ctx) => {
     console.log('Getting Courses List');
     if (!RequirePermission(ctx,['read:courses'])) {
       //TODO: Handle failure more gracefully
-      //ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-      //return;
+      ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+      return;
 
-      //Cutting this out to test independently
     }
 
     let coursesList = await GetCourses();
@@ -417,6 +432,9 @@ router.get('/test', (ctx) => {
       const buffer = await Buffer.from(responseArray);
       clip.AudioClip = buffer;
 
+      console.log('Log audio request')
+      await LogClipGeneration(GetUserName(ctx), clip.ClipText);
+
       console.log('-Updating Clip based on audio file');
       var updateClip = await UpdateClip(clip, false);
       console.log('-Finished updating clip');
@@ -472,6 +490,17 @@ router.get('/test', (ctx) => {
       var result = await DeleteClip(ctx.params.clipID);
       ctx.body = JSON.stringify(result);
 
+    })
+
+    .get('/logs', async (ctx) => {
+      if (!RequirePermission(ctx, ['read:logs'])) {
+        //TODO: Handle failure more gracefully
+        console.log('Bad Permissions')
+        ctx.status = 500
+        return;
+      }
+      var result = await GetClipLog();
+      ctx.body = JSON.stringify(result);
     })
 
 

@@ -46,3 +46,11 @@ Create Table `IA_VoiceSynth`.`Clips` (
   Alter Table  `IA_VoiceSynth`.`Clips` 
     ADD COLUMN OrdinalValue int null default null
 
+Create Table `IA_VoiceSynth`.`LogEntry` (
+  `ID` Binary(16) NOT NULL,
+  `LogType` INT NOT NULL,
+  `TimeStamp` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `Message` LongText NULL,
+  `User` Varchar(50) NULL
+  PRIMARY KEY (`ID`));
+

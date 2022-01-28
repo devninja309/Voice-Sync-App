@@ -1,5 +1,6 @@
 import React, {useContext, useState, createContext} from 'react';
 import merge from 'deepmerge';
+import { useAuth0 } from "@auth0/auth0-react";
 
 import {UseAPICallsWithAuth} from './APICalls'
 
@@ -13,6 +14,15 @@ const useContextValue = () => {
         token,
         setToken
     }
+}
+
+export function IsAdmin() {
+    const { user } = useAuth0();
+    if (user) {
+        //Would rather this be the permissions, but that's enough harder to get at it's not worth the time.
+        return user[`https://industryacademy.com//roles`].some(val => val == `Admin`);  
+    }
+    return false;
 }
 
 export const AuthProvider = ({ children }) => {
