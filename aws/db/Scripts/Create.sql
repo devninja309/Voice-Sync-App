@@ -53,4 +53,10 @@ Create Table `IA_VoiceSynth`.`LogEntry` (
   `Message` LongText NULL,
   `User` Varchar(50) NULL
   PRIMARY KEY (`ID`));
+  
+Create Table `IA_VoiceSynth`.`Pronunciations` (
+  `ID` int NOT NULL AUTO_INCREMENT,
+  `Word` LongText Not Null,
+  `Pronunciation` LongText Not Null,
+  PRIMARY KEY (`ID`))
 

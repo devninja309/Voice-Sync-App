@@ -83,6 +83,11 @@ export async function GetSlideDetails(slideID)
   await Promise.all(promises);
   return slides;
 }
+export function GetPronunciations ()
+{
+    let query = "SELECT * FROM IA_VoiceSynth.Pronunciations";
+    return SQLQuery(query);
+}
 
 export function CreateCourse(course)
 {
@@ -178,6 +183,36 @@ export function CreateSlide(slide)
       con.end();
       slide.ID = results.insertId
       resolve( slide);
+    });
+  });
+}
+export function CreatePronunciation(pronunciation)
+{
+  //Check pronunciation
+  if (!pronunciation.Word){
+    //Blow up?
+  }
+  if (!pronunciation.Pronunciation){
+    //Blow up?
+  }
+  return new Promise( function (resolve, reject) {
+
+    let con = getCon();
+
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+
+    let insert = 'Insert into IA_VoiceSynth.Pronunciations (Word, Pronunciation) Values (?,?)';
+    let values = [pronunciation.Word, pronunciation.Pronunciation];
+
+    con.query(insert,values, (err, results, fields) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      con.end();
+      pronunciation.ID = results.insertId
+      resolve( pronunciation);
     });
   });
 }
@@ -318,6 +353,46 @@ export async function UpdateClip(clip, resetAudio = true)
     });
   });
 }
+
+export async function UpdatePronunciation(pronunciation)
+{
+  //Check Clip
+  let error = false;
+  let errorString = "";
+  //Check pronunciation
+  if (!pronunciation.ID){
+    error = true;
+    errorString += "Invalid ID\n";
+  }
+  if (!pronunciation.Word){
+    error = true;
+    errorString += "Invalid Word\n";
+  }
+  if (!pronunciation.Pronunciation){
+    error = true;
+    errorString += "Invalid Pronunciation\n";
+  }
+
+  return new Promise( function (resolve, reject) {
+
+    let con = getCon();
+
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+
+     let insert = `Update IA_VoiceSynth.Pronunciations set Word = ?, Pronunciations = ? Where ID = ?`;
+     let values = [pronunciation.Word, pronunciation.Pronunciation,  pronunciation.ID];
+
+    con.query(insert,values, (err, results, fields) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      con.end();
+      resolve( pronunciation );
+    });
+  });
+}
 //Delete functions
 export async function DeleteClip(clipID)
 {
@@ -369,6 +444,14 @@ export async function DeleteCourse(courseID)
   let query = `Delete FROM IA_VoiceSynth.Courses Where Courses.ID = ?`;
   await SQLQuery(query, values);
   
+  return "success";
+}
+export async function DeletePronunciation(pronunciationID)
+{
+  let query = `Delete FROM IA_VoiceSynth.Pronunciations Where Pronunciations.ID = ?`;
+  let values = [pronunciationID];
+  await SQLQuery(query, values);
+
   return "success";
 }
 

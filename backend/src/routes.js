@@ -5,11 +5,13 @@ import {GetCourses, GetCourseDetails, CreateCourse, GetChapters, GetChapterDetai
   CreateChapter, CreateSlide, CreateClip, GetSlideDetails, GetClipDetails, 
   UpdateClip, UpdateSlide,
   DeleteClip, DeleteSlide, DeleteChapter, DeleteCourse, 
+  GetPronunciations, CreatePronunciation, UpdatePronunciation, DeletePronunciation,
   LogClipGeneration, GetClipLog, GetClipLogSize} from './databasestorage/dataaccess.js';
 import {GetTestInfo} from './databasestorage/dataaccess.js';
 import { addTests } from './routes.test.js';
 import fetch from "node-fetch";
 import Response from "node-fetch";
+import { ConvertPronunciation, ConvertPronunciationFast } from './voicesynthapi/Pronunciation.js';
 
 //TODO I should be a parameter
 const ttsEndPoint = "https://api.wellsaidlabs.com/v1/tts/stream"
@@ -354,6 +356,12 @@ router.get('/test', (ctx) => {
   
       })
 
+      /*************************************
+       * 
+       * CLIPS
+       * 
+       *************************************/
+
     .get('/clips/:clipID/audio', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
         //TODO: Handle failure more gracefully
@@ -391,20 +399,16 @@ router.get('/test', (ctx) => {
 
       //const abortController = new AbortController();
       const avatarId = clip.VoiceID;
-      const text = clip.ClipText;
-    
-      /**
-       * Should this request fail, make sure to check the response headers
-       * to try to find a root cause.
-       * 
-       * Rate-limiting headers:
-       * x-quota-limit: 200
-       * x-quota-remaining: 191
-       * x-quota-reset: 1622226323630
-       * x-rate-limit-limit: 5
-       * x-rate-limit-remaining: 4
-       * x-rate-limit-reset: 1619635874002
-       */
+      const rawText = clip.ClipText;
+
+      const pronunciations  = await GetPronunciations();
+
+      //const text = ConvertPronunciation(pronunciations, rawText);
+      const text = ConvertPronunciationFast(pronunciations, rawText);
+
+      console.log ('Pronunciation Testing')
+      console.log(rawText);
+      console.log(text);
 
       const ttsResponse = await fetch(ttsEndPoint, {
         //signal: abortController.signal,
@@ -493,6 +497,13 @@ router.get('/test', (ctx) => {
 
     })
 
+
+      /*************************************
+       * 
+       * LOGS
+       * 
+       *************************************/
+
     .post('/logs/:offset', async (ctx) => {
 
       if (!RequirePermission(ctx, ['read:logs'])) {
@@ -521,6 +532,115 @@ router.get('/test', (ctx) => {
       }
     })
 
+
+/*************************************
+* 
+* PRONUNCIATIONS
+* 
+*************************************/
+    .get('/pronunciations', async (ctx) => {
+    if (!RequirePermission(ctx,['read:courses'])) {
+      //TODO: Handle failure more gracefully
+      ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+      return;
+    }
+
+    let pronunciationList = await GetPronunciations();
+    ctx.body = JSON.stringify(pronunciationList);
+    }) 
+
+    .post('/pronunciations/check' , async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        ctx.status = 500
+        return;
+      }
+      const pronunciation = ctx.request.body;
+      const avatarId = 3;
+      const text = pronunciation.Pronunciation;
+      const ttsResponse = await fetch(ttsEndPoint, {
+        //signal: abortController.signal,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Api-Key': process.env.WELLSAID_API_KEY,
+        },
+        body: JSON.stringify({
+          speaker_id: avatarId,
+          text: text,
+        }),
+      });
+
+      let status = ttsResponse.status;
+      //TODO handle invalid responses here
+      if (status != 200)
+      {
+        console.log('tts Response Status was invalid');
+        console.log(ttsResponse.status);
+      }
+
+      //https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
+      const responseBlob = await ttsResponse.blob()
+      const responseArray = await responseBlob.arrayBuffer();
+      const buffer = await Buffer.from(responseArray);
+
+      ctx.isBase64Encoded = true;   
+
+      ctx.body = buffer;
+
+      await LogClipGeneration(GetUserName(ctx), text);
+      
+      ctx.set('Content-Type', 'audio/mpeg');
+    })
+
+    .post('/pronunciations', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        //TODO: Handle failure more gracefully
+        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+        return;
+      }
+      let pronunciation = ctx.request.body;
+      if (typeof(pronunciation) == "undefined")
+      {
+        ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
+        return;
+      }
+      var insertpronunciation = await CreatePronunciation(pronunciation);
+      ctx.body = JSON.stringify(insertpronunciation);
+    })
+
+    .put('/pronunciations/:pronunciationID', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        //TODO: Handle failure more gracefully
+        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
+        return;
+      }
+      let pronunciation = ctx.request.body;
+      
+      if (typeof(pronunciation) == "undefined")
+      {
+        ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
+        return;
+      }
+      var updatePronunciation = await UpdatePronunciation(pronunciation);
+      ctx.body = JSON.stringify(updatePronunciation);
+    })
+
+    .del('/pronunciations/:pronunciationID', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        //TODO: Handle failure more gracefully
+        ctx.status = 500
+        return;
+      }
+      var result = await DeletePronunciation(ctx.params.pronunciationID);
+      ctx.body = JSON.stringify(result);
+
+    })
+
+      /*************************************
+       * 
+       * External routes
+       * 
+       *************************************/
 
     addTests(router);
 

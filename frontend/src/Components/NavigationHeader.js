@@ -40,6 +40,7 @@ export function NavigationHeader ()
                         <div>
                         <LinkButton Link = '/courses' Text='Courses'/>
                         {isAdmin && <LinkButton Link = '/logs' Text='Logs'/>}
+                        <LinkButton Link = '/pronunciations' Text='Pronunciations'/>
                         <LinkButton Link = '/AudioTest' Text='Audio Test Page'/>
                         </div>
                     }

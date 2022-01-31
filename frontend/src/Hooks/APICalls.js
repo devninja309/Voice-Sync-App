@@ -1,3 +1,4 @@
+
 export const isLocal = window.location.hostname === 'localhost'
 
 export const getUrlPath = (route) => isLocal ? `http://localhost:3001/v1/${route}` : `/v1/${route}`
@@ -67,16 +68,19 @@ export function GetSlideDetails(fetchWithAuth, slideID)
     return fetchWithAuth(getUrlPath(`slides/${slideID}`))
     .then(response => response.json());
 }
+export function GetPronunciations(fetchWithAuth)
+{
+    return fetchWithAuth(getUrlPath('pronunciations'))
+    .then(response => response.json());
+}
 const GetHeadersForMP3 = (object) => {
     return {
         method: 'get',
         headers: {
             'Content-Type':'application/json', 
-            'Accept': 'audio/mpeg'}
-        }
-        
+            'Accept': 'audio/mpeg'},
+        }      
     }
-
 
 //Put all the Create stuff here
 const PostHeadersForCreate = (object) => {
@@ -85,6 +89,15 @@ const PostHeadersForCreate = (object) => {
         headers: {
             'Content-Type':'application/json', 
             'Accept': 'application/json',},
+        body: JSON.stringify(object)
+    }
+}
+const PostHeadersForMP3 = (object) => {
+    return {
+        method: 'post',
+        headers: {
+            'Content-Type':'application/json', 
+            'Accept': 'audio/mpeg'},
         body: JSON.stringify(object)
     }
 }
@@ -129,6 +142,11 @@ export function CreateClip(fetchWithAuth, clip)
     return fetchWithAuth(getUrlPath('clips'), PostHeadersForCreate(clip))
       .then(response => response.json())
 }
+export function CreatePronunciation(fetchWithAuth, pronunciation)
+{
+    return fetchWithAuth(getUrlPath('pronunciations'), PostHeadersForCreate(pronunciation))
+      .then(response => response.json())
+}
 export function UpdateSlide(fetchWithAuth, slide)
 {
     return fetchWithAuth(getUrlPath(`slides/${slide.ID}`), PutHeadersForUpdate(slide))
@@ -145,9 +163,21 @@ export function UpdateClipAudio(fetchWithAuth, clipID)
     .then(response => response.json());
 
 }
+export function UpdatePronunciation(fetchWithAuth, pronunciation)
+{
+    return fetchWithAuth(getUrlPath(`pronunciations/${pronunciation.ID}`), PutHeadersForUpdate(pronunciation))
+      .then(response => response.json())
+}
 export function GetClipAudio(fetchWithAuth, clipID)
 {
     return fetchWithAuth(getUrlPath(`clips/${clipID}/audio`), GetHeadersForMP3())
+    .then(response => response); 
+
+}
+export function GetPronunciationAudio(fetchWithAuth, text)
+{
+    return fetchWithAuth(getUrlPath(`pronunciations/check`), PostHeadersForMP3({
+        "Pronunciation": text}))
     .then(response => response); 
 
 }
@@ -172,6 +202,12 @@ export function DeleteChapter(fetchWithAuth, chapterID)
 export function DeleteCourse(fetchWithAuth, courseID)
 {
     return fetchWithAuth(getUrlPath(`courses/${courseID}`), DeleteHeadersForDelete())
+    .then(response => response.json()); 
+
+}
+export function DeletePronunciation(fetchWithAuth, pronunciationID)
+{
+    return fetchWithAuth(getUrlPath(`pronunciations/${pronunciationID}`), DeleteHeadersForDelete())
     .then(response => response.json()); 
 
 }
@@ -211,5 +247,9 @@ export const UseAPICallsWithAuth = (fetchWithAuth) => {
         DeleteCourse: (courseID) => DeleteCourse(fetchWithAuth, courseID), 
         GetEventLogs: (page) => GetEventLogs(fetchWithAuth, page),
         GetEventLogSize: () => GetEventLogSize(fetchWithAuth),
+        GetPronunciations: () => GetPronunciations(fetchWithAuth),
+        GetPronunciationAudio: (text) => GetPronunciationAudio(fetchWithAuth, text),
+        CreatePronunciation: (pronunciation) => CreatePronunciation(fetchWithAuth, pronunciation),
+        UpdatePronunciation: (pronunciation) => UpdatePronunciation(fetchWithAuth, pronunciation)
     }
 }
