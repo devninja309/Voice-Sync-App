@@ -5,7 +5,7 @@ import {GetCourses, GetCourseDetails, CreateCourse, GetChapters, GetChapterDetai
   CreateChapter, CreateSlide, CreateClip, GetSlideDetails, GetClipDetails, 
   UpdateClip, UpdateSlide,
   DeleteClip, DeleteSlide, DeleteChapter, DeleteCourse, 
-  LogClipGeneration, GetClipLog} from './databasestorage/dataaccess.js';
+  LogClipGeneration, GetClipLog, GetClipLogSize} from './databasestorage/dataaccess.js';
 import {GetTestInfo} from './databasestorage/dataaccess.js';
 import { addTests } from './routes.test.js';
 import fetch from "node-fetch";
@@ -15,6 +15,7 @@ import Response from "node-fetch";
 const ttsEndPoint = "https://api.wellsaidlabs.com/v1/tts/stream"
 const auth0EndPoint = "https://dev-l3ao-nin.us.auth0.com/.well-known/jwks.json"
 const auth0NameSpace = "https://industryacademy.com/"
+const defaultPageSize = 5;
 
 export const router = new Router({
   prefix: '/v1'
@@ -492,15 +493,32 @@ router.get('/test', (ctx) => {
 
     })
 
-    .get('/logs', async (ctx) => {
+    .post('/logs/:offset', async (ctx) => {
+
       if (!RequirePermission(ctx, ['read:logs'])) {
         //TODO: Handle failure more gracefully
         console.log('Bad Permissions')
         ctx.status = 500
         return;
       }
-      var result = await GetClipLog();
+      let query = ctx.request.body;
+      var result = await GetClipLog(defaultPageSize, parseInt(ctx.params.offset,10) * defaultPageSize, query);
       ctx.body = JSON.stringify(result);
+    })
+    .get('/logs/info', async (ctx) => {
+
+      if (!RequirePermission(ctx, ['read:logs'])) {
+        //TODO: Handle failure more gracefully
+        console.log('Bad Permissions')
+        ctx.status = 500
+        return;
+      }
+      var result = await GetClipLogSize();
+      console.log(result);
+      ctx.body = {
+        Records: result,
+        Limit: defaultPageSize
+      }
     })
 
 

@@ -13,13 +13,6 @@ export function NavigationHeader ()
 {
     const { user, isAuthenticated, isLoading } = useAuth0();
 
-
-    // let isAdmin = false;
-    // if (user) {
-    //     isAdmin = user[`https://industryacademy.com//roles`].some(val => val == `Admin`);  //Would rather this be the permissions, but that's enough harder to get at it's not worth the time.
-
-    // }
-
     const isAdmin = IsAdmin();
 
     const accountGroup = () => {

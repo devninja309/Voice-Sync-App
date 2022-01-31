@@ -409,14 +409,25 @@ function CreateLogEntry(LogType, User, Message) {
     });
   });
 }
-export async function GetClipLog()
+export async function GetClipLog(limit, offset, query)
 {
-  let today = new Date();
+    //let today = new Date();
     //defaulting to 1 week.  TODO: Make this whole thing more stepwise
-    let select = 'Select TimeStamp, User, Message from IA_VoiceSynth.LogEntry where LogType = 1 and TimeStamp > ?'
-    let values = [new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7)]
+    // let select = 'Select TimeStamp, User, Message from IA_VoiceSynth.LogEntry where LogType = 1 and TimeStamp > ? LIMIT ? OFFSET ?'
+    // let values = [new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7), limit, offset]
+
+    let select = 'Select TimeStamp, User, Message from IA_VoiceSynth.LogEntry where LogType = 1 order by TimeStamp desc LIMIT ? OFFSET ?'
+    let values = [limit, offset]
+
     let logs = await SQLQuery(select, values);
      return logs;
+}
+export async function GetClipLogSize() {
+
+  let select = 'Select Count(*) as quan from IA_VoiceSynth.LogEntry where LogType = 1 ';
+
+  let logs = await SQLQuery(select);
+   return logs[0].quan;
 }
 
 

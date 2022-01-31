@@ -175,10 +175,16 @@ export function DeleteCourse(fetchWithAuth, courseID)
     .then(response => response.json()); 
 
 }
-export function GetEventLogs(fetchWithAuth)
+export function GetEventLogs(fetchWithAuth, page, query)
 {
-    return fetchWithAuth(getUrlPath(`logs`))
+    return fetchWithAuth(getUrlPath(`logs/${page}`), PostHeadersForCreate(query))
         .then(response => response.json())
+}
+
+export function GetEventLogSize(fetchWithAuth) 
+{
+    return fetchWithAuth(getUrlPath(`logs/info`))
+        .then(response => response.json());
 }
 //Put any alternate stuff here
 
@@ -203,6 +209,7 @@ export const UseAPICallsWithAuth = (fetchWithAuth) => {
         DeleteSlide: (slideID) => DeleteSlide(fetchWithAuth, slideID), 
         DeleteChapter: (chapterID) => DeleteChapter(fetchWithAuth, chapterID), 
         DeleteCourse: (courseID) => DeleteCourse(fetchWithAuth, courseID), 
-        GetEventLogs: () => GetEventLogs(fetchWithAuth)
+        GetEventLogs: (page) => GetEventLogs(fetchWithAuth, page),
+        GetEventLogSize: () => GetEventLogSize(fetchWithAuth),
     }
 }
