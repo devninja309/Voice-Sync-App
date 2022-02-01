@@ -23,6 +23,7 @@ import { IconButton } from '../Elements/IconButton';
 import { ButtonGroup, Icon } from '@blueprintjs/core';
 import {Tooltip} from "@blueprintjs/core";
 import {UpdateSlideText} from '../Etc/TextManagement';
+import { PronunciationEditDialog } from '../Components/PronunciationEditDialog';
 
 const SlideDetailsPage = (props) => {
 
@@ -34,6 +35,9 @@ const SlideDetailsPage = (props) => {
     const [selectedClipEdited, setSelectedClipEdited] = useState(false);
     const {token, APICalls} = useAuthTools();
     const [audioclipfile, setaudioclipfile] = useState(null);
+
+    const [isPronunciationOpen, setIsPronunciationOpen] = useState(false);
+    const handlePronunciationClose = useCallback(() => setIsPronunciationOpen(false), []);
     
     useEffect( () => {
         APICalls.GetSlideDetails(slideID)
@@ -156,6 +160,7 @@ const SlideDetailsPage = (props) => {
             </p>
             </div>
             <div class = "div-Slide-Details-Container">
+            <PronunciationEditDialog isOpen = {isPronunciationOpen} handleClose = {handlePronunciationClose}/>
                 <div class = "div-Slide-Details-Container-Slide">
                     <div class ="div-Slide-Details-Container-TextArea">
                         {TextEditArea()}
@@ -165,7 +170,7 @@ const SlideDetailsPage = (props) => {
                     <button className="input" onClick={() =>console.log(slide)}>Debug</button>
                 </div>
                 <div class = "div-Slide-Details-ClipsList-Column">
-                    <ButtonGroup>
+                    <ButtonGroup className = "buttonGroup-row">
                 
                 <Tooltip
                             content={<span>Add New Clip</span>}
@@ -181,6 +186,14 @@ const SlideDetailsPage = (props) => {
                             usePortal={false}
                         >
                         <IconButton icon="refresh"/>
+                </Tooltip>
+                <p> </p>
+                <Tooltip
+                            content={<span>Add new Pronunciation</span>}
+                            openOnTargetFocus={false}
+                            usePortal={false}
+                        >
+                        <IconButton icon="translate" onClick={() => setIsPronunciationOpen(true)}/>
                 </Tooltip>
                     </ButtonGroup>
                     <div class = "div-Slide-Details-ClipsList">

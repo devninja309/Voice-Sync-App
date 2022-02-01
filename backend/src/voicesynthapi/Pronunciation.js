@@ -1,16 +1,5 @@
 
 
-export function ConvertPronunciation(Translations, clipText) {
-    console.log(clipText);
-    const reducer = (text, Translation) =>{
-        console.log('Inside Reducer')
-        console.log(text);
-        return text.replace(Translation.Word, Translation.Pronunciation)
-    }
-    const renderedText = Translations.reduce( reducer, clipText.toLowerCase())
-    return renderedText;
-}
-
 export function ConvertPronunciationFast(Translations, clipText) {
     const wb = '\\b'; //word boundary 
     const dict = Object.assign({}, ...Translations.map ((t) => ({[t.Word.toLowerCase()]: t.Pronunciation})))

@@ -201,6 +201,9 @@
 .SimpleDialog {
   padding: 10px
 }
+.buttonGroup-row>*{
+  padding: 5px;
+}
 .button-Simple {
   padding: 5px;
 }

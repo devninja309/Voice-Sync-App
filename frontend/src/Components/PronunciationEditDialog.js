@@ -25,8 +25,8 @@ export function PronunciationEditDialog (props)
     const [updating, setUpdating] = React.useState(false);
  
     useEffect( () => {
-         setWord(props.Word);
-         setPronunciation(props.Pronunciation);
+         setWord(props.Word || '');
+         setPronunciation(props.Pronunciation || '');
     },[props]); 
 
     function CheckPronunciation() {
