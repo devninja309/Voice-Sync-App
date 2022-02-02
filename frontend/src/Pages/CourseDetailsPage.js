@@ -24,8 +24,7 @@ const CourseDetailsPage = (props) => {
         APICalls.GetCourseDetails(CourseID)
         .then(
             data => {
-                setcourse(data[0]); //TODO Query organization doesn't support single responses.  Do we care?
-                console.log(data[0])
+                console.log(data)
             })
     
      },[token, CourseID]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call

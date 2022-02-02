@@ -44,8 +44,16 @@ export const useAuthTools = () => {
 
     //TODO I should probably be defined outside this function
     const fetchWithAuth = (resource, init) => {    
-        console.log(resource);
-        return fetch(resource,merge(authInit(token),init??{}));
+        if (token === null) return Promise.resolve({json:()=>{return''}});
+        return fetch(resource,merge(authInit(token),init??{})).then(response => {
+            if (!response.ok) {
+                console.log('Token for call');
+                console.log(token);
+                alert('There was a problem with the server');
+                var change = 0;
+            }
+            return response;
+        });
     }
 
     const APICalls = UseAPICallsWithAuth(fetchWithAuth)

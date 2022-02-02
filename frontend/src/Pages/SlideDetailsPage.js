@@ -43,7 +43,7 @@ const SlideDetailsPage = (props) => {
         APICalls.GetSlideDetails(slideID)
         .then(
             data => {
-                setSlide(data[0]); //TODO Query organization doesn't support single responses.  Do we care?
+                setSlide(data); //TODO Query organization doesn't support single responses.  Do we care?
             })
     
      },[token, CourseID, slideID]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call

@@ -81,7 +81,7 @@ export async function GetSlideDetails(slideID)
       }));
   })
   await Promise.all(promises);
-  return slides;
+  return slides[0];
 }
 export function GetPronunciations ()
 {

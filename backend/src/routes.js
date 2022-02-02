@@ -11,7 +11,7 @@ import {GetTestInfo} from './databasestorage/dataaccess.js';
 import { addTests } from './routes.test.js';
 import fetch from "node-fetch";
 import Response from "node-fetch";
-import { ConvertPronunciation, ConvertPronunciationFast } from './voicesynthapi/Pronunciation.js';
+import { ConvertPronunciationFast } from './voicesynthapi/Pronunciation.js';
 
 //TODO I should be a parameter
 const ttsEndPoint = "https://api.wellsaidlabs.com/v1/tts/stream"
@@ -27,18 +27,17 @@ export const router = new Router({
 function RequirePermission(ctx,permissions){
   if (!ctx.state )
   {
-      //console.log('Invalid ctx.state')
+    ctx.status = 401;
       return false;
   }
   if (!ctx.state.user)
   {
-      //console.log('Invalid ctx.state.user')
-      //console.log(ctx.state)
+      ctx.status = 401;
       return false;
   }
   if (!ctx.state.user.permissions)
   {
-      //console.log('Invalid ctx.state.user.permissions')
+    ctx.status = 403;
       return false;
   }
   try{
@@ -49,14 +48,10 @@ function RequirePermission(ctx,permissions){
   }
   catch (error)
   {
-    console.log(error)
+    ctx.status = 403;
     return false;
   }
-  // console.log('Permission Failure');
-  // console.log('Want');
-  // console.log(permissions);
-  // console.log('Have');
-  // console.log(ctx.state.user.permissions);
+  ctx.status = 403;
   return false;
 }
 function GetUserName(ctx) {
@@ -113,10 +108,7 @@ router.get('/test', (ctx) => {
   .get('/courses', async (ctx) => {
     console.log('Getting Courses List');
     if (!RequirePermission(ctx,['read:courses'])) {
-      //TODO: Handle failure more gracefully
-      ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
       return;
-
     }
 
     let coursesList = await GetCourses();
@@ -126,22 +118,16 @@ router.get('/test', (ctx) => {
 
     .get('/courses/:CourseID', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        //TODO: Handle failure more gracefully
-        console.log('Bad course Get Permissions')
-        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
         return;
       }
       console.log('Getting course Details');
       let course = await GetCourseDetails(ctx.params.CourseID);
-      ctx.body = JSON.stringify(course);
+      ctx.body = JSON.stringify(course[0]);
       })
 
 
       .post('/courses', async (ctx) => {
         if (!RequirePermission(ctx,['read:courses'])) {
-          //TODO: Handle failure more gracefully
-          ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-          console.log('Bad Permissions')
           return;
         }
         let course = ctx.request.body;
@@ -157,9 +143,6 @@ router.get('/test', (ctx) => {
       })
       .del('/courses/:courseID', async (ctx) => {
         if (!RequirePermission(ctx,['read:courses'])) {
-          //TODO: Handle failure more gracefully
-          console.log('Bad Permissions')
-          ctx.status = 500
           return;
         }
         var result = await DeleteCourse(ctx.params.courseID);
@@ -175,9 +158,6 @@ router.get('/test', (ctx) => {
 
       .get('/courses/:CourseID/chapters', async (ctx) => {
         if (!RequirePermission(ctx,['read:courses'])) {
-          console.log('Bad course Slides Get Permissions')
-          //TODO: Handle failure more gracefully
-          ctx.body = JSON.stringify([{ID: "0", SlideName: "No You!"}]);
           return;
         }
         let chaptersList = await GetChapters(ctx.params.CourseID);
@@ -186,24 +166,17 @@ router.get('/test', (ctx) => {
 
         .get('/chapters/:chapterID', async (ctx) => {
           if (!RequirePermission(ctx,['read:courses'])) {
-            //TODO: Handle failure more gracefully
-            console.log('Bad Chapter Get Permissions')
-            ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
             return;
           }
           console.log('Getting Chapter Details');
           console.log(ctx.params.chapterID);
           let chapter = await GetChapterDetails(ctx.params.chapterID);
-          console.log(chapter);
-          ctx.body = JSON.stringify(chapter);
+          ctx.body = JSON.stringify(chapter[0]);
           })
   
 
         .post('/chapters', async (ctx) => {
           if (!RequirePermission(ctx,['read:courses'])) {
-            //TODO: Handle failure more gracefully
-            ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-            console.log('Bad Permissions')
             return;
           }
           let chapter = ctx.request.body;
@@ -218,9 +191,6 @@ router.get('/test', (ctx) => {
         })
         .del('/chapters/:chapterID', async (ctx) => {
           if (!RequirePermission(ctx,['read:courses'])) {
-            //TODO: Handle failure more gracefully
-            console.log('Bad Permissions')
-            ctx.status = 500
             return;
           }
           var result = await DeleteChapter(ctx.params.chapterID);
@@ -235,9 +205,6 @@ router.get('/test', (ctx) => {
        *************************************/
       .get('/chapters/:chapterID/slides', async (ctx) => {
         if (!RequirePermission(ctx,['read:courses'])) {
-          console.log('Bad course Slides Get Permissions')
-          //TODO: Handle failure more gracefully
-          ctx.body = JSON.stringify([{ID: "0", SlideName: "No You!"}]);
           return;
         }
         let slidesList = await GetSlides(ctx.params.chapterID);
@@ -246,9 +213,6 @@ router.get('/test', (ctx) => {
 
     .post('/slides', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        //TODO: Handle failure more gracefully
-        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-        console.log('Bad Permissions')
         return;
       }
       let slide = ctx.request.body;
@@ -266,9 +230,6 @@ router.get('/test', (ctx) => {
 
       .get('/slides/:slideID', async (ctx) => {
         if (!RequirePermission(ctx,['read:courses'])) {
-          //TODO: Handle failure more gracefully
-          console.log('Bad Slide Get Permissions')
-          ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
           return;
         }
         let slide = await GetSlideDetails(ctx.params.slideID);
@@ -277,9 +238,6 @@ router.get('/test', (ctx) => {
 
       .post('/slides', async (ctx) => {
         if (!RequirePermission(ctx,['read:courses'])) {
-          //TODO: Handle failure more gracefully
-          ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-          console.log('Bad Permissions')
           return;
         }
         let slide = ctx.request.body;
@@ -294,9 +252,6 @@ router.get('/test', (ctx) => {
       })
       .put('/slides/:slideID', async (ctx) => {
         if (!RequirePermission(ctx,['read:courses'])) {
-          //TODO: Handle failure more gracefully
-          ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-          console.log('Bad Permissions')
           return;
         }
         let slide = ctx.request.body;
@@ -311,9 +266,6 @@ router.get('/test', (ctx) => {
       })
       .put('/slides/:slideID', async (ctx) => {
         if (!RequirePermission(ctx,['read:courses'])) {
-          //TODO: Handle failure more gracefully
-          ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-          console.log('Bad Permissions')
           return;
         }
         let slide = ctx.request.body;
@@ -331,9 +283,6 @@ router.get('/test', (ctx) => {
     //This is just pseudo code for now and needs to be implemented.
     .get('/slides/:slideID/generateaudio/', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        //TODO: Handle failure more gracefully
-        console.log('Bad Slide Get Permissions')
-        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
         return;
       }
       console.log('Request to merge clip audio files');
@@ -346,9 +295,6 @@ router.get('/test', (ctx) => {
       })
       .del('/slides/:slideID', async (ctx) => {
         if (!RequirePermission(ctx,['read:courses'])) {
-          //TODO: Handle failure more gracefully
-          console.log('Bad Permissions')
-          ctx.status = 500
           return;
         }
         var result = await DeleteSlide(ctx.params.slideID);
@@ -364,10 +310,7 @@ router.get('/test', (ctx) => {
 
     .get('/clips/:clipID/audio', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        //TODO: Handle failure more gracefully
-        console.log('Bad Clip Audio Generate Get Permissions')
-        //ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-        //return;
+        return;
       }
       console.log('Getting Audio')
       let clip = await GetClipDetails(ctx.params.clipID);
@@ -386,16 +329,9 @@ router.get('/test', (ctx) => {
 
     .get('/clips/:clipID/generateaudio', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        //TODO: Handle failure more gracefully
-        console.log('Bad Clip Audio Generate Get Permissions')
-        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
         return;
       }
-      console.log('Updating Clip Audio file')
-
-      console.log('-Getting Clip Details');
       let clip = await GetClipDetails(ctx.params.clipID);
-
 
       //const abortController = new AbortController();
       const avatarId = clip.VoiceID;
@@ -405,10 +341,6 @@ router.get('/test', (ctx) => {
 
       //const text = ConvertPronunciation(pronunciations, rawText);
       const text = ConvertPronunciationFast(pronunciations, rawText);
-
-      console.log ('Pronunciation Testing')
-      console.log(rawText);
-      console.log(text);
 
       const ttsResponse = await fetch(ttsEndPoint, {
         //signal: abortController.signal,
@@ -429,6 +361,7 @@ router.get('/test', (ctx) => {
       {
         console.log('tts Response Status was invalid');
         console.log(ttsResponse.status);
+        ctx.status = 500;
       }
 
       //https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
@@ -437,12 +370,9 @@ router.get('/test', (ctx) => {
       const buffer = await Buffer.from(responseArray);
       clip.AudioClip = buffer;
 
-      console.log('Log audio request')
       await LogClipGeneration(GetUserName(ctx), clip.ClipText);
 
-      console.log('-Updating Clip based on audio file');
       var updateClip = await UpdateClip(clip, false);
-      console.log('-Finished updating clip');
 
       
       ctx.body = JSON.stringify(updateClip);
@@ -450,9 +380,6 @@ router.get('/test', (ctx) => {
 
     .post('/clips', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        //TODO: Handle failure more gracefully
-        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-        console.log('Bad Permissions')
         return;
       }
       let clip = ctx.request.body;
@@ -469,9 +396,6 @@ router.get('/test', (ctx) => {
 
     .put('/clips/:clipID', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        //TODO: Handle failure more gracefully
-        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-        console.log('Bad Permissions')
         return;
       }
       let clip = ctx.request.body;
@@ -487,9 +411,6 @@ router.get('/test', (ctx) => {
     })
     .del('/clips/:clipID', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        //TODO: Handle failure more gracefully
-        console.log('Bad Permissions')
-        ctx.status = 500
         return;
       }
       var result = await DeleteClip(ctx.params.clipID);
@@ -507,9 +428,6 @@ router.get('/test', (ctx) => {
     .post('/logs/:offset', async (ctx) => {
 
       if (!RequirePermission(ctx, ['read:logs'])) {
-        //TODO: Handle failure more gracefully
-        console.log('Bad Permissions')
-        ctx.status = 500
         return;
       }
       let query = ctx.request.body;
@@ -519,9 +437,6 @@ router.get('/test', (ctx) => {
     .get('/logs/info', async (ctx) => {
 
       if (!RequirePermission(ctx, ['read:logs'])) {
-        //TODO: Handle failure more gracefully
-        console.log('Bad Permissions')
-        ctx.status = 500
         return;
       }
       var result = await GetClipLogSize();
@@ -540,8 +455,6 @@ router.get('/test', (ctx) => {
 *************************************/
     .get('/pronunciations', async (ctx) => {
     if (!RequirePermission(ctx,['read:courses'])) {
-      //TODO: Handle failure more gracefully
-      ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
       return;
     }
 
@@ -551,7 +464,6 @@ router.get('/test', (ctx) => {
 
     .post('/pronunciations/check' , async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        ctx.status = 500
         return;
       }
       const pronunciation = ctx.request.body;
@@ -594,8 +506,6 @@ router.get('/test', (ctx) => {
 
     .post('/pronunciations', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        //TODO: Handle failure more gracefully
-        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
         return;
       }
       let pronunciation = ctx.request.body;
@@ -610,8 +520,6 @@ router.get('/test', (ctx) => {
 
     .put('/pronunciations/:pronunciationID', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        //TODO: Handle failure more gracefully
-        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
         return;
       }
       let pronunciation = ctx.request.body;
@@ -627,8 +535,6 @@ router.get('/test', (ctx) => {
 
     .del('/pronunciations/:pronunciationID', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        //TODO: Handle failure more gracefully
-        ctx.status = 500
         return;
       }
       var result = await DeletePronunciation(ctx.params.pronunciationID);

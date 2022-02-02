@@ -24,8 +24,7 @@ const ChapterDetailsPage = (props) => {
         .then(
             data => {
                 console.log('Chapter Data')
-                console.log(data[0])
-                setChapter(data[0]); //TODO Query organization doesn't support single responses.  Do we care?
+                setChapter(data); 
             })
     
      },[token, ChapterID]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
