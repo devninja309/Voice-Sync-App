@@ -24,6 +24,8 @@ import { ButtonGroup, Icon } from '@blueprintjs/core';
 import {Tooltip} from "@blueprintjs/core";
 import {UpdateSlideText} from '../Etc/TextManagement';
 import { PronunciationEditDialog } from '../Components/PronunciationEditDialog';
+import { SimpleSelect } from '../Elements/SimpleSelect';
+import { SlideQuickSelect } from '../Components/SlideQuickSelect';
 
 const SlideDetailsPage = (props) => {
 
@@ -60,8 +62,6 @@ const SlideDetailsPage = (props) => {
 
         setSelectedClip(updatedClip)
 
-        console.log(selectedClipEdited);
-
      }
      const pushChangedClip = (clip) => {
          APICalls.UpdateClip(clip)
@@ -97,11 +97,27 @@ const SlideDetailsPage = (props) => {
 
     function DisplayClipsList() {
         if (slide.Clips){
-            console.log (slide);
-            return slide.Clips.sort(sortByOrdinalValue).map(clip => (
-                <ClipListCard key={clip.ID} clip = {clip} setSelectedClip={changeSelectedClip} updateClip={UpdateClip}/>
+            return slide.Clips.sort(sortByOrdinalValue).map((clip,index) => ( 
+                <ClipListCard className="ClipsCard" key={clip.ID} clip = {clip} setSelectedClip={changeSelectedClip} updateClip={UpdateClip}/>
             ))
         }      
+    }
+    function getVoiceList() {
+        return [{value: 3, label: 'Voice 3'}];
+    }
+    function getVolumeList() {
+        return [
+            {value: 1, label: 'Quietest'},
+            {value: 3, label: 'Normal'},
+            {value: 5, label: 'Loudest'},
+    ];
+    }
+    function getSpeedList() {
+        return [
+            {value: 1, label: 'Slowest'},
+            {value: 3, label: 'Normal'},
+            {value: 5, label: 'Fastest'},
+    ];
     }
 
     function TextEditArea() {
@@ -121,6 +137,10 @@ const SlideDetailsPage = (props) => {
                             />
                         {selectedClipEdited && <SimpleButton onClick= {()=> pushChangedClip(selectedClip)} Text="Save Changes" />}
                         <SimpleButton onClick={() => changeSelectedClip(null)} Text="Deselect Clip"/>
+                        <SimpleSelect className = "simpleSelect-small" options={getVoiceList()}/>
+                        <SimpleSelect className = "simpleSelect-small" options={getVolumeList()}/>
+                        <SimpleSelect className = "simpleSelect-small" options={getSpeedList()}/>
+                        <SimpleButton onClick={() => changeSelectedClip(null)} Text="Approve Clip"/>
                         <SimpleTextArea className="simpleTextArea-largebox"
                         value={slide.SlideText} 
                         disabled= {true}
@@ -133,7 +153,6 @@ const SlideDetailsPage = (props) => {
     }
     function UpdateClip(clip)
     {
-        console.log('Updating Slide based on clip change');
         slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = clip;
 
         setSlide({...slide});
@@ -143,21 +162,19 @@ const SlideDetailsPage = (props) => {
         <PageWrapper>
         <div className="App">
             <header className="App-header">
-            <MidLogo/>
+                <div className="div-SlideHeader">
+                    <div style={{width: '40%'}}>
+                    <div><MidLogo/></div>
+                    </div>
+                    <div style={{width: '40%'}}>
+                        <SlideQuickSelect Columns={3} ChapterID={slide.ChapterID}/>
+                    </div>
+            </div>
             <div className ="course-Name-Box">
             <h3>
             {slide.SlideName}
             </h3>
             <hr width='80%'/>
-            <p  className ="p-course-Deslideion" >
-                This is the slide details page.
-                A slide is a single output audio file.
-                It will have a page for the main slide (full text).
-                It will have tabs for the 'clips', i.e. each sentence.
-                Each clip will be able to generate it's own audio file.
-                It will have a generate full audio clip for all sentences, merging them together 
-                    and exporting a copy to the IA shared folder. 
-            </p>
             </div>
             <div class = "div-Slide-Details-Container">
             <PronunciationEditDialog isOpen = {isPronunciationOpen} handleClose = {handlePronunciationClose}/>

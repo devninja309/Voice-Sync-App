@@ -24,7 +24,6 @@ export function ClipListCard (props)
 
     useEffect( () => {
         setClip(propClip);
-        console.log(propClip);
         LoadClipAudio(propClip);
     
      },[propClip]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
@@ -36,7 +35,6 @@ export function ClipListCard (props)
         APICalls.GetClipAudio(audioClip.ID)
             .then(
                 data => {
-                    console.log('Got clip audio')
                     data.blob().then ( responseBlob => {
                         const objectURL = URL.createObjectURL(responseBlob);
                         setUrl(objectURL);
@@ -63,10 +61,16 @@ export function ClipListCard (props)
                 </SimpleCard>
             </div>)
     }
+    function cardCSS() {
+        const base = "SimpleCard-ClipListCard";
+        const approved = (clip.Status == "Approved" || clip.ID % 3 == 0) ? " SimpleCard-ClipListCard-Approved": "";
+
+        return base + approved;
+    }
 
     return (
         <div className = "div-ClipListCard" key={clip.ID} onClick={()=>setSelectedClip(clip)}>
-            <SimpleCard  {...childProps} className="SimpleCard-ClipListCard">
+            <SimpleCard  {...childProps} className={cardCSS()}>
                 <div class="div-Slide-Details-Container">
                     <p class = "p-clip-card-text">
                         Clip: {clip.OrdinalValue}

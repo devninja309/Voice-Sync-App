@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "@blueprintjs/popover2": "^0.12.8"
+    "@blueprintjs/popover2": "^0.12.8",
+    "@blueprintjs/select": "^3.18.11",
+    "react-select": "^5.2.2"
   }
 }

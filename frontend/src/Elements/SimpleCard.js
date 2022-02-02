@@ -9,9 +9,10 @@ import { Card, Elevation } from "@blueprintjs/core";
 class SimpleCard  extends Component
 {
     render() {
+        const {className} = this.props;
     return (
     <div className = "SimpleCardDiv">
-        <Card interactive={this.props.interactive} elevation={this.props.elevation} > 
+        <Card className = {className} interactive={this.props.interactive} elevation={this.props.elevation} > 
         {this.props.children}
         </Card>
     </div>
