@@ -51,12 +51,21 @@ Create Table `IA_VoiceSynth`.`LogEntry` (
   `LogType` INT NOT NULL,
   `TimeStamp` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `Message` LongText NULL,
-  `User` Varchar(50) NULL
-  PRIMARY KEY (`ID`));
+  `User` Varchar(50) NULL,
+  PRIMARY KEY (`ID`))
   
 Create Table `IA_VoiceSynth`.`Pronunciations` (
   `ID` int NOT NULL AUTO_INCREMENT,
   `Word` LongText Not Null,
   `Pronunciation` LongText Not Null,
   PRIMARY KEY (`ID`))
+
+  Alter Table  `IA_VoiceSynth`.`Clips` 
+    ADD COLUMN Volume int null default 100
+
+  Alter Table  `IA_VoiceSynth`.`Clips` 
+    ADD COLUMN Speed int null default 100
+
+  Alter Table  `IA_VoiceSynth`.`Clips` 
+    ADD COLUMN Approved bool not null default false
 

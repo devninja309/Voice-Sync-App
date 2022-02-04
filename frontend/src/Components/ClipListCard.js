@@ -63,7 +63,7 @@ export function ClipListCard (props)
     }
     function cardCSS() {
         const base = "SimpleCard-ClipListCard";
-        const approved = (clip.Status == "Approved" || clip.ID % 3 == 0) ? " SimpleCard-ClipListCard-Approved": "";
+        const approved = (clip.Approved) ? " SimpleCard-ClipListCard-Approved": "";
 
         return base + approved;
     }

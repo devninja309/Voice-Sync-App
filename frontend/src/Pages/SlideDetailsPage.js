@@ -35,6 +35,7 @@ const SlideDetailsPage = (props) => {
     const [slide, setSlide] = useState('');
     const [selectedClip, setSelectedClip] = useState(null);
     const [selectedClipEdited, setSelectedClipEdited] = useState(false);
+    const [selectedClipPostEdited, setSelectedClipPostEdited] = useState(false);
     const {token, APICalls} = useAuthTools();
     const [audioclipfile, setaudioclipfile] = useState(null);
 
@@ -55,7 +56,7 @@ const SlideDetailsPage = (props) => {
          setSelectedClipEdited(false);
          setSelectedClip(clip);
      }
-     const selectedClipModified = (event) => {
+     const selectedClipTextModified = (event) => {
 
         const updatedClip = {...selectedClip, ClipText: event.target.value}
         setSelectedClipEdited(true);
@@ -63,10 +64,22 @@ const SlideDetailsPage = (props) => {
         setSelectedClip(updatedClip)
 
      }
+
+     const selectedClipApproved = () => {
+         const updatedClip = {...selectedClip, Approved: true}
+         setSelectedClipPostEdited(true);
+         setSelectedClip(updatedClip);
+     }
      const pushChangedClip = (clip) => {
+        clip.AudioClip = null;
+        if (selectedClipEdited) {
          APICalls.UpdateClip(clip)
-         clip.AudioClip = null;
+        }
+        else {
+            APICalls.UpdatePostClip(clip);
+        }
          setSelectedClipEdited(false);
+         setSelectedClipPostEdited(false);
          slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = clip;
          const newSlide = UpdateSlideText(slide);
          setSlide(newSlide);
@@ -133,14 +146,14 @@ const SlideDetailsPage = (props) => {
             return <div>
                         <SimpleTextArea className="simpleTextArea-largebox"
                             value={selectedClip.ClipText}
-                            onChange={event => selectedClipModified(event)}
+                            onChange={event => selectedClipTextModified(event)}
                             />
-                        {selectedClipEdited && <SimpleButton onClick= {()=> pushChangedClip(selectedClip)} Text="Save Changes" />}
+                        {(selectedClipEdited || selectedClipPostEdited) && <SimpleButton onClick= {()=> pushChangedClip(selectedClip)} Text="Save Changes" />}
                         <SimpleButton onClick={() => changeSelectedClip(null)} Text="Deselect Clip"/>
                         <SimpleSelect className = "simpleSelect-small" options={getVoiceList()}/>
                         <SimpleSelect className = "simpleSelect-small" options={getVolumeList()}/>
                         <SimpleSelect className = "simpleSelect-small" options={getSpeedList()}/>
-                        <SimpleButton onClick={() => changeSelectedClip(null)} Text="Approve Clip"/>
+                        <SimpleButton onClick={() => selectedClipApproved()} Text="Approve Clip"/>
                         <SimpleTextArea className="simpleTextArea-largebox"
                         value={slide.SlideText} 
                         disabled= {true}

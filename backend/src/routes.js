@@ -2,11 +2,12 @@
 import Router from 'koa-router';
 //TODO this is dumb, fix it
 import {GetCourses, GetCourseDetails, CreateCourse, GetChapters, GetChapterDetails, GetSlides,
-  CreateChapter, CreateSlide, CreateClip, GetSlideDetails, GetClipDetails, 
-  UpdateClip, UpdateSlide,
+  CreateChapter, CreateSlide, CreateClip, GetSlideDetails, GetClipDetails, GetClipAudio,
+  UpdateClip, UpdateClipPost, UpdateSlide, UpdateClipAudio, 
   DeleteClip, DeleteSlide, DeleteChapter, DeleteCourse, 
   GetPronunciations, CreatePronunciation, UpdatePronunciation, DeletePronunciation,
   LogClipGeneration, GetClipLog, GetClipLogSize} from './databasestorage/dataaccess.js';
+//import {audioProcessTest} from './audioManipulation/audioProcess'
 import {GetTestInfo} from './databasestorage/dataaccess.js';
 import { addTests } from './routes.test.js';
 import fetch from "node-fetch";
@@ -67,6 +68,9 @@ router.get('/test', (ctx) => {
 .get('/v1/test', (ctx) => {
     ctx.body = 'Hello World Updated test'
 })
+.get('/audiottest', async(ctx) => {
+  //ctx.body = JSON.stringify(audioProcessTest());
+})
 .get('/dbtest', async (ctx) => {
 
   let getKey = async () => {
@@ -106,7 +110,6 @@ router.get('/test', (ctx) => {
    * 
    *************************************/
   .get('/courses', async (ctx) => {
-    console.log('Getting Courses List');
     if (!RequirePermission(ctx,['read:courses'])) {
       return;
     }
@@ -120,7 +123,6 @@ router.get('/test', (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
         return;
       }
-      console.log('Getting course Details');
       let course = await GetCourseDetails(ctx.params.CourseID);
       ctx.body = JSON.stringify(course[0]);
       })
@@ -131,7 +133,6 @@ router.get('/test', (ctx) => {
           return;
         }
         let course = ctx.request.body;
-        console.log('Request to create course');
         if (typeof(course) == "undefined")
         {
           ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
@@ -168,8 +169,6 @@ router.get('/test', (ctx) => {
           if (!RequirePermission(ctx,['read:courses'])) {
             return;
           }
-          console.log('Getting Chapter Details');
-          console.log(ctx.params.chapterID);
           let chapter = await GetChapterDetails(ctx.params.chapterID);
           ctx.body = JSON.stringify(chapter[0]);
           })
@@ -216,7 +215,6 @@ router.get('/test', (ctx) => {
         return;
       }
       let slide = ctx.request.body;
-      console.log('Request to create slide');
       if (typeof(slide) == "undefined")
       {
         ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
@@ -269,7 +267,6 @@ router.get('/test', (ctx) => {
           return;
         }
         let slide = ctx.request.body;
-        console.log('Request to update clip');
         if (typeof(clip) == "undefined")
         {
           ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
@@ -310,10 +307,10 @@ router.get('/test', (ctx) => {
 
     .get('/clips/:clipID/audio', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        return;
+        //return;
       }
-      console.log('Getting Audio')
-      let clip = await GetClipDetails(ctx.params.clipID);
+      console.log('clip')
+      let clip = await GetClipAudio(ctx.params.clipID);
 
       //'body': base64.b64encode(image).decode('utf-8'),
       ctx.isBase64Encoded = true;   
@@ -370,12 +367,10 @@ router.get('/test', (ctx) => {
       const buffer = await Buffer.from(responseArray);
       clip.AudioClip = buffer;
 
-      await LogClipGeneration(GetUserName(ctx), clip.ClipText);
+      await LogClipGeneration(GetUserName(ctx), text);
 
-      var updateClip = await UpdateClip(clip, false);
-
-      
-      ctx.body = JSON.stringify(updateClip);
+      await UpdateClipAudio(clip.ClipID, buffer);
+      ctx.body = JSON.stringify(clip);
       })
 
     .post('/clips', async (ctx) => {
@@ -383,7 +378,6 @@ router.get('/test', (ctx) => {
         return;
       }
       let clip = ctx.request.body;
-      console.log('Request to create clip');
       if (typeof(clip) == "undefined")
       {
         ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
@@ -399,13 +393,27 @@ router.get('/test', (ctx) => {
         return;
       }
       let clip = ctx.request.body;
-      console.log('Request to update clip');
       if (typeof(clip) == "undefined")
       {
         ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
         return;
       }
       var updateClip = await UpdateClip(clip);
+      ctx.body = JSON.stringify(updateClip);
+
+    })
+
+    .put('/clipsPost/:clipID', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        return;
+      }
+      let clip = ctx.request.body;
+      if (typeof(clip) == "undefined")
+      {
+        ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
+        return;
+      }
+      var updateClip = await UpdateClipPost(clip);
       ctx.body = JSON.stringify(updateClip);
 
     })
@@ -440,7 +448,6 @@ router.get('/test', (ctx) => {
         return;
       }
       var result = await GetClipLogSize();
-      console.log(result);
       ctx.body = {
         Records: result,
         Limit: defaultPageSize

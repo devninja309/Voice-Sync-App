@@ -244,8 +244,6 @@ export function UpdateSlide(slide, resetAudio = true)
       if (err) console.log( err);
     });
 
-      console.log('Updating Slide');
-      console.log (slide)
      let update = 'Update  IA_VoiceSynth.Slides set SlideName = ?,SlideText = ?, VoiceID = ?, ChapterID = ? Where ID = ?';
      let values = [slide.SlideName, slide.SlideText,slide.VoiceID, slide.ChapterID, slide.ID];
  
@@ -262,19 +260,30 @@ export function UpdateSlide(slide, resetAudio = true)
 export async function GetClipDetails(clipID)
 {
   let promises = [];
-  let querySlides = `SELECT * FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
+  //This is everything except AudioClip, which is binary data.
+  //Consider moving AudioClip to a filestore (S3) or a separate table.
+  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Approved
+     FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
   let valuesSlides = [clipID];
   let clips = await SQLQuery(querySlides, valuesSlides);
 
   let clip = clips[0];
-  if (clip.AudioClip !== null)
-  {
-    //const buffer =  Buffer.from(clip.AudioClip, "binary");
-    //clip.AudioClip = buffer;
-  }
   return clip;
 }
 
+export async function GetClipAudio(clipID)
+{
+  let promises = [];
+  //This is everything except AudioClip, which is binary data.
+  //Consider moving AudioClip to a filestore (S3) or a separate table.
+  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Approved, AudioClip
+     FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
+  let valuesSlides = [clipID];
+  let clips = await SQLQuery(querySlides, valuesSlides);
+
+  let clip = clips[0];
+  return clip;
+}
 export function CreateClip(clip)
 {
   //Check Clip
@@ -312,8 +321,10 @@ export function CreateClip(clip)
   });
 }
 
-export async function UpdateClip(clip, resetAudio = true)
+//this function updates the entire clip AND resets the audio to null.
+export async function UpdateClip(clip)
 {
+  console.log('UpdateClip');
   //Check Clip
   let error = false;
   let errorString = "";
@@ -333,16 +344,13 @@ export async function UpdateClip(clip, resetAudio = true)
 
     let con = getCon();
 
-    let voiceID = clip.VoiceID || 3
-
     con.connect(function(err) {
       if (err) console.log( err);
     });
 
-    const audioClip = resetAudio ? null : clip.AudioClip
 
-     let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, AudioClip = ? Where ID = ?`;
-     let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, audioClip, clip.ID];
+     let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, Volume =?, Speed=?, Approved=?, AudioClip = null Where ID = ?`;
+     let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Aproved, clip.ID];
 
     con.query(insert,values, (err, results, fields) => {
       if (err) {
@@ -352,6 +360,71 @@ export async function UpdateClip(clip, resetAudio = true)
       resolve( clip);
     });
   });
+}
+export async function UpdateClipAudio(clipID, audioBuffer)
+{
+  console.log('Update Clip Audio')
+  //Check Clip
+  let error = false;
+  let errorString = "";
+  if (!clipID) {
+    error = true;
+    errorString += "Invalid ClipID\n";
+  }
+  return new Promise( function (resolve, reject) {
+
+    let con = getCon();
+
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+
+     let insert = `Update IA_VoiceSynth.Clips set AudioClip = ? Where ID = ?`;
+     let values = [audioBuffer, clipID];
+
+    con.query(insert,values, (err, results, fields) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      con.end();
+      resolve( );
+    });
+  });
+
+}
+
+//This function only updates items that do not require the audio to be regenerated
+export async function UpdateClipPost(clip)
+{
+  //Check Clip
+  let error = false;
+  let errorString = "";
+  if (!clip.ID) {
+    error = true;
+    errorString += "Invalid ClipID\n";
+  }
+  return new Promise( function (resolve, reject) {
+
+    let con = getCon();
+
+    let voiceID = clip.VoiceID || 3
+
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+
+     let insert = `Update IA_VoiceSynth.Clips set Volume = ?, Speed = ?, Approved =? Where ID = ?`;
+     let values = [clip.Volume, clip.Speed, clip.Approved, clip.ID];
+
+    con.query(insert,values, (err, results, fields) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      con.end();
+      resolve( clip);
+    });
+  });
+
 }
 
 export async function UpdatePronunciation(pronunciation)
@@ -415,7 +488,6 @@ export async function DeleteSlide(slideID)
 }
 export async function DeleteChapter(chapterID)
 {
-  console.log('Deleting Chapter');
   let checkChildren = `Select Count (*) as slidesCount from IA_VoiceSynth.Slides where Slides.ChapterID = ?`
   let values = [chapterID];
   const count = await SQLQuery(checkChildren, values);
@@ -423,9 +495,6 @@ export async function DeleteChapter(chapterID)
   {
     return "Cannot Delete, Existing Slides";
   }
-  console.log('OK to delete')
-  console.log(count);
-  console.log(count[0].slidesCount);
   let query = `Delete FROM IA_VoiceSynth.Chapters Where Chapters.ID = ?`;
   await SQLQuery(query, values);
   

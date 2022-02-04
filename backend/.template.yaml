@@ -30,7 +30,7 @@ Resources:
   WebAPILambdaV1:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://s3-ia-cfg/8db59f2d86e8b503118c822aadaba73b
+      CodeUri: s3://s3-ia-cfg/509722cf66f05ea492172cb154111358
       Handler: main.handler
       Events:
         ProxyGateway:

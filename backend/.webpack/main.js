@@ -7827,7 +7827,7 @@ formatters.O = function (v) {
 
 var pSlice = Array.prototype.slice;
 var objectKeys = __webpack_require__(1705);
-var isArguments = __webpack_require__(5539);
+var isArguments = __webpack_require__(5099);
 
 var deepEqual = module.exports = function (actual, expected, opts) {
   if (!opts) opts = {};
@@ -7923,7 +7923,7 @@ function objEquiv(a, b, opts) {
 
 /***/ }),
 
-/***/ 5539:
+/***/ 5099:
 /***/ ((module, exports) => {
 
 var supportsArgumentsClass = (function(){
@@ -57303,7 +57303,6 @@ function GetTestInfo()
 {
   try {
     let query = "select count(*) as NumCourses FROM IA_VoiceSynth.Courses"; 
-    console.log(query);
     return SQLQuery(query);
   }
   catch (err)
@@ -57380,7 +57379,12 @@ async function GetSlideDetails(slideID)
       }));
   })
   await Promise.all(promises);
-  return slides;
+  return slides[0];
+}
+function GetPronunciations ()
+{
+    let query = "SELECT * FROM IA_VoiceSynth.Pronunciations";
+    return SQLQuery(query);
 }
 
 function CreateCourse(course)
@@ -57480,6 +57484,36 @@ function CreateSlide(slide)
     });
   });
 }
+function CreatePronunciation(pronunciation)
+{
+  //Check pronunciation
+  if (!pronunciation.Word){
+    //Blow up?
+  }
+  if (!pronunciation.Pronunciation){
+    //Blow up?
+  }
+  return new Promise( function (resolve, reject) {
+
+    let con = getCon();
+
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+
+    let insert = 'Insert into IA_VoiceSynth.Pronunciations (Word, Pronunciation) Values (?,?)';
+    let values = [pronunciation.Word, pronunciation.Pronunciation];
+
+    con.query(insert,values, (err, results, fields) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      con.end();
+      pronunciation.ID = results.insertId
+      resolve( pronunciation);
+    });
+  });
+}
 
 function UpdateSlide(slide, resetAudio = true)
 {
@@ -57508,8 +57542,6 @@ function UpdateSlide(slide, resetAudio = true)
       if (err) console.log( err);
     });
 
-      console.log('Updating Slide');
-      console.log (slide)
      let update = 'Update  IA_VoiceSynth.Slides set SlideName = ?,SlideText = ?, VoiceID = ?, ChapterID = ? Where ID = ?';
      let values = [slide.SlideName, slide.SlideText,slide.VoiceID, slide.ChapterID, slide.ID];
  
@@ -57526,19 +57558,30 @@ function UpdateSlide(slide, resetAudio = true)
 async function GetClipDetails(clipID)
 {
   let promises = [];
-  let querySlides = `SELECT * FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
+  //This is everything except AudioClip, which is binary data.
+  //Consider moving AudioClip to a filestore (S3) or a separate table.
+  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Approved
+     FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
   let valuesSlides = [clipID];
   let clips = await SQLQuery(querySlides, valuesSlides);
 
   let clip = clips[0];
-  if (clip.AudioClip !== null)
-  {
-    //const buffer =  Buffer.from(clip.AudioClip, "binary");
-    //clip.AudioClip = buffer;
-  }
   return clip;
 }
 
+async function GetClipAudio(clipID)
+{
+  let promises = [];
+  //This is everything except AudioClip, which is binary data.
+  //Consider moving AudioClip to a filestore (S3) or a separate table.
+  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Approved, AudioClip
+     FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
+  let valuesSlides = [clipID];
+  let clips = await SQLQuery(querySlides, valuesSlides);
+
+  let clip = clips[0];
+  return clip;
+}
 function CreateClip(clip)
 {
   //Check Clip
@@ -57576,8 +57619,10 @@ function CreateClip(clip)
   });
 }
 
-function UpdateClip(clip, resetAudio = true)
+//this function updates the entire clip AND resets the audio to null.
+async function UpdateClip(clip)
 {
+  console.log('UpdateClip');
   //Check Clip
   let error = false;
   let errorString = "";
@@ -57597,16 +57642,13 @@ function UpdateClip(clip, resetAudio = true)
 
     let con = getCon();
 
-    let voiceID = clip.VoiceID || 3
-
     con.connect(function(err) {
       if (err) console.log( err);
     });
 
-    const audioClip = resetAudio ? null : clip.AudioClip
 
-     let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, AudioClip = ? Where ID = ?`;
-     let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, audioClip, clip.ID];
+     let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, Volume =?, Speed=?, Approved=?, AudioClip = null Where ID = ?`;
+     let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Aproved, clip.ID];
 
     con.query(insert,values, (err, results, fields) => {
       if (err) {
@@ -57617,6 +57659,228 @@ function UpdateClip(clip, resetAudio = true)
     });
   });
 }
+async function UpdateClipAudio(clipID, audioBuffer)
+{
+  console.log('Update Clip Audio')
+  //Check Clip
+  let error = false;
+  let errorString = "";
+  if (!clipID) {
+    error = true;
+    errorString += "Invalid ClipID\n";
+  }
+  return new Promise( function (resolve, reject) {
+
+    let con = getCon();
+
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+
+     let insert = `Update IA_VoiceSynth.Clips set AudioClip = ? Where ID = ?`;
+     let values = [audioBuffer, clipID];
+
+    con.query(insert,values, (err, results, fields) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      con.end();
+      resolve( );
+    });
+  });
+
+}
+
+//This function only updates items that do not require the audio to be regenerated
+async function UpdateClipPost(clip)
+{
+  //Check Clip
+  let error = false;
+  let errorString = "";
+  if (!clip.ID) {
+    error = true;
+    errorString += "Invalid ClipID\n";
+  }
+  return new Promise( function (resolve, reject) {
+
+    let con = getCon();
+
+    let voiceID = clip.VoiceID || 3
+
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+
+     let insert = `Update IA_VoiceSynth.Clips set Volume = ?, Speed = ?, Approved =? Where ID = ?`;
+     let values = [clip.Volume, clip.Speed, clip.Approved, clip.ID];
+
+    con.query(insert,values, (err, results, fields) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      con.end();
+      resolve( clip);
+    });
+  });
+
+}
+
+async function UpdatePronunciation(pronunciation)
+{
+  //Check Clip
+  let error = false;
+  let errorString = "";
+  //Check pronunciation
+  if (!pronunciation.ID){
+    error = true;
+    errorString += "Invalid ID\n";
+  }
+  if (!pronunciation.Word){
+    error = true;
+    errorString += "Invalid Word\n";
+  }
+  if (!pronunciation.Pronunciation){
+    error = true;
+    errorString += "Invalid Pronunciation\n";
+  }
+
+  return new Promise( function (resolve, reject) {
+
+    let con = getCon();
+
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+
+     let insert = `Update IA_VoiceSynth.Pronunciations set Word = ?, Pronunciations = ? Where ID = ?`;
+     let values = [pronunciation.Word, pronunciation.Pronunciation,  pronunciation.ID];
+
+    con.query(insert,values, (err, results, fields) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      con.end();
+      resolve( pronunciation );
+    });
+  });
+}
+//Delete functions
+async function DeleteClip(clipID)
+{
+  let query = `Delete FROM IA_VoiceSynth.Clips Where Clips.ID = ?`;
+  let values = [clipID];
+  await SQLQuery(query, values);
+
+  return "success";
+}
+async function DeleteSlide(slideID)
+{
+  let deleteChildren = `Delete From IA_VoiceSynth.Clips where Clips.SlideID = ?`;
+  let values = [slideID];
+  await SQLQuery(deleteChildren, values);
+  
+  let query = `Delete FROM IA_VoiceSynth.Slides Where Slides.ID = ?`;
+  await SQLQuery(query, values);
+
+  return "success";
+}
+async function DeleteChapter(chapterID)
+{
+  let checkChildren = `Select Count (*) as slidesCount from IA_VoiceSynth.Slides where Slides.ChapterID = ?`
+  let values = [chapterID];
+  const count = await SQLQuery(checkChildren, values);
+  if (count[0].slidesCount > 0)
+  {
+    return "Cannot Delete, Existing Slides";
+  }
+  let query = `Delete FROM IA_VoiceSynth.Chapters Where Chapters.ID = ?`;
+  await SQLQuery(query, values);
+  
+  return "success";
+}
+async function DeleteCourse(courseID)
+{
+  let checkChildren = `Select Count (*) as chaptersCount from IA_VoiceSynth.Chapters where Chapters.CourseID = ?`
+  let values = [courseID];
+  const count = await SQLQuery(checkChildren, values);
+  if (count[0].chaptersCount > 0)
+  {
+    return "Cannot Delete, Existing Chapters";
+  }
+
+  let query = `Delete FROM IA_VoiceSynth.Courses Where Courses.ID = ?`;
+  await SQLQuery(query, values);
+  
+  return "success";
+}
+async function DeletePronunciation(pronunciationID)
+{
+  let query = `Delete FROM IA_VoiceSynth.Pronunciations Where Pronunciations.ID = ?`;
+  let values = [pronunciationID];
+  await SQLQuery(query, values);
+
+  return "success";
+}
+
+const LogTypes = {
+  Error: 0,
+  ClipGenerated: 1,
+}
+
+function LogClipGeneration(User, Text) {
+  return CreateLogEntry(LogTypes.ClipGenerated, User, Text);
+}
+function LogError(Err) {
+  return LogErrorMessage(Err.message)
+}
+function LogErrorMessage(Message) {
+  return CreateLogEntry(LogTypes.Error, `Unknown`, Message);
+}
+
+function CreateLogEntry(LogType, User, Message) {
+
+  return new Promise( function (resolve, reject) {
+
+    let con = getCon();
+
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+
+    let insert = 'Insert into IA_VoiceSynth.LogEntry (ID, User, LogType, Message) Values (UUID_TO_BIN(UUID()),?,?,?)';
+    let values = [User, LogType, Message];
+
+    con.query(insert,values, (err, results, fields) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      con.end();
+      resolve( );
+    });
+  });
+}
+async function GetClipLog(limit, offset, query)
+{
+    //let today = new Date();
+    //defaulting to 1 week.  TODO: Make this whole thing more stepwise
+    // let select = 'Select TimeStamp, User, Message from IA_VoiceSynth.LogEntry where LogType = 1 and TimeStamp > ? LIMIT ? OFFSET ?'
+    // let values = [new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7), limit, offset]
+
+    let select = 'Select TimeStamp, User, Message from IA_VoiceSynth.LogEntry where LogType = 1 order by TimeStamp desc LIMIT ? OFFSET ?'
+    let values = [limit, offset]
+
+    let logs = await SQLQuery(select, values);
+     return logs;
+}
+async function GetClipLogSize() {
+
+  let select = 'Select Count(*) as quan from IA_VoiceSynth.LogEntry where LogType = 1 ';
+
+  let logs = await SQLQuery(select);
+   return logs[0].quan;
+}
+
+
 function getConObj()
 {
   return {
@@ -57631,7 +57895,6 @@ function getConObj()
 function getCon()
 {
     const conObj = getConObj();
-    console.log(conObj);
     return mysql.createConnection(conObj);
 }
 
@@ -59783,10 +60046,24 @@ function addTests(router) {
 
       return router;
 }
+;// CONCATENATED MODULE: ./src/voicesynthapi/Pronunciation.js
+
+
+function ConvertPronunciationFast(Translations, clipText) {
+    const wb = '\\b'; //word boundary 
+    const dict = Object.assign({}, ...Translations.map ((t) => ({[t.Word.toLowerCase()]: t.Pronunciation})))
+    var re = new RegExp(Object.keys(dict).map(k=>wb+k+wb).join("|"),"gi");  
+    return clipText.toLowerCase().replace(re, function(matched){
+            return dict[matched];
+        });
+    
+}
 ;// CONCATENATED MODULE: ./src/routes.js
 
 
 //TODO this is dumb, fix it
+
+//import {audioProcessTest} from './audioManipulation/audioProcess'
 
 
 
@@ -59796,6 +60073,8 @@ function addTests(router) {
 //TODO I should be a parameter
 const routes_ttsEndPoint = "https://api.wellsaidlabs.com/v1/tts/stream"
 const auth0EndPoint = "https://dev-l3ao-nin.us.auth0.com/.well-known/jwks.json"
+const auth0NameSpace = "https://industryacademy.com/"
+const defaultPageSize = 5;
 
 const routes_router = new router({
   prefix: '/v1'
@@ -59805,18 +60084,17 @@ const routes_router = new router({
 function RequirePermission(ctx,permissions){
   if (!ctx.state )
   {
-      console.log('Invalid ctx.state')
+    ctx.status = 401;
       return false;
   }
   if (!ctx.state.user)
   {
-      console.log('Invalid ctx.state.user')
-      console.log(ctx.state)
+      ctx.status = 401;
       return false;
   }
   if (!ctx.state.user.permissions)
   {
-      console.log('Invalid ctx.state.user.permissions')
+    ctx.status = 403;
       return false;
   }
   try{
@@ -59827,15 +60105,17 @@ function RequirePermission(ctx,permissions){
   }
   catch (error)
   {
-    console.log(error)
+    ctx.status = 403;
     return false;
   }
-  console.log('Permission Failure');
-  console.log('Want');
-  console.log(permissions);
-  console.log('Have');
-  console.log(ctx.state.user.permissions);
+  ctx.status = 403;
   return false;
+}
+function GetUserName(ctx) {
+  const user = ctx.state.user
+  const email = user[auth0NameSpace +'email']
+  return email;
+
 }
 
 routes_router.get('/test', (ctx) => {
@@ -59843,6 +60123,9 @@ routes_router.get('/test', (ctx) => {
 })
 .get('/v1/test', (ctx) => {
     ctx.body = 'Hello World Updated test'
+})
+.get('/audiottest', async(ctx) => {
+  //ctx.body = JSON.stringify(audioProcessTest());
 })
 .get('/dbtest', async (ctx) => {
 
@@ -59869,6 +60152,13 @@ routes_router.get('/test', (ctx) => {
     ctx.status = 200;
   }
 })
+.get('/whoami', async (ctx) => {
+    const userName = GetUserName(ctx);
+    console.log('WhoAmI');
+    console.log(email);
+    ctx.body = email;
+
+})
   //TODO Move these into a controller specific to the object when this becomes unmanageable
   /*************************************
    * 
@@ -59876,13 +60166,8 @@ routes_router.get('/test', (ctx) => {
    * 
    *************************************/
   .get('/courses', async (ctx) => {
-    console.log('Getting Courses List');
     if (!RequirePermission(ctx,['read:courses'])) {
-      //TODO: Handle failure more gracefully
-      //ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-      //return;
-
-      //Cutting this out to test independently
+      return;
     }
 
     let coursesList = await GetCourses();
@@ -59892,26 +60177,18 @@ routes_router.get('/test', (ctx) => {
 
     .get('/courses/:CourseID', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        //TODO: Handle failure more gracefully
-        console.log('Bad course Get Permissions')
-        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
         return;
       }
-      console.log('Getting course Details');
       let course = await GetCourseDetails(ctx.params.CourseID);
-      ctx.body = JSON.stringify(course);
+      ctx.body = JSON.stringify(course[0]);
       })
 
 
       .post('/courses', async (ctx) => {
         if (!RequirePermission(ctx,['read:courses'])) {
-          //TODO: Handle failure more gracefully
-          ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-          console.log('Bad Permissions')
           return;
         }
         let course = ctx.request.body;
-        console.log('Request to create course');
         if (typeof(course) == "undefined")
         {
           ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
@@ -59919,6 +60196,14 @@ routes_router.get('/test', (ctx) => {
         }
         var insertcourse = await CreateCourse(course);
         ctx.body = JSON.stringify(insertcourse);
+  
+      })
+      .del('/courses/:courseID', async (ctx) => {
+        if (!RequirePermission(ctx,['read:courses'])) {
+          return;
+        }
+        var result = await DeleteCourse(ctx.params.courseID);
+        ctx.body = JSON.stringify(result);
   
       })
 
@@ -59930,9 +60215,6 @@ routes_router.get('/test', (ctx) => {
 
       .get('/courses/:CourseID/chapters', async (ctx) => {
         if (!RequirePermission(ctx,['read:courses'])) {
-          console.log('Bad course Slides Get Permissions')
-          //TODO: Handle failure more gracefully
-          ctx.body = JSON.stringify([{ID: "0", SlideName: "No You!"}]);
           return;
         }
         let chaptersList = await GetChapters(ctx.params.CourseID);
@@ -59941,30 +60223,18 @@ routes_router.get('/test', (ctx) => {
 
         .get('/chapters/:chapterID', async (ctx) => {
           if (!RequirePermission(ctx,['read:courses'])) {
-            //TODO: Handle failure more gracefully
-            console.log('Bad Chapter Get Permissions')
-            ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
             return;
           }
-          console.log('Getting Chapter Details');
-          console.log(ctx.params.chapterID);
           let chapter = await GetChapterDetails(ctx.params.chapterID);
-          console.log(chapter);
-          ctx.body = JSON.stringify(chapter);
+          ctx.body = JSON.stringify(chapter[0]);
           })
   
 
         .post('/chapters', async (ctx) => {
           if (!RequirePermission(ctx,['read:courses'])) {
-            //TODO: Handle failure more gracefully
-            ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-            console.log('Bad Permissions')
             return;
           }
           let chapter = ctx.request.body;
-          console.log('Request to create chapter');
-          console.log(ctx.request);
-          console.log(chapter)
           if (typeof(chapter) == "undefined")
           {
             ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
@@ -59972,6 +60242,14 @@ routes_router.get('/test', (ctx) => {
           }
           var insertChapter = await CreateChapter(chapter);
           ctx.body = JSON.stringify(insertChapter);
+    
+        })
+        .del('/chapters/:chapterID', async (ctx) => {
+          if (!RequirePermission(ctx,['read:courses'])) {
+            return;
+          }
+          var result = await DeleteChapter(ctx.params.chapterID);
+          ctx.body = JSON.stringify(result);
     
         })
 
@@ -59982,9 +60260,6 @@ routes_router.get('/test', (ctx) => {
        *************************************/
       .get('/chapters/:chapterID/slides', async (ctx) => {
         if (!RequirePermission(ctx,['read:courses'])) {
-          console.log('Bad course Slides Get Permissions')
-          //TODO: Handle failure more gracefully
-          ctx.body = JSON.stringify([{ID: "0", SlideName: "No You!"}]);
           return;
         }
         let slidesList = await GetSlides(ctx.params.chapterID);
@@ -59993,13 +60268,9 @@ routes_router.get('/test', (ctx) => {
 
     .post('/slides', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        //TODO: Handle failure more gracefully
-        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-        console.log('Bad Permissions')
         return;
       }
       let slide = ctx.request.body;
-      console.log('Request to create slide');
       if (typeof(slide) == "undefined")
       {
         ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
@@ -60013,25 +60284,17 @@ routes_router.get('/test', (ctx) => {
 
       .get('/slides/:slideID', async (ctx) => {
         if (!RequirePermission(ctx,['read:courses'])) {
-          //TODO: Handle failure more gracefully
-          console.log('Bad Slide Get Permissions')
-          ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
           return;
         }
-        console.log('Getting Slide Details');
         let slide = await GetSlideDetails(ctx.params.slideID);
         ctx.body = JSON.stringify(slide);
         })
 
       .post('/slides', async (ctx) => {
         if (!RequirePermission(ctx,['read:courses'])) {
-          //TODO: Handle failure more gracefully
-          ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-          console.log('Bad Permissions')
           return;
         }
         let slide = ctx.request.body;
-        console.log('Request to create slide');
         if (typeof(slide) == "undefined")
         {
           ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
@@ -60043,13 +60306,9 @@ routes_router.get('/test', (ctx) => {
       })
       .put('/slides/:slideID', async (ctx) => {
         if (!RequirePermission(ctx,['read:courses'])) {
-          //TODO: Handle failure more gracefully
-          ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-          console.log('Bad Permissions')
           return;
         }
         let slide = ctx.request.body;
-        console.log('Request to update slide');
         if (typeof(slide) == "undefined")
         {
           ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
@@ -60061,13 +60320,9 @@ routes_router.get('/test', (ctx) => {
       })
       .put('/slides/:slideID', async (ctx) => {
         if (!RequirePermission(ctx,['read:courses'])) {
-          //TODO: Handle failure more gracefully
-          ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-          console.log('Bad Permissions')
           return;
         }
         let slide = ctx.request.body;
-        console.log('Request to update clip');
         if (typeof(clip) == "undefined")
         {
           ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
@@ -60081,9 +60336,6 @@ routes_router.get('/test', (ctx) => {
     //This is just pseudo code for now and needs to be implemented.
     .get('/slides/:slideID/generateaudio/', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        //TODO: Handle failure more gracefully
-        console.log('Bad Slide Get Permissions')
-        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
         return;
       }
       console.log('Request to merge clip audio files');
@@ -60094,16 +60346,27 @@ routes_router.get('/test', (ctx) => {
       //return audio file (or the full slide?)
       ctx.body = JSON.stringify(slide);
       })
+      .del('/slides/:slideID', async (ctx) => {
+        if (!RequirePermission(ctx,['read:courses'])) {
+          return;
+        }
+        var result = await DeleteSlide(ctx.params.slideID);
+        ctx.body = JSON.stringify(result);
+  
+      })
+
+      /*************************************
+       * 
+       * CLIPS
+       * 
+       *************************************/
 
     .get('/clips/:clipID/audio', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        //TODO: Handle failure more gracefully
-        console.log('Bad Clip Audio Generate Get Permissions')
-        //ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
         //return;
       }
-      console.log('Getting Audio')
-      let clip = await GetClipDetails(ctx.params.clipID);
+      console.log('clip')
+      let clip = await GetClipAudio(ctx.params.clipID);
 
       //'body': base64.b64encode(image).decode('utf-8'),
       ctx.isBase64Encoded = true;   
@@ -60119,34 +60382,156 @@ routes_router.get('/test', (ctx) => {
 
     .get('/clips/:clipID/generateaudio', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        //TODO: Handle failure more gracefully
-        console.log('Bad Clip Audio Generate Get Permissions')
-        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
         return;
       }
-      console.log('Updating Clip Audio file')
-
-      console.log('-Getting Clip Details');
       let clip = await GetClipDetails(ctx.params.clipID);
-
 
       //const abortController = new AbortController();
       const avatarId = clip.VoiceID;
-      const text = clip.ClipText;
-    
-      /**
-       * Should this request fail, make sure to check the response headers
-       * to try to find a root cause.
-       * 
-       * Rate-limiting headers:
-       * x-quota-limit: 200
-       * x-quota-remaining: 191
-       * x-quota-reset: 1622226323630
-       * x-rate-limit-limit: 5
-       * x-rate-limit-remaining: 4
-       * x-rate-limit-reset: 1619635874002
-       */
+      const rawText = clip.ClipText;
 
+      const pronunciations  = await GetPronunciations();
+
+      //const text = ConvertPronunciation(pronunciations, rawText);
+      const text = ConvertPronunciationFast(pronunciations, rawText);
+
+      const ttsResponse = await fetch(routes_ttsEndPoint, {
+        //signal: abortController.signal,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Api-Key': process.env.WELLSAID_API_KEY,
+        },
+        body: JSON.stringify({
+          speaker_id: avatarId,
+          text: text,
+        }),
+      });
+
+      let status = ttsResponse.status;
+      //TODO handle invalid responses here
+      if (status != 200)
+      {
+        console.log('tts Response Status was invalid');
+        console.log(ttsResponse.status);
+        ctx.status = 500;
+      }
+
+      //https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
+      const responseBlob = await ttsResponse.blob()
+      const responseArray = await responseBlob.arrayBuffer();
+      const buffer = await Buffer.from(responseArray);
+      clip.AudioClip = buffer;
+
+      await LogClipGeneration(GetUserName(ctx), text);
+
+      await UpdateClipAudio(clip.ClipID, buffer);
+      ctx.body = JSON.stringify(clip);
+      })
+
+    .post('/clips', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        return;
+      }
+      let clip = ctx.request.body;
+      if (typeof(clip) == "undefined")
+      {
+        ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
+        return;
+      }
+      var insertClip = await CreateClip(clip);
+      ctx.body = JSON.stringify(insertClip);
+
+    })
+
+    .put('/clips/:clipID', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        return;
+      }
+      let clip = ctx.request.body;
+      if (typeof(clip) == "undefined")
+      {
+        ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
+        return;
+      }
+      var updateClip = await UpdateClip(clip);
+      ctx.body = JSON.stringify(updateClip);
+
+    })
+
+    .put('/clipsPost/:clipID', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        return;
+      }
+      let clip = ctx.request.body;
+      if (typeof(clip) == "undefined")
+      {
+        ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
+        return;
+      }
+      var updateClip = await UpdateClipPost(clip);
+      ctx.body = JSON.stringify(updateClip);
+
+    })
+    .del('/clips/:clipID', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        return;
+      }
+      var result = await DeleteClip(ctx.params.clipID);
+      ctx.body = JSON.stringify(result);
+
+    })
+
+
+      /*************************************
+       * 
+       * LOGS
+       * 
+       *************************************/
+
+    .post('/logs/:offset', async (ctx) => {
+
+      if (!RequirePermission(ctx, ['read:logs'])) {
+        return;
+      }
+      let query = ctx.request.body;
+      var result = await GetClipLog(defaultPageSize, parseInt(ctx.params.offset,10) * defaultPageSize, query);
+      ctx.body = JSON.stringify(result);
+    })
+    .get('/logs/info', async (ctx) => {
+
+      if (!RequirePermission(ctx, ['read:logs'])) {
+        return;
+      }
+      var result = await GetClipLogSize();
+      ctx.body = {
+        Records: result,
+        Limit: defaultPageSize
+      }
+    })
+
+
+/*************************************
+* 
+* PRONUNCIATIONS
+* 
+*************************************/
+    .get('/pronunciations', async (ctx) => {
+    if (!RequirePermission(ctx,['read:courses'])) {
+      return;
+    }
+
+    let pronunciationList = await GetPronunciations();
+    ctx.body = JSON.stringify(pronunciationList);
+    }) 
+
+    .post('/pronunciations/check' , async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        return;
+      }
+      const pronunciation = ctx.request.body;
+      const avatarId = 3;
+      const text = pronunciation.Pronunciation;
       const ttsResponse = await fetch(routes_ttsEndPoint, {
         //signal: abortController.signal,
         method: 'POST',
@@ -60172,54 +60557,59 @@ routes_router.get('/test', (ctx) => {
       const responseBlob = await ttsResponse.blob()
       const responseArray = await responseBlob.arrayBuffer();
       const buffer = await Buffer.from(responseArray);
-      clip.AudioClip = buffer;
 
-      console.log('-Updating Clip based on audio file');
-      var updateClip = await UpdateClip(clip, false);
-      console.log('-Finished updating clip');
+      ctx.isBase64Encoded = true;   
 
+      ctx.body = buffer;
+
+      await LogClipGeneration(GetUserName(ctx), text);
       
-      ctx.body = JSON.stringify(updateClip);
-      })
+      ctx.set('Content-Type', 'audio/mpeg');
+    })
 
-    .post('/clips', async (ctx) => {
+    .post('/pronunciations', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        //TODO: Handle failure more gracefully
-        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-        console.log('Bad Permissions')
         return;
       }
-      let clip = ctx.request.body;
-      console.log('Request to create clip');
-      if (typeof(clip) == "undefined")
+      let pronunciation = ctx.request.body;
+      if (typeof(pronunciation) == "undefined")
       {
         ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
         return;
       }
-      var insertClip = await CreateClip(clip);
-      ctx.body = JSON.stringify(insertClip);
-
+      var insertpronunciation = await CreatePronunciation(pronunciation);
+      ctx.body = JSON.stringify(insertpronunciation);
     })
 
-    .put('/clips/:clipID', async (ctx) => {
+    .put('/pronunciations/:pronunciationID', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
-        //TODO: Handle failure more gracefully
-        ctx.body = JSON.stringify([{ID: "0", courseName: "No You!"}]);
-        console.log('Bad Permissions')
         return;
       }
-      let clip = ctx.request.body;
-      console.log('Request to update clip');
-      if (typeof(clip) == "undefined")
+      let pronunciation = ctx.request.body;
+      
+      if (typeof(pronunciation) == "undefined")
       {
         ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
         return;
       }
-      var updateClip = await UpdateClip(clip);
-      ctx.body = JSON.stringify(updateClip);
+      var updatePronunciation = await UpdatePronunciation(pronunciation);
+      ctx.body = JSON.stringify(updatePronunciation);
+    })
+
+    .del('/pronunciations/:pronunciationID', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        return;
+      }
+      var result = await DeletePronunciation(ctx.params.pronunciationID);
+      ctx.body = JSON.stringify(result);
 
     })
 
+      /*************************************
+       * 
+       * External routes
+       * 
+       *************************************/
 
     addTests(routes_router);
 
@@ -60263,8 +60653,6 @@ var jwtCheck = lib({
 //return jwtCheck;
 
 let retFunc = (ctx, next) => {
-  //console.log('Deep in the middleware')
-  //console.log(ctx);
   return jwtCheck(ctx, next);
 }
 return retFunc
