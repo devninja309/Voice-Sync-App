@@ -333,6 +333,7 @@ router.get('/test', (ctx) => {
       //const abortController = new AbortController();
       const avatarId = clip.VoiceID;
       const rawText = clip.ClipText;
+      console.log(avatarId);
 
       const pronunciations  = await GetPronunciations();
 
@@ -359,6 +360,7 @@ router.get('/test', (ctx) => {
         console.log('tts Response Status was invalid');
         console.log(ttsResponse.status);
         ctx.status = 500;
+        console.log(ttsResponse);
       }
 
       //https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
@@ -369,7 +371,7 @@ router.get('/test', (ctx) => {
 
       await LogClipGeneration(GetUserName(ctx), text);
 
-      await UpdateClipAudio(clip.ClipID, buffer);
+      await UpdateClipAudio(ctx.params.clipID, buffer);
       ctx.body = JSON.stringify(clip);
       })
 
@@ -398,6 +400,8 @@ router.get('/test', (ctx) => {
         ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
         return;
       }
+      console.log('Update');
+      console.log(clip);
       var updateClip = await UpdateClip(clip);
       ctx.body = JSON.stringify(updateClip);
 

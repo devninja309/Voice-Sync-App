@@ -26,6 +26,9 @@ import {UpdateSlideText} from '../Etc/TextManagement';
 import { PronunciationEditDialog } from '../Components/PronunciationEditDialog';
 import { SimpleSelect } from '../Elements/SimpleSelect';
 import { SlideQuickSelect } from '../Components/SlideQuickSelect';
+import {VoiceSelect} from '../Components/VoiceSelect';
+import { VolumeSelect } from '../Components/VolumeSelect';
+import { PaceSelect } from '../Components/PaceSelect';
 
 const SlideDetailsPage = (props) => {
 
@@ -47,6 +50,7 @@ const SlideDetailsPage = (props) => {
         .then(
             data => {
                 setSlide(data); //TODO Query organization doesn't support single responses.  Do we care?
+                setSelectedClip(null);
             })
     
      },[token, CourseID, slideID]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
@@ -54,15 +58,25 @@ const SlideDetailsPage = (props) => {
      const changeSelectedClip = (clip) =>
      {
          setSelectedClipEdited(false);
+         setSelectedClipPostEdited(false);
          setSelectedClip(clip);
      }
+     //Update values on the selected clip.
+     //The first one is a generic edit, while the others are specific use cases
+     const UpdateSelectedClip = (newClip) => {
+         setSelectedClipEdited(true);
+         setSelectedClip(newClip);
+     }     
+     const UpdateSelectedClipPost = (newClip) => {
+        setSelectedClipPostEdited(true);
+        setSelectedClip(newClip);
+    }
      const selectedClipTextModified = (event) => {
-
         const updatedClip = {...selectedClip, ClipText: event.target.value}
+        console.log('Clip Text');
+        console.log(updatedClip.ClipText)
         setSelectedClipEdited(true);
-
         setSelectedClip(updatedClip)
-
      }
 
      const selectedClipApproved = () => {
@@ -71,9 +85,9 @@ const SlideDetailsPage = (props) => {
          setSelectedClip(updatedClip);
      }
      const pushChangedClip = (clip) => {
-        clip.AudioClip = null;
         if (selectedClipEdited) {
-         APICalls.UpdateClip(clip)
+            clip.AudioClip = null;
+            APICalls.UpdateClip(clip)
         }
         else {
             APICalls.UpdatePostClip(clip);
@@ -115,16 +129,6 @@ const SlideDetailsPage = (props) => {
             ))
         }      
     }
-    function getVoiceList() {
-        return [{value: 3, label: 'Voice 3'}];
-    }
-    function getVolumeList() {
-        return [
-            {value: 1, label: 'Quietest'},
-            {value: 3, label: 'Normal'},
-            {value: 5, label: 'Loudest'},
-    ];
-    }
     function getSpeedList() {
         return [
             {value: 1, label: 'Slowest'},
@@ -150,9 +154,9 @@ const SlideDetailsPage = (props) => {
                             />
                         {(selectedClipEdited || selectedClipPostEdited) && <SimpleButton onClick= {()=> pushChangedClip(selectedClip)} Text="Save Changes" />}
                         <SimpleButton onClick={() => changeSelectedClip(null)} Text="Deselect Clip"/>
-                        <SimpleSelect className = "simpleSelect-small" options={getVoiceList()}/>
-                        <SimpleSelect className = "simpleSelect-small" options={getVolumeList()}/>
-                        <SimpleSelect className = "simpleSelect-small" options={getSpeedList()}/>
+                        <VoiceSelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClip(newClip)}/>
+                        <VolumeSelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClipPost(newClip)}/>
+                        <PaceSelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClipPost(newClip)}/>
                         <SimpleButton onClick={() => selectedClipApproved()} Text="Approve Clip"/>
                         <SimpleTextArea className="simpleTextArea-largebox"
                         value={slide.SlideText} 

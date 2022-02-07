@@ -154,6 +154,8 @@ export function UpdateSlide(fetchWithAuth, slide)
 }
 export function UpdateClip(fetchWithAuth, clip)
 {
+    console.log('Transmitting');
+    console.log (clip.ClipText);
     return fetchWithAuth(getUrlPath(`clips/${clip.ID}`), PutHeadersForUpdate(clip))
       .then(response => response.json())
 }

@@ -8,6 +8,7 @@ export function SimpleAudioPlayer(props) {
     const [url, setUrl] = useState('');
 
 
+
 var file = props.audiofile;
 if (props.updating)
 {
@@ -18,9 +19,33 @@ if (!file) {
         <p className="p-no-audio">No Audio</p>
     )
 }
-function PlayAudio() {
-    const audio = new Audio(file);
-    audio.play();
+async function  PlayAudio() {
+    const vol = (props.volume||100) /100;
+    const pace = (props.pace||100) /100;
+    console.log('Volume' + vol);
+
+    try {
+        const audioCtx = new window.AudioContext();
+
+        let arrayBuffer = await fetch(file).then(r => r.arrayBuffer());
+    
+        const clipAudioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+        const track = audioCtx.createBufferSource();
+        track.buffer = clipAudioBuffer;
+
+        track.playbackRate.value = pace;
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.value = vol;
+
+        track.connect(gainNode).connect(audioCtx.destination);
+
+        track.start();
+    }
+    catch (err) {
+        console.log('Audio error')
+        console.log(err);
+    }
 }
 console.log('url')
 //<audio controls src={props.audiofile} />

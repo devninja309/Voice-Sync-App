@@ -350,8 +350,9 @@ export async function UpdateClip(clip)
 
 
      let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, Volume =?, Speed=?, Approved=?, AudioClip = null Where ID = ?`;
-     let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Aproved, clip.ID];
+     let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Approved, clip.ID];
 
+     console.log(clip.ClipText);
     con.query(insert,values, (err, results, fields) => {
       if (err) {
         return console.error(err.message);
@@ -363,7 +364,6 @@ export async function UpdateClip(clip)
 }
 export async function UpdateClipAudio(clipID, audioBuffer)
 {
-  console.log('Update Clip Audio')
   //Check Clip
   let error = false;
   let errorString = "";
@@ -384,6 +384,7 @@ export async function UpdateClipAudio(clipID, audioBuffer)
 
     con.query(insert,values, (err, results, fields) => {
       if (err) {
+        console.log(err);
         return console.error(err.message);
       }
       con.end();
