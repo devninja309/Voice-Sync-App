@@ -1,0 +1,19 @@
+service: lambda-layers
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+
+package:
+  exclude:
+    - ./*
+  include:
+    - layers
+
+layers:
+  ffmpeg:
+    path: layers
+    description: FFmpeg binary
+    compatibleRuntimes:
+      - nodejs10.x
+    licenseInfo: GPL v2+, for more info see https://github.com/FFmpeg/FFmpeg/blob/master/LICENSE.md

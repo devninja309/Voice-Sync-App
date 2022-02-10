@@ -36,11 +36,13 @@ const SlideDetailsPage = (props) => {
     const slideID =useParams().slideID;
 
     const [slide, setSlide] = useState('');
+    const [slideAudioURL, setSlideAudioURL] = useState(null);
+    const [slideHasAudio, setSlideHasAudio] = useState(false);
+    const [slideAudioUpdating, setSlideAudioUpdating] = useState(false);
     const [selectedClip, setSelectedClip] = useState(null);
     const [selectedClipEdited, setSelectedClipEdited] = useState(false);
     const [selectedClipPostEdited, setSelectedClipPostEdited] = useState(false);
     const {token, APICalls} = useAuthTools();
-    const [audioclipfile, setaudioclipfile] = useState(null);
 
     const [isPronunciationOpen, setIsPronunciationOpen] = useState(false);
     const handlePronunciationClose = useCallback(() => setIsPronunciationOpen(false), []);
@@ -51,6 +53,10 @@ const SlideDetailsPage = (props) => {
             data => {
                 setSlide(data); //TODO Query organization doesn't support single responses.  Do we care?
                 setSelectedClip(null);
+                setSlideHasAudio(data.HasAudio)
+                if (data.HasAudio) {
+                    getSlideAudio(data.ID);
+                }
             })
     
      },[token, CourseID, slideID]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
@@ -100,23 +106,32 @@ const SlideDetailsPage = (props) => {
          APICalls.UpdateSlide(newSlide);
      }
 
-     const getSlideClip = useCallback(async () => {
-       setSlide({...slide, SlideClip: null})
-       const path = getUrlPath('stream');
-       const slideText = slide.SlideText
-       const currentAvatar = 3;
-       const response = await fetch(path, { 
-           method: 'POST',
-           headers: {
-             'Content-Type': 'application/json'
-           },
-           body: JSON.stringify({ avatarId: currentAvatar, text: slideText})
-         });
-       const responseBlob = await response.blob()
-       const objectURL = URL.createObjectURL(responseBlob);
-       setSlide({...slide, MergedClip: objectURL})
-       setaudioclipfile(objectURL)
-     }, [ slide])
+     const mergeSlide = () => {
+       setSlideAudioUpdating(true);
+       setSlideAudioURL(null);
+       APICalls.GenerateSlideAudio(slide.ID).then(() => {
+           setSlideHasAudio(true);
+           getSlideAudio(slide.ID);
+     })};
+
+     function getSlideAudio(slideID) {
+         setSlideAudioUpdating(true);
+         
+         APICalls.GetSlideAudio(slideID).then( (data) => {
+            data.blob().then ( responseBlob => {
+                const objectURL = URL.createObjectURL(responseBlob);
+                setSlideAudioURL(objectURL);
+                setSlideAudioUpdating(false);
+            })
+         })
+     }
+     function downloadSlideAudio () {
+         APICalls.DownloadSlideAudio(slide.ID).then ((data) => {
+             data.blob().then (responseBlob => {
+                const objectURL = URL.createObjectURL(responseBlob);
+                window.open(responseBlob);
+            })})
+     }
 
     function sortByOrdinalValue(a,b) {
         return a.OrdinalValue - b.OrdinalValue;
@@ -128,13 +143,6 @@ const SlideDetailsPage = (props) => {
                 <ClipListCard className="ClipsCard" key={clip.ID} clip = {clip} setSelectedClip={changeSelectedClip} updateClip={UpdateClip}/>
             ))
         }      
-    }
-    function getSpeedList() {
-        return [
-            {value: 1, label: 'Slowest'},
-            {value: 3, label: 'Normal'},
-            {value: 5, label: 'Fastest'},
-    ];
     }
 
     function TextEditArea() {
@@ -172,6 +180,7 @@ const SlideDetailsPage = (props) => {
     {
         slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = clip;
 
+        //TODO This will reload all clip audios
         setSlide({...slide});
     }
 
@@ -195,13 +204,17 @@ const SlideDetailsPage = (props) => {
             </div>
             <div class = "div-Slide-Details-Container">
             <PronunciationEditDialog isOpen = {isPronunciationOpen} handleClose = {handlePronunciationClose}/>
-                <div class = "div-Slide-Details-Container-Slide">
-                    <div class ="div-Slide-Details-Container-TextArea">
+                <div className = "div-Slide-Details-Container-Slide">
+                    <div className ="div-Slide-Details-Container-TextArea">
                         {TextEditArea()}
                     </div>
-                    <SimpleAudioPlayer audiofile = {slide.MergedClip} />
-                    <button className="input" onClick={getSlideClip}>Merge all clips</button>
-                    <button className="input" onClick={() =>console.log(slide)}>Debug</button>
+                    <ButtonGroup>
+                    <button className="input" onClick={mergeSlide}>Merge all clips</button>
+                    <SimpleAudioPlayer audiofile = {slideAudioURL} updating={slideAudioUpdating}/>  
+                    {slideHasAudio && <a href={slideAudioURL} download={'Slide-' + slide.ID + '-Audio.mp3'}>
+                        <IconButton icon="cloud-download" text="Download Slide Audio" download/>
+                    </a>}
+                    </ButtonGroup>
                 </div>
                 <div class = "div-Slide-Details-ClipsList-Column">
                     <ButtonGroup className = "buttonGroup-row">

@@ -209,7 +209,8 @@
 }
 .div-Slide-Details-Container-TextArea{
   /*height: 400px;*/
-  width: 100%
+  width: 100%;
+  margin: 5px;
 }
 .SimpleTextArea {
   width: 90%;

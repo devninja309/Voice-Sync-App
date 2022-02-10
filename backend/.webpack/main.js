@@ -57648,8 +57648,9 @@ async function UpdateClip(clip)
 
 
      let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, Volume =?, Speed=?, Approved=?, AudioClip = null Where ID = ?`;
-     let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Aproved, clip.ID];
+     let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Approved, clip.ID];
 
+     console.log(clip.ClipText);
     con.query(insert,values, (err, results, fields) => {
       if (err) {
         return console.error(err.message);
@@ -57661,7 +57662,6 @@ async function UpdateClip(clip)
 }
 async function UpdateClipAudio(clipID, audioBuffer)
 {
-  console.log('Update Clip Audio')
   //Check Clip
   let error = false;
   let errorString = "";
@@ -57682,6 +57682,7 @@ async function UpdateClipAudio(clipID, audioBuffer)
 
     con.query(insert,values, (err, results, fields) => {
       if (err) {
+        console.log(err);
         return console.error(err.message);
       }
       con.end();
@@ -60365,7 +60366,6 @@ routes_router.get('/test', (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
         //return;
       }
-      console.log('clip')
       let clip = await GetClipAudio(ctx.params.clipID);
 
       //'body': base64.b64encode(image).decode('utf-8'),
@@ -60389,6 +60389,7 @@ routes_router.get('/test', (ctx) => {
       //const abortController = new AbortController();
       const avatarId = clip.VoiceID;
       const rawText = clip.ClipText;
+      console.log(avatarId);
 
       const pronunciations  = await GetPronunciations();
 
@@ -60415,6 +60416,7 @@ routes_router.get('/test', (ctx) => {
         console.log('tts Response Status was invalid');
         console.log(ttsResponse.status);
         ctx.status = 500;
+        console.log(ttsResponse);
       }
 
       //https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
@@ -60425,7 +60427,7 @@ routes_router.get('/test', (ctx) => {
 
       await LogClipGeneration(GetUserName(ctx), text);
 
-      await UpdateClipAudio(clip.ClipID, buffer);
+      await UpdateClipAudio(ctx.params.clipID, buffer);
       ctx.body = JSON.stringify(clip);
       })
 

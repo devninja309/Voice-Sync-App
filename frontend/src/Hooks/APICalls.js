@@ -149,18 +149,19 @@ export function CreatePronunciation(fetchWithAuth, pronunciation)
 }
 export function UpdateSlide(fetchWithAuth, slide)
 {
-    return fetchWithAuth(getUrlPath(`slides/${slide.ID}`), PutHeadersForUpdate(slide))
+    const strippedSlide = {...slide, Clips:[]};
+    return fetchWithAuth(getUrlPath(`slides/${strippedSlide.ID}`), PutHeadersForUpdate(strippedSlide))
       .then(response => response.json())
 }
 export function UpdateClip(fetchWithAuth, clip)
 {
-    console.log('Transmitting');
-    console.log (clip.ClipText);
+    clip.ClipAudio = null;
     return fetchWithAuth(getUrlPath(`clips/${clip.ID}`), PutHeadersForUpdate(clip))
       .then(response => response.json())
 }
 export function UpdatePostClip(fetchWithAuth, clip)
 {
+    clip.ClipAudio = null;
     return fetchWithAuth(getUrlPath(`clipsPost/${clip.ID}`), PutHeadersForUpdate(clip))
       .then(response => response.json())
 }
@@ -175,6 +176,24 @@ export function UpdatePronunciation(fetchWithAuth, pronunciation)
 {
     return fetchWithAuth(getUrlPath(`pronunciations/${pronunciation.ID}`), PutHeadersForUpdate(pronunciation))
       .then(response => response.json())
+}
+export function GetSlideAudio(fetchWithAuth, slideID)
+{
+    return fetchWithAuth(getUrlPath(`slides/${slideID}/audio`), GetHeadersForMP3())
+    .then(response => response); 
+
+}
+export function GenerateSlideAudio(fetchWithAuth, slideID)
+{
+    return fetchWithAuth(getUrlPath(`slides/${slideID}/generateaudio`))
+    .then(response => response); 
+
+}
+export function DownloadSlideAudio(fetchWithAuth, slideID)
+{
+    return fetchWithAuth(getUrlPath(`slides/${slideID}/downloadaudio`), GetHeadersForMP3())
+    .then(response => response); 
+
 }
 export function GetClipAudio(fetchWithAuth, clipID)
 {
@@ -248,6 +267,9 @@ export const UseAPICallsWithAuth = (fetchWithAuth) => {
         UpdateClip: (clip) => UpdateClip(fetchWithAuth, clip),
         UpdatePostClip: (clip) => UpdatePostClip(fetchWithAuth, clip),
         UpdateClipAudio: (clipID) => UpdateClipAudio(fetchWithAuth, clipID),
+        GetSlideAudio: (slideID) => GetSlideAudio(fetchWithAuth, slideID), 
+        GenerateSlideAudio: (slideID) => GenerateSlideAudio(fetchWithAuth, slideID), 
+        DownloadSlideAudio: (slideID) => DownloadSlideAudio(fetchWithAuth, slideID), 
         GetClipAudio: (clipID) => GetClipAudio(fetchWithAuth, clipID),
         GetSlideDetails: (slideID) => GetSlideDetails(fetchWithAuth, slideID),
         DeleteClip: (clipID) => DeleteClip(fetchWithAuth, clipID), 

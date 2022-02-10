@@ -69,3 +69,7 @@ Create Table `IA_VoiceSynth`.`Pronunciations` (
   Alter Table  `IA_VoiceSynth`.`Clips` 
     ADD COLUMN Approved bool not null default false
 
+Create Table `IA_VoiceSynth`.`SlideAudio` (
+  `SlideID` INT NOT NULL,
+  `AudioFile` LongBlob NULL,
+  PRIMARY KEY (`SlideID`))

@@ -4,6 +4,7 @@ import Router from 'koa-router';
 import {GetCourses, GetCourseDetails, CreateCourse, GetChapters, GetChapterDetails, GetSlides,
   CreateChapter, CreateSlide, CreateClip, GetSlideDetails, GetClipDetails, GetClipAudio,
   UpdateClip, UpdateClipPost, UpdateSlide, UpdateClipAudio, 
+  GetSlideAudio, SetSlideAudio,
   DeleteClip, DeleteSlide, DeleteChapter, DeleteCourse, 
   GetPronunciations, CreatePronunciation, UpdatePronunciation, DeletePronunciation,
   LogClipGeneration, GetClipLog, GetClipLogSize} from './databasestorage/dataaccess.js';
@@ -13,6 +14,7 @@ import { addTests } from './routes.test.js';
 import fetch from "node-fetch";
 import Response from "node-fetch";
 import { ConvertPronunciationFast } from './voicesynthapi/Pronunciation.js';
+import {ProcessSlide} from './audioManipulation/audioProcess.js';
 
 //TODO I should be a parameter
 const ttsEndPoint = "https://api.wellsaidlabs.com/v1/tts/stream"
@@ -68,17 +70,32 @@ router.get('/test', (ctx) => {
 .get('/v1/test', (ctx) => {
     ctx.body = 'Hello World Updated test'
 })
-.get('/audiottest', async(ctx) => {
-  //ctx.body = JSON.stringify(audioProcessTest());
+.get('/audiotest', async(ctx) => {
+  console.log('AudioTest 1');
+  const testSlideID = 81; //Hardcoded to Two Sentence Slide for testing.
+  //Load slide
+    let slide = await GetSlideDetails(81);
+
+  //Process slide
+  console.log('AudioTest 2');
+    const audioFile = await ProcessSlide(slide);
+
+  //return slide
+  console.log('AudioTest 3');
+    ctx.isBase64Encoded = true; 
+    ctx.body = audioFile;  
+    ctx.set('Content-Type', 'audio/mpeg');
+    ctx.set('Content-Disposition', 'attachment; filename=clip.mp3')
+    //Amazon encoding code
+    //ctx.body =  Buffer.from(clip.AudioClip).toString('base64');
+
 })
 .get('/dbtest', async (ctx) => {
 
   let getKey = async () => {
-    console.log('Fetching');
     var result = await fetch(auth0EndPoint, {
       method: 'GET',
     });
-    console.log('fetched');
     return result;
   }
 
@@ -278,18 +295,38 @@ router.get('/test', (ctx) => {
       })
         
     //This is just pseudo code for now and needs to be implemented.
-    .get('/slides/:slideID/generateaudio/', async (ctx) => {
-      if (!RequirePermission(ctx,['read:courses'])) {
-        return;
-      }
-      console.log('Request to merge clip audio files');
-      //Check each clip to ensure there is audio, else error
-      //Load all audio clips
-      //Merge all audio clips with parameters (part of slide?  do we need another input?)  This includes 'white space' between clips and speed up factor
-      //Save audio file to slide
-      //return audio file (or the full slide?)
-      ctx.body = JSON.stringify(slide);
+    .get('/slides/:slideID/generateaudio', async (ctx) => {
+      //Load slide
+        let slide = await GetSlideDetails(ctx.params.slideID);
+    
+      //Process slide=
+        const audioFile = await ProcessSlide(slide);
+    
+      //Save slide
+        await SetSlideAudio(ctx.params.slideID, audioFile);
+        ctx.body = 'ok';
       })
+      .get('/slides/:slideID/downloadaudio', async (ctx) => {
+        const slideID = ctx.params.slideID
+        //Load slide
+          let slideAudio = await GetSlideAudio(slideID);
+      
+        //return slide
+          ctx.isBase64Encoded = true; 
+          ctx.body = slideAudio.AudioFile;  
+          //ctx.set('Content-Type', 'audio/mpeg');
+          ctx.set('Content-Type', 'application/octet-stream');
+          ctx.set('Content-Disposition', `attachment; filename=slide-${slideID}.mp3`)
+        })
+      .get('/slides/:slideID/audio', async (ctx) => {
+          //Load slide
+          let slideAudio = await GetSlideAudio(ctx.params.slideID);
+          
+          //return slide
+            ctx.isBase64Encoded = true; 
+            ctx.body = slideAudio.AudioFile;  
+            ctx.set('Content-Type', 'audio/mpeg');
+          })
       .del('/slides/:slideID', async (ctx) => {
         if (!RequirePermission(ctx,['read:courses'])) {
           return;
@@ -309,7 +346,6 @@ router.get('/test', (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
         //return;
       }
-      console.log('clip')
       let clip = await GetClipAudio(ctx.params.clipID);
 
       //'body': base64.b64encode(image).decode('utf-8'),
@@ -400,8 +436,6 @@ router.get('/test', (ctx) => {
         ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
         return;
       }
-      console.log('Update');
-      console.log(clip);
       var updateClip = await UpdateClip(clip);
       ctx.body = JSON.stringify(updateClip);
 

@@ -1,0 +1,26 @@
+Transform: 'AWS::Serverless-2016-10-31'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+
+Resources:
+  S3AudioProcessing:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Join ['', ['ia-audiofiles-', !Ref Environment]] 
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+        - Id: ExpireTempFolder
+          Status: Enabled
+          AbortIncompleteMultipartUpload:
+            DaysAfterInitiation: 3
+          ExpirationInDays: 3
+          NoncurrentVersionExpirationInDays: 3
+          Prefix: temp/

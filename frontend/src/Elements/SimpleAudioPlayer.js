@@ -26,21 +26,26 @@ async function  PlayAudio() {
 
     try {
         const audioCtx = new window.AudioContext();
+        const audio = new Audio(file);
+        audio.playbackRate = pace;
+        audio.volume = vol;
+        //const track = audioCtx.createBufferSource(file);
 
-        let arrayBuffer = await fetch(file).then(r => r.arrayBuffer());
+        // let arrayBuffer = await fetch(file).then(r => r.arrayBuffer());
     
-        const clipAudioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+        // const clipAudioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 
-        const track = audioCtx.createBufferSource();
-        track.buffer = clipAudioBuffer;
+        // const track = audioCtx.createBufferSource();
+        // track.buffer = clipAudioBuffer;
 
-        track.playbackRate.value = pace;
-        const gainNode = audioCtx.createGain();
-        gainNode.gain.value = vol;
+        // track.playbackRate.value = pace;
+        // const gainNode = audioCtx.createGain();
+        // gainNode.gain.value = vol;
 
-        track.connect(gainNode).connect(audioCtx.destination);
+        //track.connect(gainNode).connect(audioCtx.destination);
 
-        track.start();
+        audio.play();
+        //track.start();
     }
     catch (err) {
         console.log('Audio error')

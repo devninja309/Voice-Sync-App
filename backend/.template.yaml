@@ -30,11 +30,23 @@ Resources:
   WebAPILambdaV1:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://s3-ia-cfg/509722cf66f05ea492172cb154111358
+      CodeUri: s3://s3-ia-cfg/b40519d57c12c2759a5df2956de613a8
       Handler: main.handler
+      Layers:
+      - Ref: FFMPEGLayer
       Events:
         ProxyGateway:
           Type: Api
           Properties:
             Path: /{proxy+}
             Method: ANY
+  FFMPEGLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: sam-app-ffmpeg
+      Description: ffmpeg app
+      ContentUri: s3://s3-ia-cfg/ccfdc8fd5ca54a0aae445f932f1c313f
+      CompatibleRuntimes:
+      - nodejs14.x
+      LicenseInfo: MIT
+      RetentionPolicy: Retain

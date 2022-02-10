@@ -24,8 +24,6 @@ import{useAuthTools} from '../Hooks/Auth';
          data => {
              setRecords(data.Records);
              setLimit(data.Limit);
-             console.log('limit');
-             console.log(limit);
              if (data.Limit > 0)
              {
                 setPageCount(Math.ceil(records/limit));
@@ -35,12 +33,24 @@ import{useAuthTools} from '../Hooks/Auth';
  })
  
  useEffect( () => {
+     if (!token) {
+         return;
+     }
     APICalls.GetEventLogs(page)
     .then(
         data => {
-            setLogs(data.sort(function(a,b){
-                return new Date(b.TimeStamp) - new Date(a.TimeStamp);
-              }));
+            if (data == '') {
+                return;
+            }
+            try {
+                setLogs(data.sort(function(a,b){
+                    return new Date(b.TimeStamp) - new Date(a.TimeStamp);
+                }));
+            }
+            catch (err) {
+                alert('Bad Log values');
+                return;
+            }
         })
 
  },[page, token]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
@@ -56,10 +66,7 @@ function paginationControls() {
     if (!limit || !records || pageCount <= 0 || pageCount >= 10000) {
         return(<p>No Data</p>);
     }
-    console.log('pageCount')
-    console.log(pageCount);
     const array = Array.from({length: pageCount}, (_, index) => index + 1);
-    console.log(array);
     return array.map( pageVar => (
             <SimpleButton onClick={() => setPage(pageVar-1)} text= { pageVar} disabled= {(pageVar-1) == page} minimal = {true} />
     )      

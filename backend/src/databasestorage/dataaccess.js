@@ -74,12 +74,18 @@ export async function GetSlideDetails(slideID)
   
   slides.forEach(slide => {
     
-      let queryClips = `Select * from Clips where Clips.SlideID = ?`;
+      let queryClips = `Select ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Approved, (audioclip is not null) as HasAudio from Clips where Clips.SlideID = ?`;
 
       promises.push(SQLQuery(queryClips, valuesSlides).then(clips => {
         slide.Clips = clips
       }));
   })
+
+  let queryAudio = `select Count(*) as AudioCount from SlideAudio where SlideAudio.SlideID = ?`;
+  promises.push (SQLQuery(queryAudio, valuesSlides).then(count => {
+    slides[0].HasAudio = count[0].AudioCount > 0
+  }));
+
   await Promise.all(promises);
   return slides[0];
 }
@@ -262,7 +268,7 @@ export async function GetClipDetails(clipID)
   let promises = [];
   //This is everything except AudioClip, which is binary data.
   //Consider moving AudioClip to a filestore (S3) or a separate table.
-  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Approved
+  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Approved, (audioclip is not null) as HasAudio
      FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
   let valuesSlides = [clipID];
   let clips = await SQLQuery(querySlides, valuesSlides);
@@ -273,9 +279,6 @@ export async function GetClipDetails(clipID)
 
 export async function GetClipAudio(clipID)
 {
-  let promises = [];
-  //This is everything except AudioClip, which is binary data.
-  //Consider moving AudioClip to a filestore (S3) or a separate table.
   let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Approved, AudioClip
      FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
   let valuesSlides = [clipID];
@@ -359,6 +362,47 @@ export async function UpdateClip(clip)
       }
       con.end();
       resolve( clip);
+    });
+  });
+}
+export async function GetSlideAudio(slideID) {
+  let querySlides = `SELECT SlideID, AudioFile
+     FROM IA_VoiceSynth.SlideAudio as SlideAudio Where SlideAudio.SlideID = ?`;
+  let valuesSlides = [slideID];
+  let audios = await SQLQuery(querySlides, valuesSlides);
+
+  let audio = audios[0];
+  return audio;
+
+}
+export async function SetSlideAudio(slideID, audioBuffer) {
+
+  //Check Slide
+  let error = false;
+  let errorString = "";
+  if (!slideID) {
+    error = true;
+    errorString += "Invalid SlideID\n";
+  }
+  await DeleteSlideAudio(slideID); //Get rid of any pre-existing slide audio files
+  return new Promise( function (resolve, reject) {
+
+    let con = getCon();
+
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+
+     let insert = `Insert into IA_VoiceSynth.SlideAudio (SlideID, AudioFile) values (?,?)`;
+     let values = [slideID, audioBuffer];
+
+    con.query(insert,values, (err, results, fields) => {
+      if (err) {
+        console.log(err);
+        return console.error(err.message);
+      }
+      con.end();
+      resolve( );
     });
   });
 }
@@ -520,6 +564,14 @@ export async function DeletePronunciation(pronunciationID)
 {
   let query = `Delete FROM IA_VoiceSynth.Pronunciations Where Pronunciations.ID = ?`;
   let values = [pronunciationID];
+  await SQLQuery(query, values);
+
+  return "success";
+}
+export async function DeleteSlideAudio(slideID)
+{
+  let query = `Delete FROM IA_VoiceSynth.SlideAudio Where SlideAudio.SlideID = ?`;
+  let values = [slideID];
   await SQLQuery(query, values);
 
   return "success";
