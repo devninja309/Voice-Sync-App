@@ -408,6 +408,7 @@ router.get('/test', (ctx) => {
       await LogClipGeneration(GetUserName(ctx), text);
 
       await UpdateClipAudio(ctx.params.clipID, buffer);
+      clip.HasAudio = 1;
       ctx.body = JSON.stringify(clip);
       })
 

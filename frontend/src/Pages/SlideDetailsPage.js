@@ -93,6 +93,7 @@ const SlideDetailsPage = (props) => {
      const pushChangedClip = (clip) => {
         if (selectedClipEdited) {
             clip.AudioClip = null;
+            clip.HasAudio = false;
             APICalls.UpdateClip(clip)
         }
         else {
