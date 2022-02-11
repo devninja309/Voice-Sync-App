@@ -10,7 +10,11 @@ module.exports = {
   optimization: {
     // We no not want to minimize our code.
     minimize: false
-  },
+  },plugins: [
+    new webpack.DefinePlugin({
+        'process.env.FLUENTFFMPEG_COV': false
+    })
+],
   node: {
     __dirname: true,
   },

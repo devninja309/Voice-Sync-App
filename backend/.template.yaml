@@ -1,0 +1,63 @@
+Transform: AWS::Serverless-2016-10-31
+Globals:
+  Function:
+    Runtime: nodejs14.x
+    Timeout: 10
+    MemorySize: 256
+    Environment:
+      Variables:
+        Env:
+          Ref: Env
+        SQL_Host: ir1u4exjv62zcvp.cgljbdlc6j4o.us-west-2.rds.amazonaws.com
+        SQL_Schema: IA_VoiceSynth
+        SQL_User: VoiceSynthUser
+        SQL_PWD: 3ntranc3
+        AUTH0_Audience: VoiceSynthManagerBackend
+        AUTH0_Issuer: https://dev-l3ao-nin.us.auth0.com/
+        AUTH0_Algorithm: RS256
+        WELLSAID_API_KEY: b8c9f415-6d67-40ba-88fe-4602d700198d
+        FFMPEG_PATH: /opt/ffmpeg
+        FFPROBE_PATH: /opt/ffprobe
+  Api:
+    EndpointConfiguration: REGIONAL
+    Cors: '''*'''
+Parameters:
+  Env:
+    Type: String
+    Default: qa
+    AllowedValues:
+    - qa
+    - prod
+Resources:
+  WebAPILambdaV1:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://s3-ia-cfg/4c2106b9768f14c2130f553a10d5d1d9
+      Handler: main.handler
+      Layers:
+      - Ref: FFMPEGLayer
+      Events:
+        ProxyGateway:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+    Metadata:
+      SamResourceId: WebAPILambdaV1
+  FFMPEGLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: ffmpeg
+      Description: ffmpeg app
+      ContentUri: s3://s3-ia-cfg/ccfdc8fd5ca54a0aae445f932f1c313f
+      CompatibleRuntimes:
+      - nodejs14.x
+      - nodejs10.x
+      - python3.6
+      - ruby2.5
+      - java8
+      - go1.x
+      LicenseInfo: MIT
+      RetentionPolicy: Retain
+    Metadata:
+      SamResourceId: FFMPEGLayer

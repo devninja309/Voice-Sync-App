@@ -19,3 +19,8 @@ Deploying
     Frontend -> in aws\hosting run make deploy for the setup of S3.
         code updates are currently TBD, but it's something like yarn build and then copying the files up manually.  TODO build a make file for that, I guess?
 
+AWS Customizations:
+Because of the way the AWS security works, the Lambda(backend) needs to be in the same subnet as the S3 bucket AND on a private subnet connected
+to a public one via the NAT : https://aws.amazon.com/premiumsupport/knowledge-center/internet-access-lambda-function/
+This isn't something that's set up in the YAML atm, so if you change the stack, you'll need to add it back in, or the database won't work.
+

@@ -28,6 +28,7 @@ export const router = new Router({
 
 // TODO: This function is dumb and should be replaced with whatever a standard method is
 function RequirePermission(ctx,permissions){
+  return true;
   if (!ctx.state )
   {
     ctx.status = 401;
@@ -104,6 +105,7 @@ router.get('/test', (ctx) => {
     console.log('printingKey');
     console.log(key);
     let test = await GetTestInfo();
+    console.log('Con Test End');
     ctx.body = JSON.stringify(test);
   }
   catch (err)

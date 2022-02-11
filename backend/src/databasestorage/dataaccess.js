@@ -659,12 +659,13 @@ function SQLQuery(query, values)
       return new Promise( function (resolve, reject) {
 
     let con = getCon();
-
+        console.log('Con Test 1');
     con.connect(function(err) {
       if (err) {
         console.log( err);
-        resolve(error.message);
+        resolve(err.message);
       }
+      console.log('Con Test 2');
     
     
     con.query(query, values, function (error, results, fields) {
@@ -676,6 +677,7 @@ function SQLQuery(query, values)
       con.end();
       resolve( results);
     });
+    console.log('Con Test 3');
 
   });
     

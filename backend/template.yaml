@@ -18,7 +18,8 @@ Globals:
         AUTH0_Algorithm: 'RS256'
 
         WELLSAID_API_KEY: b8c9f415-6d67-40ba-88fe-4602d700198d
-        FFMPEG_PATH: /opt/ffmpeg/ffmpeg
+        FFMPEG_PATH: /opt/ffmpeg
+        FFPROBE_PATH: /opt/ffprobe
   Api:
     EndpointConfiguration: REGIONAL
     Cors: "'*'"
@@ -48,10 +49,15 @@ Resources:
   FFMPEGLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: sam-app-ffmpeg
+      LayerName: ffmpeg
       Description: ffmpeg app
       ContentUri: ./layers/ffmpeg
       CompatibleRuntimes:
         - nodejs14.x
+        - nodejs10.x
+        - python3.6
+        - ruby2.5
+        - java8
+        - go1.x
       LicenseInfo: 'MIT'
       RetentionPolicy: Retain

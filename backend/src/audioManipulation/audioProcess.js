@@ -6,8 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { Buffer } from 'buffer';
 import fluent from  'fluent-ffmpeg';
 
-const originalDir = './tmp/original';
-const processedDir = './tmp/processed';
+const deployedEnv = process.env.Env || 'dev'
+const originalDir = (deployedEnv == 'dev')? './tmp/original' : '/tmp/original';
+const processedDir = (deployedEnv == 'dev')? './tmp/processed' : '/tmp/processed';
 
 
 let files = [];
@@ -15,10 +16,14 @@ let files = [];
 export async function ProcessSlide(slide) {
     await SetupTmp();
     try {
-
+    
+        function sortByOrdinalValue(a,b) {
+            return a.OrdinalValue - b.OrdinalValue;
+        }
+        const slideClips = slide.Clips.sort(sortByOrdinalValue);
         const clips = [];
-        for(let i = 0; i< slide.Clips.length;i++){  //This should be synchronous
-            const clipFile = await ProcessClip(slide.Clips[i]);
+        for(let i = 0; i< slideClips.length;i++){  //This should be synchronous
+            const clipFile = await ProcessClip(slideClips[i]);
             clips.push(clipFile);
         }
         console.log(clips);
@@ -120,6 +125,12 @@ async function ProcessClip(clip) {
             .audioCodec('libmp3lame')
             .on('error', function(err, stdout, stderr) {
                 console.log(`Cannot process clip ${clip.ID}: ` + err.message);
+                try {
+                    const arrayOfFiles = fs.readdirSync("/opt")
+                    console.log(arrayOfFiles)
+                } catch(e) {
+                    console.log(e)
+                }
                 reject();
               })
               .on('end', function(stdout, stderr) {
