@@ -1,11 +1,8 @@
 
  
  import {useState, useEffect} from 'react';
- import { Link } from 'react-router-dom';
 import { Avatars } from '../Etc/Avatars';
- import{useAuthTools} from '../Hooks/Auth';
-
- import {SimpleSelect} from '../Elements/SimpleSelect'
+ import {SimpleSlider} from '../Elements/SImpleSlider'
 
  const Speeds = [
     {value: 70, label: 'Slowest'},
@@ -22,12 +19,16 @@ import { Avatars } from '../Etc/Avatars';
      const { clip, onChange, ...childprops} = props;
      const avatars = Avatars;
 
-     const UpdateClip = (event) => {
-         var newClip = {...clip, Speed: event.target.value}
+     const UpdateClip = (value) => {
+         var newClip = {...clip, Speed: value}
          onChange(newClip);
      }
-  
+  //<SimpleSelect className = "simpleSelect-small" onChange={UpdateClip} options={Speeds} value = {clip.Speed}/>
   return (
-        <SimpleSelect className = "simpleSelect-small" onChange={UpdateClip} options={Speeds} value = {clip.Speed}/>
+
+    <div style={{width: '30%', padding:'20px'}}>
+        Pace
+        <SimpleSlider  onChange={UpdateClip} max={145} min={70} value = {clip.Speed} labelValues = {[70, 80, 90, 100, 115, 130, 145]}/>
+    </div>
   )
  }

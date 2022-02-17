@@ -177,20 +177,28 @@
     height: 600px;
     /* height: 100%; */
     padding-right: 10px;
-    columns: 2;
-    flex: 2 2;
+    columns: 4;
+    flex: 4 4;
     display: flex;
     /* overflow: auto; */
     flex-direction: row;
     flex-wrap: wrap;
 }
 .div-Slide-Details-ClipsList-Column {
-  width: 25%;
+  width: 55%;
   margin-left: 5px;
 }
 .div-SlidQuickSelectContainer {
   display: flex;
   flex-direction: row;
+}
+.div-ClipEditButtonRow {
+  display: flex;
+  flex-direction: row;
+  padding: 5px;
+}
+.div-ClipEditButtonRow  > * {
+  padding: 20px;
 }
 .div-SlideQuickSelectColumn {
   display: flex;
@@ -205,7 +213,7 @@
   display: flex;
 }
 .div-ClipListCard {
-  width: 50%;
+  width: 25%;
 }
 .div-Slide-Details-Container-TextArea{
   /*height: 400px;*/
@@ -221,7 +229,18 @@
 }
 .simpleTextArea-largebox{
   width: 100%;
+  height: 600px !important;
+  /*height: 90%;*/
+}
+.simpleTextArea-midbox{
+  width: 100%;
+  height: 400px !important;
+  /*height: 90%;*/
+}
+.simpleTextArea-smallbox{
+  width: 100%;
   height: 200px !important;
+  /*height: 90%;*/
 }
 
 .courseListCard {
@@ -232,6 +251,7 @@
   padding: 10px
 }
 .simpleSelect-small {
+  height: 20px;
   
 }
 .buttonGroup-row>*{

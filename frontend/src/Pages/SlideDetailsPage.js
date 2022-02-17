@@ -157,17 +157,19 @@ const SlideDetailsPage = (props) => {
         }
         else {
             return <div>
-                        <SimpleTextArea className="simpleTextArea-largebox"
+                        <SimpleTextArea className="simpleTextArea-smallbox"
                             value={selectedClip.ClipText}
                             onChange={event => selectedClipTextModified(event)}
                             />
+                        <div className="div-ClipEditButtonRow">
                         {(selectedClipEdited || selectedClipPostEdited) && <SimpleButton onClick= {()=> pushChangedClip(selectedClip)} Text="Save Changes" />}
-                        <SimpleButton onClick={() => changeSelectedClip(null)} Text="Deselect Clip"/>
-                        <VoiceSelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClip(newClip)}/>
+                        <SimpleButton style={{height: '3%', padding:'10px'}} onClick={() => changeSelectedClip(null)} Text="Deselect Clip"/>
+                        <VoiceSelect style={{height: '3%', width:'50px'}} clip = {selectedClip} onChange={(newClip) => UpdateSelectedClip(newClip)}/>
+                        <SimpleButton style={{height: '3%', padding:'10px'}} onClick={() => selectedClipApproved()} Text="Approve Clip"/>
                         <VolumeSelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClipPost(newClip)}/>
                         <PaceSelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClipPost(newClip)}/>
-                        <SimpleButton onClick={() => selectedClipApproved()} Text="Approve Clip"/>
-                        <SimpleTextArea className="simpleTextArea-largebox"
+                        </div>
+                        <SimpleTextArea className="simpleTextArea-midbox"
                         value={slide.SlideText} 
                         disabled= {true}
                         placeholder="Enter Slide Text" 

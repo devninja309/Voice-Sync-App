@@ -5,7 +5,7 @@
 import { Avatars } from '../Etc/Avatars';
  import{useAuthTools} from '../Hooks/Auth';
 
- import {SimpleSelect} from '../Elements/SimpleSelect'
+import { SimpleSlider } from '../Elements/SImpleSlider';
 
  const Volumes = [
     {value: 20, label: 'Quietest'},
@@ -22,12 +22,15 @@ import { Avatars } from '../Etc/Avatars';
      const { clip, onChange, ...childprops} = props;
      const avatars = Avatars;
 
-     const UpdateClip = (event) => {
-         var newClip = {...clip, Volume: event.target.value}
+     const UpdateClip = (value) => {
+         var newClip = {...clip, Volume: value}
          onChange(newClip);
      }
-  
+  //<SimpleSelect className = "simpleSelect-small" onChange={UpdateClip} options={Volumes} value = {clip.Volume}/>
   return (
-        <SimpleSelect className = "simpleSelect-small" onChange={UpdateClip} options={Volumes} value = {clip.Volume}/>
+    <div style={{width: '30%', padding:'20px'}}>
+          Volume
+        <SimpleSlider  onChange={UpdateClip} max={200} min={20} value = {clip.Volume} labelValues = {[20,50,75, 100,125,150,200]}/>
+    </div>
   )
  }
