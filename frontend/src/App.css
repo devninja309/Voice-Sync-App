@@ -198,7 +198,8 @@
   padding: 5px;
 }
 .div-ClipEditButtonRow  > * {
-  padding: 20px;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 .div-SlideQuickSelectColumn {
   display: flex;
@@ -219,6 +220,11 @@
   /*height: 400px;*/
   width: 100%;
   margin: 5px;
+}
+.div-Slider {
+  width: 30%;
+  flex-grow:1;
+  /*padding-left: 20px;*/
 }
 .SimpleTextArea {
   width: 90%;
@@ -241,6 +247,11 @@
   width: 100%;
   height: 200px !important;
   /*height: 90%;*/
+}
+.simpleButtonSlideButtonGroup {
+  height: 3%;
+  /*padding: 10px;*/
+  margin-top: 8px;
 }
 
 .courseListCard {

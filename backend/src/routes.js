@@ -296,7 +296,6 @@ router.get('/test', (ctx) => {
   
       })
         
-    //This is just pseudo code for now and needs to be implemented.
     .get('/slides/:slideID/generateaudio', async (ctx) => {
       //Load slide
         let slide = await GetSlideDetails(ctx.params.slideID);

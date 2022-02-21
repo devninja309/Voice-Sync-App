@@ -26,7 +26,7 @@ import { Avatars } from '../Etc/Avatars';
   //<SimpleSelect className = "simpleSelect-small" onChange={UpdateClip} options={Speeds} value = {clip.Speed}/>
   return (
 
-    <div style={{width: '30%', padding:'20px'}}>
+    <div className = 'div-Slider'>
         Pace
         <SimpleSlider  onChange={UpdateClip} max={145} min={70} value = {clip.Speed} labelValues = {[70, 80, 90, 100, 115, 130, 145]}/>
     </div>

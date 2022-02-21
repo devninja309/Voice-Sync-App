@@ -26,9 +26,8 @@ import { SimpleSlider } from '../Elements/SImpleSlider';
          var newClip = {...clip, Volume: value}
          onChange(newClip);
      }
-  //<SimpleSelect className = "simpleSelect-small" onChange={UpdateClip} options={Volumes} value = {clip.Volume}/>
   return (
-    <div style={{width: '30%', padding:'20px'}}>
+    <div className='div-Slider'>
           Volume
         <SimpleSlider  onChange={UpdateClip} max={200} min={20} value = {clip.Volume} labelValues = {[20,50,75, 100,125,150,200]}/>
     </div>

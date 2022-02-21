@@ -145,6 +145,10 @@ const SlideDetailsPage = (props) => {
             ))
         }      
     }
+    function allClipsApproved() {
+        if (!Array.isArray(slide.Clips)) return false;
+        return slide.Clips.every((clip) => clip.Approved);
+    }
 
     function TextEditArea() {
         if (selectedClip === null) {
@@ -162,10 +166,10 @@ const SlideDetailsPage = (props) => {
                             onChange={event => selectedClipTextModified(event)}
                             />
                         <div className="div-ClipEditButtonRow">
-                        {(selectedClipEdited || selectedClipPostEdited) && <SimpleButton onClick= {()=> pushChangedClip(selectedClip)} Text="Save Changes" />}
-                        <SimpleButton style={{height: '3%', padding:'10px'}} onClick={() => changeSelectedClip(null)} Text="Deselect Clip"/>
-                        <VoiceSelect style={{height: '3%', width:'50px'}} clip = {selectedClip} onChange={(newClip) => UpdateSelectedClip(newClip)}/>
-                        <SimpleButton style={{height: '3%', padding:'10px'}} onClick={() => selectedClipApproved()} Text="Approve Clip"/>
+                        {(selectedClipEdited || selectedClipPostEdited) && <SimpleButton onClick= {()=> pushChangedClip(selectedClip)} Text="Save Changes" className="simpleButtonSlideButtonGroup" />}
+                        <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => changeSelectedClip(null)} Text="Deselect Clip"/>
+                        <div style ={{verticalAlign:'Top'}}><VoiceSelect style={{height: '3%', width:'50px'}} clip = {selectedClip} onChange={(newClip) => UpdateSelectedClip(newClip)}/></div>
+                        <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipApproved()} Text="Approve Clip"/>
                         <VolumeSelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClipPost(newClip)}/>
                         <PaceSelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClipPost(newClip)}/>
                         </div>
@@ -212,7 +216,7 @@ const SlideDetailsPage = (props) => {
                         {TextEditArea()}
                     </div>
                     <ButtonGroup>
-                    <button className="input" onClick={mergeSlide}>Merge all clips</button>
+                    {allClipsApproved() && <button className="input" onClick={mergeSlide}>Merge all clips</button>}
                     <SimpleAudioPlayer audiofile = {slideAudioURL} updating={slideAudioUpdating}/>  
                     {slideHasAudio && <a href={slideAudioURL} download={'Slide-' + slide.ID + '-Audio.mp3'}>
                         <IconButton icon="cloud-download" text="Download Slide Audio" download/>

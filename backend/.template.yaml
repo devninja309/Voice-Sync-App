@@ -15,7 +15,7 @@ Globals:
         AUTH0_Audience: VoiceSynthManagerBackend
         AUTH0_Issuer: https://dev-l3ao-nin.us.auth0.com/
         AUTH0_Algorithm: RS256
-        WELLSAID_API_KEY: b8c9f415-6d67-40ba-88fe-4602d700198d
+        WELLSAID_API_KEY: c8ddf33c-760f-40c6-9217-7806138aeabd
         FFMPEG_PATH: /opt/ffmpeg
         FFPROBE_PATH: /opt/ffprobe
   Api:
@@ -32,7 +32,7 @@ Resources:
   WebAPILambdaV1:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://s3-ia-cfg/4c2106b9768f14c2130f553a10d5d1d9
+      CodeUri: s3://s3-ia-cfg/648e29c8a4a638aff9595cdc84b6c7bc
       Handler: main.handler
       Layers:
       - Ref: FFMPEGLayer

@@ -18,7 +18,7 @@ Resources:
     Properties:
       DeletionProtection: true
       Engine: mysql #Make this MySQL!
-      EngineVersion: '5.6'
+      EngineVersion: '8.0'
       DBName: IA_VoiceSynth
       MasterUsername: !Ref MasterUsername
       MasterUserPassword: !Ref MasterUserPassword

@@ -68564,13 +68564,11 @@ function SQLQuery(query, values)
       return new Promise( function (resolve, reject) {
 
     let con = getCon();
-        console.log('Con Test 1');
     con.connect(function(err) {
       if (err) {
         console.log( err);
         resolve(err.message);
       }
-      console.log('Con Test 2');
     
     
     con.query(query, values, function (error, results, fields) {
@@ -68582,7 +68580,6 @@ function SQLQuery(query, values)
       con.end();
       resolve( results);
     });
-    console.log('Con Test 3');
 
   });
     
@@ -70815,6 +70812,7 @@ function addTests(router) {
 
 
 function ConvertPronunciationFast(Translations, clipText) {
+    if (!Array.isArray(Translations) || Translations.length == 0 ) return clipTrext.toLowerCase();
     const wb = '\\b'; //word boundary 
     const dict = Object.assign({}, ...Translations.map ((t) => ({[t.Word.toLowerCase()]: t.Pronunciation})))
     var re = new RegExp(Object.keys(dict).map(k=>wb+k+wb).join("|"),"gi");  
@@ -71349,7 +71347,6 @@ routes_router.get('/test', (ctx) => {
   
       })
         
-    //This is just pseudo code for now and needs to be implemented.
     .get('/slides/:slideID/generateaudio', async (ctx) => {
       //Load slide
         let slide = await GetSlideDetails(ctx.params.slideID);

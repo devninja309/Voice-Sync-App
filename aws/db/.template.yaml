@@ -16,7 +16,7 @@ Resources:
     Properties:
       DeletionProtection: true
       Engine: mysql
-      EngineVersion: '5.6'
+      EngineVersion: '8.0'
       DBName: IA_VoiceSynth
       MasterUsername:
         Ref: MasterUsername
@@ -25,3 +25,5 @@ Resources:
       AllocatedStorage: '5'
       DBInstanceClass: db.t3.small
     DeletionPolicy: Snapshot
+    Metadata:
+      SamResourceId: RDSInstance
