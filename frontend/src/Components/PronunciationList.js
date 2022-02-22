@@ -40,12 +40,22 @@ import { PronunciationEditDialog } from './PronunciationEditDialog';
 
     setIsOpen(true);
  }
+ function DeletePronunciation(pronunciationID){
+     //console.log('Deleting');
+     //let pronunciations = pronunciations.filter(pron => pron.ID == pronunciationID)
+
+     APICalls.DeletePronunciation(pronunciationID)
+        .then(
+            setPronunciations(pronunciations.filter(pron => pron.ID != pronunciationID))        
+        )
+ }
  
  function DisplayPronunciationList() {
     if (pronunciations)
     {
         return pronunciations.map(pron => (<tr className = "LogListTable-DataRow"><td>{pron.Word}</td><td>{pron.Pronunciation}</td><td>
-            <IconButton icon="edit" onClick = {()=> EditPronunciation(pron.ID, pron.Word, pron.Pronunciation)}/></td></tr>))
+            <IconButton icon="edit" onClick = {()=> EditPronunciation(pron.ID, pron.Word, pron.Pronunciation)}/></td><td>
+            <IconButton icon="trash" onClick = {()=> DeletePronunciation(pron.ID)}/></td></tr>))
     }
     else {
     }
@@ -61,8 +71,9 @@ const messageStyle = {
             <table className = "LogListTable">
                 <thead>
                     <tr className = "LogListTable-HeaderRow">
-                        <th>Word</th>
+                        <th>Word2</th>
                         <th>Pronunciation</th>
+                        <th> </th>
                         <th> </th>
                     </tr>
                 </thead>

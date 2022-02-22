@@ -279,6 +279,7 @@ export const UseAPICallsWithAuth = (fetchWithAuth) => {
         GetEventLogs: (page) => GetEventLogs(fetchWithAuth, page),
         GetEventLogSize: () => GetEventLogSize(fetchWithAuth),
         GetPronunciations: () => GetPronunciations(fetchWithAuth),
+        DeletePronunciation: (pronunciationID) => DeletePronunciation(fetchWithAuth, pronunciationID),
         GetPronunciationAudio: (text) => GetPronunciationAudio(fetchWithAuth, text),
         CreatePronunciation: (pronunciation) => CreatePronunciation(fetchWithAuth, pronunciation),
         UpdatePronunciation: (pronunciation) => UpdatePronunciation(fetchWithAuth, pronunciation)
