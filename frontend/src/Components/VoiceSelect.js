@@ -27,8 +27,8 @@ import { Avatars } from '../Etc/Avatars';
          var newClip = {...clip, VoiceID: event.target.value}
          onChange(newClip);
      }
-  
+  //TODO The icon is refusing to stay with the rest of the control, so I've just taken it out.
   return (
-        <SimpleSelect className = "simpleSelect-small" onChange={UpdateClip} options={avatars} value = {clip.VoiceID}/>
+        <SimpleSelect className = "simpleSelect-small" onChange={UpdateClip} options={avatars} value = {clip.VoiceID} iconProps={{'icon': ''}}/>
   )
  }

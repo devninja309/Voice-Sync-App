@@ -81,7 +81,7 @@ export function ClipListCard (props)
                     <IconButton icon="refresh" onClick={()=>UpdateClipAudio(clip.ID)}/>
                 </div>
                 <div class="div-Slide-Details-Container">
-                    <SimpleAudioPlayer pace = {clip.Speed} volume = {clip.Volume} audiofile = {url} updating={updating}/>  
+                    <SimpleAudioPlayer pace = {clip.Speed} volume = {clip.Volume/2} audiofile = {url} updating={updating}/>  
                 </div>
                 <p class = "p-clip-card-text">
                     Voice: {clip.VoiceID}

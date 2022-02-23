@@ -73,3 +73,6 @@ Create Table `IA_VoiceSynth`.`SlideAudio` (
   `SlideID` INT NOT NULL,
   `AudioFile` LongBlob NULL,
   PRIMARY KEY (`SlideID`))
+
+  Alter Table  `IA_VoiceSynth`.`Clips` 
+    ADD COLUMN Delay int null default .2

@@ -13,6 +13,67 @@ const processedDir = (deployedEnv == 'dev')? './tmp/processed' : '/tmp/processed
 
 let files = [];
 
+//padding is in seconds
+async function ProcessFile (origFile, procFile, volume, speed, padding) {
+    console.log(`Padding= ${padding}`)
+    return new Promise((resolve, reject) => {
+        const command = fluent(origFile)
+            .on('codecData', function(data) {
+            console.log('Input is ' + data.audio + ' audio ' +
+                'with ' + data.video|| 'no' + ' video');
+            })
+            .audioCodec('libmp3lame')
+            .audioFilters(`volume=${volume}`)
+            .audioFilters(`atempo=${speed}`)
+            .audioFilters(`apad=pad_dur=${padding}`)
+            .output(procFile) 
+            .audioCodec('libmp3lame')
+            .on('error', function(err, stdout, stderr) {
+                console.log(`Cannot process clip :` + err.message);
+                try {
+                    const arrayOfFiles = fs.readdirSync("/opt")
+                    console.log(arrayOfFiles)
+                } catch(e) {
+                    console.log(e)
+                }
+                reject();
+              })
+              .on('end', function(stdout, stderr) {
+                console.log(`Transcoding clip succeeded !`);
+                resolve();
+              })
+            .run();
+    });
+    
+}
+
+export async function PreProcessClip(clipID, clipAudio) {
+    await SetupTmp(); //TODO this is currently just called at the entry point to every function in this class, but maybe just run on instantiation / code start?
+    try {
+        console.log('Processing Clip ' + clipID)
+        const clipUUID = uuidv4();
+        const clipFileName = "".concat(clipID, '-', clipUUID);
+        var origFile = `${originalDir}/${clipFileName}.mp3`;
+        files.push(origFile);
+        var procFile = `${processedDir}/${clipFileName}.mp3`;
+        files.push(procFile);
+        
+        var origBuffer = Buffer.from(clipData.AudioClip);
+        await fs.createWriteStream(origFile).write(origBuffer);
+
+        //This method doesn't allow tempo changes greater than *2 /2, but since that's chipmunk range already, it's ok.
+        console.log('Starting Clip ' +clip.ID)
+        const finished = ProcessFile(origFile, procFile, `5.3dB`, 1.05, 0)
+        await finished;
+        console.log('Finished Clip ' +clip.ID)
+        return procFile;
+    }
+    finally {
+        CleanupTmp();
+    }
+
+}
+
 export async function ProcessSlide(slide) {
     await SetupTmp();
     try {
@@ -112,33 +173,7 @@ async function ProcessClip(clip) {
 
     //This method doesn't allow tempo changes greater than *2 /2, but since that's chipmunk range already, it's ok.
     console.log('Starting Clip ' +clip.ID)
-    const finished = new Promise((resolve, reject) => {
-        const command = fluent(origFile)
-            .on('codecData', function(data) {
-            console.log('Input is ' + data.audio + ' audio ' +
-                'with ' + data.video + ' video');
-            })
-            .audioCodec('libmp3lame')
-            .audioFilters(`volume=${clip.Volume/100}`)
-            .audioFilters(`atempo=${clip.Speed/100}`)
-            .output(procFile) 
-            .audioCodec('libmp3lame')
-            .on('error', function(err, stdout, stderr) {
-                console.log(`Cannot process clip ${clip.ID}: ` + err.message);
-                try {
-                    const arrayOfFiles = fs.readdirSync("/opt")
-                    console.log(arrayOfFiles)
-                } catch(e) {
-                    console.log(e)
-                }
-                reject();
-              })
-              .on('end', function(stdout, stderr) {
-                console.log(`Transcoding clip ${clip.ID} succeeded !`);
-                resolve();
-              })
-            .run();
-    });
+    const finished = ProcessFile(origFile, procFile, clip.Volume/200, clip.Speed/100, clip.Delay || .2);
     await finished;
     console.log('Finished Clip ' +clip.ID)
     return procFile;

@@ -74,7 +74,7 @@ export async function GetSlideDetails(slideID)
   
   slides.forEach(slide => {
     
-      let queryClips = `Select ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Approved, (audioclip is not null) as HasAudio from Clips where Clips.SlideID = ?`;
+      let queryClips = `Select ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, (audioclip is not null) as HasAudio from Clips where Clips.SlideID = ?`;
 
       promises.push(SQLQuery(queryClips, valuesSlides).then(clips => {
         slide.Clips = clips
@@ -268,7 +268,7 @@ export async function GetClipDetails(clipID)
   let promises = [];
   //This is everything except AudioClip, which is binary data.
   //Consider moving AudioClip to a filestore (S3) or a separate table.
-  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Approved, (audioclip is not null) as HasAudio
+  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, (audioclip is not null) as HasAudio
      FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
   let valuesSlides = [clipID];
   let clips = await SQLQuery(querySlides, valuesSlides);
@@ -279,7 +279,7 @@ export async function GetClipDetails(clipID)
 
 export async function GetClipAudio(clipID)
 {
-  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Approved, AudioClip
+  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, AudioClip
      FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
   let valuesSlides = [clipID];
   let clips = await SQLQuery(querySlides, valuesSlides);
@@ -352,8 +352,8 @@ export async function UpdateClip(clip)
     });
 
 
-     let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, Volume =?, Speed=?, Approved=?, AudioClip = null Where ID = ?`;
-     let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Approved, clip.ID];
+     let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, Volume =?, Speed=?, Delay=?, Approved=?, AudioClip = null Where ID = ?`;
+     let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Delay, clip.Approved, clip.ID];
 
      console.log(clip.ClipText);
     con.query(insert,values, (err, results, fields) => {
@@ -458,8 +458,8 @@ export async function UpdateClipPost(clip)
       if (err) console.log( err);
     });
 
-     let insert = `Update IA_VoiceSynth.Clips set Volume = ?, Speed = ?, Approved =? Where ID = ?`;
-     let values = [clip.Volume, clip.Speed, clip.Approved, clip.ID];
+     let insert = `Update IA_VoiceSynth.Clips set Volume = ?, Speed = ?, Delay = ?, Approved =? Where ID = ?`;
+     let values = [clip.Volume, clip.Speed, clip.Delay, clip.Approved, clip.ID];
 
     con.query(insert,values, (err, results, fields) => {
       if (err) {

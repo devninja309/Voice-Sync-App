@@ -29,6 +29,7 @@ import { SlideQuickSelect } from '../Components/SlideQuickSelect';
 import {VoiceSelect} from '../Components/VoiceSelect';
 import { VolumeSelect } from '../Components/VolumeSelect';
 import { PaceSelect } from '../Components/PaceSelect';
+import { DelaySelect } from '../Components/DelaySelect';
 
 const SlideDetailsPage = (props) => {
 
@@ -168,10 +169,13 @@ const SlideDetailsPage = (props) => {
                         <div className="div-ClipEditButtonRow">
                         {(selectedClipEdited || selectedClipPostEdited) && <SimpleButton onClick= {()=> pushChangedClip(selectedClip)} Text="Save Changes" className="simpleButtonSlideButtonGroup" />}
                         <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => changeSelectedClip(null)} Text="Deselect Clip"/>
-                        <div style ={{verticalAlign:'Top'}}><VoiceSelect style={{height: '3%', width:'50px'}} clip = {selectedClip} onChange={(newClip) => UpdateSelectedClip(newClip)}/></div>
+                        <VoiceSelect className ="simpleButtonSlideButtonGroup" clip = {selectedClip} onChange={(newClip) => UpdateSelectedClip(newClip)}/>
                         <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipApproved()} Text="Approve Clip"/>
+                        </div>
+                        <div className="div-ClipEditButtonRow">
                         <VolumeSelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClipPost(newClip)}/>
                         <PaceSelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClipPost(newClip)}/>
+                        <DelaySelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClipPost(newClip)}/>
                         </div>
                         <SimpleTextArea className="simpleTextArea-midbox"
                         value={slide.SlideText} 

@@ -29,7 +29,7 @@ import { SimpleSlider } from '../Elements/SImpleSlider';
   return (
     <div className='div-Slider'>
           Volume
-        <SimpleSlider  onChange={UpdateClip} max={200} min={20} value = {clip.Volume} labelValues = {[20,50,75, 100,125,150,200]}/>
+        <SimpleSlider  onChange={UpdateClip} max={200} min={20} value = {clip.Volume} labelValues = {[20,50, 100,150,200]}/>
     </div>
   )
  }
