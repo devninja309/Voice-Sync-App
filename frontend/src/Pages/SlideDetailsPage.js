@@ -30,13 +30,17 @@ import {VoiceSelect} from '../Components/VoiceSelect';
 import { VolumeSelect } from '../Components/VolumeSelect';
 import { PaceSelect } from '../Components/PaceSelect';
 import { DelaySelect } from '../Components/DelaySelect';
+import {Breadcrumbs} from '@blueprintjs/core';
 
 const SlideDetailsPage = (props) => {
 
     const CourseID =useParams().CourseID;
     const slideID =useParams().slideID;
+    const ChapterID = useParams().ChapterID;
 
     const [slide, setSlide] = useState('');
+    const [courseName, setCourseName] = useState('Loading');
+    const [chapterName, setChapterName] = useState('Loading');
     const [slideAudioURL, setSlideAudioURL] = useState(null);
     const [slideHasAudio, setSlideHasAudio] = useState(false);
     const [slideAudioUpdating, setSlideAudioUpdating] = useState(false);
@@ -59,8 +63,20 @@ const SlideDetailsPage = (props) => {
                     getSlideAudio(data.ID);
                 }
             })
+        APICalls.GetChapterDetails(ChapterID)
+        .then(
+            data => {
+                setChapterName(data.ChapterName);
+            }
+        )
+        APICalls.GetCourseDetails(CourseID)
+        .then(
+            data => {
+                setCourseName(data.CourseName);
+            }
+        )
     
-     },[token, CourseID, slideID]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
+     },[token, ChapterID, CourseID, slideID]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
     
      const changeSelectedClip = (clip) =>
      {
@@ -194,6 +210,30 @@ const SlideDetailsPage = (props) => {
         //TODO This will reload all clip audios
         setSlide({...slide});
     }
+    function addClip() {
+        const ordinalValue = Math.max(...slide.Clips.map(clip => clip.OrdinalValue)) + 1;
+        const Clip = {
+            SlideID: slideID,
+            ClipText: "",
+            OrdinalValue: ordinalValue,
+            VoiceID: 3,
+            Volume: 100,
+            Speed: 100,
+            Approved: false,
+            Delay: 0.2          
+        }
+        APICalls.CreateClip(Clip).then(
+            data => {
+                slide.Clips.push(data);
+                setSlide({...slide});
+            }
+        )
+    }
+    const BreadCrumbsList = [
+        { href: `/courses/${CourseID}`, text: `${courseName}` },
+        { href:  `/courses/${CourseID}/chapters/${slide.ChapterID}`, text: `${chapterName}` },
+        { icon: `/courses/${CourseID}/chapters/${slide.ChapterID}/slides/${slideID}`, text: `${slide.SlideName}` },
+    ];
 
     return  (     
         <PageWrapper>
@@ -211,6 +251,9 @@ const SlideDetailsPage = (props) => {
             <h3>
             {slide.SlideName}
             </h3>
+            <Breadcrumbs
+                items={BreadCrumbsList}/>
+
             <hr width='80%'/>
             </div>
             <div class = "div-Slide-Details-Container">
@@ -235,7 +278,7 @@ const SlideDetailsPage = (props) => {
                             openOnTargetFocus={false}
                             usePortal={false}
                         >
-                        <IconButton icon="plus"/>
+                        <IconButton icon="plus" onClick = {() => addClip()}/>
                 </Tooltip>
                 <p> </p>
                 <Tooltip

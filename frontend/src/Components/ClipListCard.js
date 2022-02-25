@@ -79,14 +79,7 @@ export function ClipListCard (props)
                     </p>
                                            
                     <IconButton icon="refresh" onClick={()=>UpdateClipAudio(clip.ID)}/>
-                </div>
-                <div class="div-Slide-Details-Container">
                     <SimpleAudioPlayer pace = {clip.Speed} volume = {clip.Volume/2} audiofile = {url} updating={updating}/>  
-                </div>
-                <p class = "p-clip-card-text">
-                    Voice: {clip.VoiceID}
-                </p>
-                
                 <Tooltip
                             content={<span>{clip.ClipText}</span>}
                             openOnTargetFocus={false}
@@ -99,6 +92,11 @@ export function ClipListCard (props)
                         SlideID = {clip.SlideID}
                         Redirect = {currentLocation.pathname}
                         />
+                </div>
+                <p class = "p-clip-card-text">
+                    Voice: {clip.VoiceID}
+                </p>
+                
                 
             </SimpleCard>
         </div>

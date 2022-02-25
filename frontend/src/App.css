@@ -162,7 +162,7 @@
 
 }
 .div-Slide-Details-Container-Slide {
-  width: 50%;
+  width: 35%;
   height: 100%;
   display: flex;    
   flex-direction: column;
@@ -174,18 +174,18 @@
     /* display: flex; */
     /* flex-direction: column; */
     overflow-y: scroll;
-    height: 600px;
+    height: 800px;
     /* height: 100%; */
     padding-right: 10px;
-    columns: 4;
-    flex: 4 4;
+    columns: 6;
+    flex: 6 6;
     display: flex;
     /* overflow: auto; */
     flex-direction: row;
     flex-wrap: wrap;
 }
 .div-Slide-Details-ClipsList-Column {
-  width: 55%;
+  width: 65%;
   margin-left: 5px;
 }
 .div-SlidQuickSelectContainer {
@@ -214,7 +214,7 @@
   display: flex;
 }
 .div-ClipListCard {
-  width: 25%;
+  width: 16%;
 }
 .div-Slide-Details-Container-TextArea{
   /*height: 400px;*/
