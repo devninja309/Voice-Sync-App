@@ -159,6 +159,13 @@ export function UpdateClip(fetchWithAuth, clip)
     return fetchWithAuth(getUrlPath(`clips/${clip.ID}`), PutHeadersForUpdate(clip))
       .then(response => response.json())
 }
+export function UpdateClipOrder(fetchWithAuth, clips)
+{
+    console.log('In UpdateClipOrder');
+    clips.forEach(clip => clip.ClipAudio = null);
+    return fetchWithAuth(getUrlPath(`clips_reorder`), PutHeadersForUpdate(clips))
+      .then(response => response.json())
+}
 export function UpdatePostClip(fetchWithAuth, clip)
 {
     clip.ClipAudio = null;
@@ -265,6 +272,7 @@ export const UseAPICallsWithAuth = (fetchWithAuth) => {
         UpdateSlide: (slide) => UpdateSlide(fetchWithAuth, slide),
         CreateClip: (clip) => CreateClip(fetchWithAuth, clip),
         UpdateClip: (clip) => UpdateClip(fetchWithAuth, clip),
+        UpdateClipOrder: (clips) => UpdateClipOrder(fetchWithAuth, clips),
         UpdatePostClip: (clip) => UpdatePostClip(fetchWithAuth, clip),
         UpdateClipAudio: (clipID) => UpdateClipAudio(fetchWithAuth, clipID),
         GetSlideAudio: (slideID) => GetSlideAudio(fetchWithAuth, slideID), 

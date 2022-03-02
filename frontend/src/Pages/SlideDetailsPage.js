@@ -31,6 +31,9 @@ import { VolumeSelect } from '../Components/VolumeSelect';
 import { PaceSelect } from '../Components/PaceSelect';
 import { DelaySelect } from '../Components/DelaySelect';
 import {Breadcrumbs} from '@blueprintjs/core';
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
+
 
 const SlideDetailsPage = (props) => {
 
@@ -158,7 +161,7 @@ const SlideDetailsPage = (props) => {
     function DisplayClipsList() {
         if (slide.Clips){
             return slide.Clips.sort(sortByOrdinalValue).map((clip,index) => ( 
-                <ClipListCard className="ClipsCard" key={clip.ID} clip = {clip} setSelectedClip={changeSelectedClip} updateClip={UpdateClip}/>
+                <ClipListCard className="ClipsCard" key={clip.ID} clip = {clip} setSelectedClip={changeSelectedClip} updateClip={UpdateClip} MoveClipCard = {MoveClipCard}/>
             ))
         }      
     }
@@ -210,6 +213,38 @@ const SlideDetailsPage = (props) => {
         //TODO This will reload all clip audios
         setSlide({...slide});
     }
+    function MoveClipCard(fromOrdinal, toOrdinal)
+    {
+        //start spinner
+        const clipsToUpdate = [];
+        const movingClip = slide.Clips.find(clip => clip.OrdinalValue === fromOrdinal);
+        slide.Clips.filter(clip=> (clip.OrdinalValue > fromOrdinal && clip.OrdinalValue <=toOrdinal)).forEach(clip => {
+            clip.OrdinalValue -=1;  
+            slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = clip; 
+            clipsToUpdate.push(clip);
+            //APICalls.UpdatePostClip(clip);  
+            //Save Clip here  
+        });
+        slide.Clips.filter(clip=> (clip.OrdinalValue < fromOrdinal && clip.OrdinalValue >=toOrdinal)).forEach(clip => {
+            clip.OrdinalValue +=1;      
+            slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = clip; 
+            clipsToUpdate.push(clip);
+            //it APICalls.UpdatePostClip(clip);
+            //Save Clip here  
+        });
+        movingClip.OrdinalValue = toOrdinal;
+        //Save Clip here  
+        clipsToUpdate.push(movingClip);
+        //APICalls.UpdatePostClip(movingClip);
+        
+        if (selectedClip) {
+            selectedClip.OrdinalValue = slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == selectedClip.ID)].OrdinalValue;
+        }
+        console.log('UpdatingClipOrder');
+        //TODO This will reload all clip audios
+        APICalls.UpdateClipOrder(clipsToUpdate).then( setSlide({...slide}))
+        
+    }
     function addClip() {
         const ordinalValue = Math.max(...slide.Clips.map(clip => clip.OrdinalValue)) + 1;
         const Clip = {
@@ -236,7 +271,7 @@ const SlideDetailsPage = (props) => {
     ];
 
     return  (     
-        <PageWrapper>
+        <PageWrapper><DndProvider backend={HTML5Backend}>
         <div className="App">
             <header className="App-header">
                 <div className="div-SlideHeader">
@@ -304,6 +339,7 @@ const SlideDetailsPage = (props) => {
             </div>
             </header>
         </div>
+        </DndProvider>
         </PageWrapper>
     )
 }

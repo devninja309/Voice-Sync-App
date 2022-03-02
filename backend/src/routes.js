@@ -3,7 +3,7 @@ import Router from 'koa-router';
 //TODO this is dumb, fix it
 import {GetCourses, GetCourseDetails, CreateCourse, GetChapters, GetChapterDetails, GetSlides,
   CreateChapter, CreateSlide, CreateClip, GetSlideDetails, GetClipDetails, GetClipAudio,
-  UpdateClip, UpdateClipPost, UpdateSlide, UpdateClipAudio, 
+  UpdateClip, UpdateClipPost, UpdateSlide, UpdateClipAudio, UpdateClipOrder,
   GetSlideAudio, SetSlideAudio,
   DeleteClip, DeleteSlide, DeleteChapter, DeleteCourse, 
   GetPronunciations, CreatePronunciation, UpdatePronunciation, DeletePronunciation,
@@ -455,6 +455,25 @@ router.get('/test', (ctx) => {
       }
       var updateClip = await UpdateClipPost(clip);
       ctx.body = JSON.stringify(updateClip);
+
+    })
+
+    .put('/clips_reorder', async (ctx) => {
+      console.log('Reorder firing');
+      if (!RequirePermission(ctx,['read:courses'])) {
+        return;
+      }
+      let clips = ctx.request.body;
+      if (typeof(clips) == "undefined")
+      {
+        console.log ('Undefined Data')
+        ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
+        return;
+      }
+      console.log('Received Clips');
+      console.log(clips);
+      await UpdateClipOrder(clips);
+      ctx.body = JSON.stringify('Success');
 
     })
     .del('/clips/:clipID', async (ctx) => {

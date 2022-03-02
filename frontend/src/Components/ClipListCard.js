@@ -6,12 +6,16 @@ import { ButtonGroup, Icon } from '@blueprintjs/core';
 import { useState, useEffect,useCallback } from 'react';
 import { useAuthTools } from '../Hooks/Auth';
 import { useLocation} from "react-router-dom";
+import { useDrag } from 'react-dnd'
 
 import { SimpleCard } from "../Elements/SimpleCard";
 import {SimpleAudioPlayer} from "../Elements/SimpleAudioPlayer";
 import { IconButton } from '../Elements/IconButton'; 
 import {LoadingSpinner} from "../Elements/LoadingSpinner";
 import {ClipDeleteButton} from "./ClipDeleteButton";
+import {ItemTypes} from "./DnDItemTypes";
+import {SimpleDropCardWrapper} from "../Elements/SimpleDropCardWrapper";
+import { SlideQuickSelect } from "./SlideQuickSelect";
 
 export function ClipListCard (props) 
 {
@@ -29,9 +33,7 @@ export function ClipListCard (props)
      },[propClip]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
     function LoadClipAudio(audioClip) //from database
     {
-        console.log('Redraw');
         setUrl(null);
-        console.log(audioClip);
         if (audioClip.HasAudio)
         {
         APICalls.GetClipAudio(audioClip.ID)
@@ -54,25 +56,31 @@ export function ClipListCard (props)
              setUpdating(false);
          });
      }
-    if (clip === null){
-
-        return ( 
-            <div className = "div-ClipListCard" key="Loading" onClick={()=>setSelectedClip(clip)}>
-                <SimpleCard  {...childProps} className="SimpleCard-ClipListCard">
-                    <LoadingSpinner/>
-                </SimpleCard>
-            </div>)
-    }
+     let card = null;
+     
     function cardCSS() {
         const base = "SimpleCard-ClipListCard";
+        if (clip === null) {
+            return base;
+        }
         const approved = (clip.Approved) ? " SimpleCard-ClipListCard-Approved": "";
 
         return base + approved;
     }
+    
+    if (clip === null){
+    
+        card = (
+            <SimpleCard  {...childProps} className="SimpleCard-ClipListCard">
+                <LoadingSpinner/>
+            </SimpleCard>
+            )
+    }
+    else {
 
-    return (
-        <div className = "div-ClipListCard" key={clip.ID} onClick={()=>setSelectedClip(clip)}>
-            <SimpleCard  {...childProps} className={cardCSS()}>
+     card = (
+        <div ordinal = {clip.OrdinalValue}>
+            <SimpleCard  {...childProps} className={cardCSS()} onClick={()=>setSelectedClip(clip)} ordinal = {clip.OrdinalValue}>
                 <div class="div-Slide-Details-Container">
                     <p class = "p-clip-card-text">
                         Clip: {clip.OrdinalValue}
@@ -99,6 +107,34 @@ export function ClipListCard (props)
                 
                 
             </SimpleCard>
-        </div>
+        </div>);
+    }   
+    
+
+   const [{ isDragging, opacity }, dragRef] = useDrag(
+        () => ({
+            type: ItemTypes.ClipCard,
+            item: { card },
+            collect: (monitor) => ({
+                opacity: monitor.isDragging() ? 0.5 : 1,
+                isDragging: !!monitor.isDragging()
+            })
+            }),
+            [clip]
+    )
+    const MoveCard = props.MoveClipCard;
+
+
+    return (
+        <SimpleDropCardWrapper  className = "div-ClipListCard" 
+            MoveCard={MoveCard}
+            id={clip ? clip.ID : 0} 
+            key={clip ? clip.ID : 0} 
+            ordinal = {clip?clip.OrdinalValue:0}>
+            <div ref = {dragRef}> 
+                {!isDragging && card}
+                {isDragging && 'Original Spot'}
+            </div>
+        </SimpleDropCardWrapper>
     )
 }

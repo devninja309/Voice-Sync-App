@@ -67979,7 +67979,7 @@ async function GetSlideDetails(slideID)
   
   slides.forEach(slide => {
     
-      let queryClips = `Select ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Approved, (audioclip is not null) as HasAudio from Clips where Clips.SlideID = ?`;
+      let queryClips = `Select ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, (audioclip is not null) as HasAudio from Clips where Clips.SlideID = ?`;
 
       promises.push(SQLQuery(queryClips, valuesSlides).then(clips => {
         slide.Clips = clips
@@ -68173,7 +68173,7 @@ async function GetClipDetails(clipID)
   let promises = [];
   //This is everything except AudioClip, which is binary data.
   //Consider moving AudioClip to a filestore (S3) or a separate table.
-  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Approved, (audioclip is not null) as HasAudio
+  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, (audioclip is not null) as HasAudio
      FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
   let valuesSlides = [clipID];
   let clips = await SQLQuery(querySlides, valuesSlides);
@@ -68184,7 +68184,7 @@ async function GetClipDetails(clipID)
 
 async function GetClipAudio(clipID)
 {
-  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Approved, AudioClip
+  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, AudioClip
      FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
   let valuesSlides = [clipID];
   let clips = await SQLQuery(querySlides, valuesSlides);
@@ -68257,8 +68257,8 @@ async function UpdateClip(clip)
     });
 
 
-     let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, Volume =?, Speed=?, Approved=?, AudioClip = null Where ID = ?`;
-     let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Approved, clip.ID];
+     let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, Volume =?, Speed=?, Delay=?, Approved=?, AudioClip = null Where ID = ?`;
+     let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Delay, clip.Approved, clip.ID];
 
      console.log(clip.ClipText);
     con.query(insert,values, (err, results, fields) => {
@@ -68363,8 +68363,8 @@ async function UpdateClipPost(clip)
       if (err) console.log( err);
     });
 
-     let insert = `Update IA_VoiceSynth.Clips set Volume = ?, Speed = ?, Approved =? Where ID = ?`;
-     let values = [clip.Volume, clip.Speed, clip.Approved, clip.ID];
+     let insert = `Update IA_VoiceSynth.Clips set Volume = ?, Speed = ?, Delay = ?, Approved =? Where ID = ?`;
+     let values = [clip.Volume, clip.Speed, clip.Delay, clip.Approved, clip.ID];
 
     con.query(insert,values, (err, results, fields) => {
       if (err) {
@@ -70812,7 +70812,7 @@ function addTests(router) {
 
 
 function ConvertPronunciationFast(Translations, clipText) {
-    if (!Array.isArray(Translations) || Translations.length == 0 ) return clipTrext.toLowerCase();
+    if (!Array.isArray(Translations) || Translations.length == 0 ) return clipText.toLowerCase();
     const wb = '\\b'; //word boundary 
     const dict = Object.assign({}, ...Translations.map ((t) => ({[t.Word.toLowerCase()]: t.Pronunciation})))
     var re = new RegExp(Object.keys(dict).map(k=>wb+k+wb).join("|"),"gi");  
@@ -70924,6 +70924,67 @@ const processedDir = (deployedEnv == 'dev')? './tmp/processed' : '/tmp/processed
 
 let files = [];
 
+//padding is in seconds
+async function ProcessFile (origFile, procFile, volume, speed, padding) {
+    console.log(`Padding= ${padding}`)
+    return new Promise((resolve, reject) => {
+        const command = fluent_ffmpeg(origFile)
+            .on('codecData', function(data) {
+            console.log('Input is ' + data.audio + ' audio ' +
+                'with ' + data.video|| 0);
+            })
+            .audioCodec('libmp3lame')
+            .audioFilters(`volume=${volume}`)
+            .audioFilters(`atempo=${speed}`)
+            .audioFilters(`apad=pad_dur=${padding}`)
+            .output(procFile) 
+            .audioCodec('libmp3lame')
+            .on('error', function(err, stdout, stderr) {
+                console.log(`Cannot process clip :` + err.message);
+                try {
+                    const arrayOfFiles = external_fs_.readdirSync("/opt")
+                    console.log(arrayOfFiles)
+                } catch(e) {
+                    console.log(e)
+                }
+                reject();
+              })
+              .on('end', function(stdout, stderr) {
+                console.log(`Transcoding clip succeeded !`);
+                resolve();
+              })
+            .run();
+    });
+    
+}
+
+async function PreProcessClip(clipID, clipAudio) {
+    await SetupTmp(); //TODO this is currently just called at the entry point to every function in this class, but maybe just run on instantiation / code start?
+    try {
+        console.log('Processing Clip ' + clipID)
+        const clipUUID = uuidv4();
+        const clipFileName = "".concat(clipID, '-', clipUUID);
+        var origFile = `${originalDir}/${clipFileName}.mp3`;
+        files.push(origFile);
+        var procFile = `${processedDir}/${clipFileName}.mp3`;
+        files.push(procFile);
+        
+        var origBuffer = Buffer.from(clipData.AudioClip);
+        await fs.createWriteStream(origFile).write(origBuffer);
+
+        //This method doesn't allow tempo changes greater than *2 /2, but since that's chipmunk range already, it's ok.
+        console.log('Starting Clip ' +clip.ID)
+        const finished = ProcessFile(origFile, procFile, `5.3dB`, 1.05, 0)
+        await finished;
+        console.log('Finished Clip ' +clip.ID)
+        return procFile;
+    }
+    finally {
+        CleanupTmp();
+    }
+
+}
+
 async function ProcessSlide(slide) {
     await SetupTmp();
     try {
@@ -71023,33 +71084,7 @@ async function ProcessClip(clip) {
 
     //This method doesn't allow tempo changes greater than *2 /2, but since that's chipmunk range already, it's ok.
     console.log('Starting Clip ' +clip.ID)
-    const finished = new Promise((resolve, reject) => {
-        const command = fluent_ffmpeg(origFile)
-            .on('codecData', function(data) {
-            console.log('Input is ' + data.audio + ' audio ' +
-                'with ' + data.video + ' video');
-            })
-            .audioCodec('libmp3lame')
-            .audioFilters(`volume=${clip.Volume/100}`)
-            .audioFilters(`atempo=${clip.Speed/100}`)
-            .output(procFile) 
-            .audioCodec('libmp3lame')
-            .on('error', function(err, stdout, stderr) {
-                console.log(`Cannot process clip ${clip.ID}: ` + err.message);
-                try {
-                    const arrayOfFiles = external_fs_.readdirSync("/opt")
-                    console.log(arrayOfFiles)
-                } catch(e) {
-                    console.log(e)
-                }
-                reject();
-              })
-              .on('end', function(stdout, stderr) {
-                console.log(`Transcoding clip ${clip.ID} succeeded !`);
-                resolve();
-              })
-            .run();
-    });
+    const finished = ProcessFile(origFile, procFile, clip.Volume/200, clip.Speed/100, clip.Delay || .2);
     await finished;
     console.log('Finished Clip ' +clip.ID)
     return procFile;
