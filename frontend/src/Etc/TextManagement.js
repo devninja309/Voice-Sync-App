@@ -71,9 +71,9 @@ export function ImportNewSlideText(chapterID, defaultSlideName, defaultVoice, te
             var promiseArray = [];
             console.log(slides);
             Array.from(slides).forEach(slide => {
-                let name = slide.getAttribute('name') || defaultSlideName;
+                let name = slide.getAttribute('name') || slide.getAttribute('Name') || defaultSlideName;
                 console.log(slide.getAttribute('name') )
-                let voice = parseInt(slide.getAttribute('voiceid'))|| defaultVoice;
+                let voice = parseInt(slide.getAttribute('voiceid')) || parseInt(slide.getAttribute('VoiceID')) || defaultVoice;
                 console.log(slide.getAttribute('voiceid') )
                 promiseArray.push( new Promise((resolve, reject) => {
                     CreateSlide(chapterID, name, voice, slide, slide.textContent, APICalls)
