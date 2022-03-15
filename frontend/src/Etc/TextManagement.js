@@ -39,11 +39,14 @@ export async function UpdateSlideTextOnServer(APICalls, slideID) {
 //Imports a slide text file, creates 1-many slides and returns a promise that resolves with the first slide
 export function ImportNewSlideText(chapterID, defaultSlideName, defaultVoice, text, APICalls)
 {
-    //<Slide Name="SlideName" VoiceID="1"></Slide>
+    //cd f
 
     let dom = "";
     try {
-        let xmlText = "<document>" + text.replace(/”/g, '"') + "</document>"
+        let xmlText = "<document>" + text.replace(/”/g, '"')
+                                    .replace(/[\u2018\u2019]/g, "'")
+                                    .replace(/[\u201C\u201D]/g, '"') 
+                                    + "</document>"
         let parser = new DOMParser();
         dom = parser.parseFromString(xmlText, "text/xml");
         console.log (dom);

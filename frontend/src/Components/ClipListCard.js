@@ -80,7 +80,7 @@ export function ClipListCard (props)
 
      card = (
         <div ordinal = {clip.OrdinalValue}>
-            <SimpleCard  {...childProps} className={cardCSS()} onClick={()=>setSelectedClip(clip)} ordinal = {clip.OrdinalValue}>
+            <SimpleCard  {...childProps} className={cardCSS()} ordinal = {clip.OrdinalValue}>
                 <div class="div-Slide-Details-Container">
                     <p class = "p-clip-card-text">
                         Clip: {clip.OrdinalValue}
@@ -126,7 +126,7 @@ export function ClipListCard (props)
 
 
     return (
-        <SimpleDropCardWrapper  className = "div-ClipListCard" 
+        <SimpleDropCardWrapper  className = "div-ClipListCard" onClick={()=>setSelectedClip(clip)} 
             MoveCard={MoveCard}
             id={clip ? clip.ID : 0} 
             key={clip ? clip.ID : 0} 

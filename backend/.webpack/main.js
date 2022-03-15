@@ -68170,7 +68170,6 @@ function UpdateSlide(slide, resetAudio = true)
 
 async function GetClipDetails(clipID)
 {
-  let promises = [];
   //This is everything except AudioClip, which is binary data.
   //Consider moving AudioClip to a filestore (S3) or a separate table.
   let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, (audioclip is not null) as HasAudio
@@ -68376,6 +68375,56 @@ async function UpdateClipPost(clip)
   });
 
 }
+async function UpdateClipOrder(clips) {
+
+  //Check Clip
+  let error = false;
+  let errorString = "";
+  if (!clips.every(clip => clip.ID)) {
+    error = true;
+    errorString += "Invalid ClipID\n";
+    console.log(errorString);
+  }
+  const promises = [];
+  let con = getCon();
+
+  con.connect(function(err) {
+    if (err) console.log( err);
+  });
+
+  const update = `Update IA_VoiceSynth.Clips set OrdinalValue =? Where ID = ?`;
+  con.beginTransaction(function (err) {
+    if (err) {
+      throw err;
+    }  
+
+  clips.forEach(clip => {
+      const values = [clip.OrdinalValue, clip.ID];
+      console.log('Updating');
+      console.log(values);
+    
+      promises.push (SQLQuery(update, values));
+    })
+
+  //con.query(update,values, (err, results, fields) => { if (err) { return connection.rollback(function() { throw err }); } });
+  });
+
+  //TODO This is messier than it should be.
+  await Promise.all(promises).then (
+
+    function(result){con.commit(function(err) {
+      if (err) { 
+        con.rollback(function() {
+          throw err;
+        })}})},
+    function(rejected){
+      con.rollback(function() {
+        throw(rejected);
+      })
+    }
+    )
+  return;
+}
 
 async function UpdatePronunciation(pronunciation)
 {
@@ -68407,8 +68456,9 @@ async function UpdatePronunciation(pronunciation)
      let insert = `Update IA_VoiceSynth.Pronunciations set Word = ?, Pronunciations = ? Where ID = ?`;
      let values = [pronunciation.Word, pronunciation.Pronunciation,  pronunciation.ID];
 
-    con.query(insert,values, (err, results, fields) => {
+      con.query(insert,values, (err, results, fields) => {
       if (err) {
+        console.log('Error');
         return console.error(err.message);
       }
       con.end();
@@ -68588,7 +68638,7 @@ function SQLQuery(query, values)
   catch (error)
   {
       console.error(error)
-      resolve(error.message);
+      reject(error.message);
   }
 }
 
@@ -71541,6 +71591,25 @@ routes_router.get('/test', (ctx) => {
       }
       var updateClip = await UpdateClipPost(clip);
       ctx.body = JSON.stringify(updateClip);
+
+    })
+
+    .put('/clips_reorder', async (ctx) => {
+      console.log('Reorder firing');
+      if (!RequirePermission(ctx,['read:courses'])) {
+        return;
+      }
+      let clips = ctx.request.body;
+      if (typeof(clips) == "undefined")
+      {
+        console.log ('Undefined Data')
+        ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
+        return;
+      }
+      console.log('Received Clips');
+      console.log(clips);
+      await UpdateClipOrder(clips);
+      ctx.body = JSON.stringify('Success');
 
     })
     .del('/clips/:clipID', async (ctx) => {
