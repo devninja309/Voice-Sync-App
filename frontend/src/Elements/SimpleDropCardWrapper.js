@@ -16,9 +16,6 @@ export function SimpleDropCardWrapper(props) {
         console.log('Dropped Item');
         const original = item.card.props.ordinal;
         const index = calculateInsertIndex(offset.x, original);
-        // alert('Dropping! on ' + ordinal + '\n' 
-        //     +'Original is ' + original + '\n'
-        //     + 'Index is ' + index + '\n');
         props.MoveCard(original, index);
     }
     function onHover(item, monitor) {

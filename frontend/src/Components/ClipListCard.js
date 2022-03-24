@@ -19,7 +19,7 @@ import { SlideQuickSelect } from "./SlideQuickSelect";
 
 export function ClipListCard (props) 
 {
-    const {clip: propClip, setSelectedClip, updateClip, ...childProps} = props;
+    const {clip: propClip, setSelectedClip, updateClip, ordinal: propOrdinal, ...childProps} = props;
     const {token, APICalls} = useAuthTools();
     const [url, setUrl] = useState(null);
     const [clip, setClip] = useState(null);
@@ -29,8 +29,9 @@ export function ClipListCard (props)
     useEffect( () => {
         setClip(propClip);
         LoadClipAudio(propClip);
+        console.log('Refreshing the card: ' +propClip.ClipText);
     
-     },[propClip]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
+     },[propClip, propOrdinal]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
     function LoadClipAudio(audioClip) //from database
     {
         setUrl(null);
@@ -93,8 +94,10 @@ export function ClipListCard (props)
                             openOnTargetFocus={false}
                             usePortal={false}
                         >
-                            ...
+                            ... 
                 </Tooltip>
+                        <p class = "p-clip-card-text">
+                </p>
                 <ClipDeleteButton 
                         ItemID = {clip.ID}
                         SlideID = {clip.SlideID}
@@ -130,7 +133,7 @@ export function ClipListCard (props)
             MoveCard={MoveCard}
             id={clip ? clip.ID : 0} 
             key={clip ? clip.ID : 0} 
-            ordinal = {clip?clip.OrdinalValue:0}>
+            ordinal = {propOrdinal || (clip?clip.OrdinalValue:0)}>
             <div ref = {dragRef}> 
                 {!isDragging && card}
                 {isDragging && 'Original Spot'}

@@ -110,6 +110,11 @@ const SlideDetailsPage = (props) => {
          setSelectedClipPostEdited(true);
          setSelectedClip(updatedClip);
      }
+     const selectedClipDisapproved = () => {
+         const updatedClip = {...selectedClip, Approved: false}
+         setSelectedClipPostEdited(true);
+         setSelectedClip(updatedClip);
+     }
      const pushChangedClip = (clip) => {
         if (selectedClipEdited) {
             clip.AudioClip = null;
@@ -158,10 +163,10 @@ const SlideDetailsPage = (props) => {
         return a.OrdinalValue - b.OrdinalValue;
     }
 
-    function DisplayClipsList() {
-        if (slide.Clips){
-            return slide.Clips.sort(sortByOrdinalValue).map((clip,index) => ( 
-                <ClipListCard className="ClipsCard" key={clip.ID} clip = {clip} setSelectedClip={changeSelectedClip} updateClip={UpdateClip} MoveClipCard = {MoveClipCard}/>
+    function DisplayClipsList(passedSlide) {
+        if (passedSlide.Clips){
+            return passedSlide.Clips.sort(sortByOrdinalValue).map((clip,index) => ( 
+                <ClipListCard className="ClipsCard" key={clip.ID} clip = {clip} ordinal = {clip.OrdinalValue} setSelectedClip={changeSelectedClip} updateClip={UpdateClip} MoveClipCard = {MoveClipCard}/>
             ))
         }      
     }
@@ -189,7 +194,8 @@ const SlideDetailsPage = (props) => {
                         {(selectedClipEdited || selectedClipPostEdited) && <SimpleButton onClick= {()=> pushChangedClip(selectedClip)} Text="Save Changes" className="simpleButtonSlideButtonGroup" />}
                         <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => changeSelectedClip(null)} Text="Deselect Clip"/>
                         <VoiceSelect className ="simpleButtonSlideButtonGroup" clip = {selectedClip} onChange={(newClip) => UpdateSelectedClip(newClip)}/>
-                        <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipApproved()} Text="Approve Clip"/>
+                        {!selectedClip.Approved && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipApproved()} Text="Approve Clip"/>}
+                        {selectedClip.Approved && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipDisapproved()} Text="Disapprove Clip"/>}
                         </div>
                         <div className="div-ClipEditButtonRow">
                         <VolumeSelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClipPost(newClip)}/>
@@ -215,19 +221,22 @@ const SlideDetailsPage = (props) => {
     }
     function MoveClipCard(fromOrdinal, toOrdinal)
     {
+        console.log('From:' + fromOrdinal + '   To:' + toOrdinal);
         //start spinner
         const clipsToUpdate = [];
         const movingClip = slide.Clips.find(clip => clip.OrdinalValue === fromOrdinal);
         slide.Clips.filter(clip=> (clip.OrdinalValue > fromOrdinal && clip.OrdinalValue <=toOrdinal)).forEach(clip => {
+            console.log('Moving ' + clip.ClipText + ' from ' + clip.OrdinalValue + ' down 1');
             clip.OrdinalValue -=1;  
-            slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = clip; 
+            slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = {...clip}; 
             clipsToUpdate.push(clip);
             //APICalls.UpdatePostClip(clip);  
             //Save Clip here  
         });
         slide.Clips.filter(clip=> (clip.OrdinalValue < fromOrdinal && clip.OrdinalValue >=toOrdinal)).forEach(clip => {
+            console.log('Moving ' + clip.ClipText + ' from ' + clip.OrdinalValue + ' up 1');
             clip.OrdinalValue +=1;      
-            slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = clip; 
+            slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = {...clip}; 
             clipsToUpdate.push(clip);
             //it APICalls.UpdatePostClip(clip);
             //Save Clip here  
@@ -333,7 +342,7 @@ const SlideDetailsPage = (props) => {
                 </Tooltip>
                     </ButtonGroup>
                     <div class = "div-Slide-Details-ClipsList">
-                    {DisplayClipsList() }
+                    {DisplayClipsList(slide) }
                     </div>
                 </div>
             </div>

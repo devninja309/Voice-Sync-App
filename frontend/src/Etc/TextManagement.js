@@ -6,6 +6,8 @@ const nlp  = winkNLP( model )
 const its = nlp.its;
 const as = nlp.as;
 
+const CLIPSIZE = 3;
+
 //Updates the display slide text.  Should this be moved to the server and fired when needed from there?
 export function UpdateSlideText(slide)
 {
@@ -158,12 +160,27 @@ export function SplitVoiceIntoClips(slide, voice, text, APICalls ,ordinalValue) 
 export function SplitTextIntoSentences( text ) {
     console.log('Pre split');
     console.log(text);
-        const doc = nlp.readDoc( text );
+    console.log('splitting on CRs');
+    const paragraphs = text.split(/\r\n|\r|\n/);
+    debugger;
+    let groupedSentences = [];
+    paragraphs.forEach( paragraph => {
+        const doc = nlp.readDoc( paragraph );
         // Place every sentence in a new row of the table by using .markup() api.
+
         console.log('splitting sentences');
+
         let sentenceList = doc.sentences().out().filter((el) => {
             return (el != null) && (el.trim() != "");
           });;
+
+        while (sentenceList.length > 0) {
+            groupedSentences.push(sentenceList.splice(0,CLIPSIZE).join(' '))
+        }
+
         console.log(sentenceList);
-        return sentenceList;
+        console.log(groupedSentences);
+        console.log('Returning');
+    });
+    return groupedSentences;
 }

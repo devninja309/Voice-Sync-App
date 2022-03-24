@@ -34,7 +34,7 @@ import{useAuthTools} from '../Hooks/Auth';
 }
     return (
         <div className = "courseListBox"> 
-        <div className = 'info-row'><h3>Scripts </h3> <ButtonGroup height = '10px'><SlideCreateButton CourseID = {CourseID} ChapterID = {ChapterID}/>
+        <div className = 'info-row'><h3>Slides </h3> <ButtonGroup height = '10px'><SlideCreateButton CourseID = {CourseID} ChapterID = {ChapterID}/>
         </ButtonGroup></div>
         {DisplaySlideList()}
         </div>
