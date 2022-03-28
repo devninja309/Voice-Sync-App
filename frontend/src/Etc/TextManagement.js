@@ -57,13 +57,14 @@ export function ImportNewSlideText(chapterID, defaultSlideName, defaultVoice, te
           throw 'Bad XML'
         } 
         let slides = dom.getElementsByTagName('Slide');
+        let ordinalValue = 0;
         if (slides.length === 0 )
         {
             console.log('Single Slide File');
             // There are no slide labels, this is all one slide
             return new Promise((resolve, reject) => {
                 console.log('Parsing as sngle string');
-                CreateSlide(chapterID, defaultSlideName, defaultVoice, null, text, APICalls).then(result => {resolve(result)});
+                CreateSlide(chapterID, defaultSlideName, defaultVoice, null, text, APICalls, ordinalValue++).then(result => {resolve(result)});
             })
         }
         else
@@ -78,7 +79,7 @@ export function ImportNewSlideText(chapterID, defaultSlideName, defaultVoice, te
                 let voice = parseInt(slide.getAttribute('voiceid')) || parseInt(slide.getAttribute('VoiceID')) || defaultVoice;
                 console.log(slide.getAttribute('voiceid') )
                 promiseArray.push( new Promise((resolve, reject) => {
-                    CreateSlide(chapterID, name, voice, slide, slide.textContent, APICalls)
+                    CreateSlide(chapterID, name, voice, slide, slide.textContent, APICalls, ordinalValue++)
                         .then(result => {resolve(result)}); //.childNodes[0].nodeValue seems wrong?)
                 }
             ))});
@@ -96,11 +97,11 @@ export function ImportNewSlideText(chapterID, defaultSlideName, defaultVoice, te
 }
 
 //Does not parse slide tags
-export function CreateSlide(chapterID, slideName, slideVoice, slideDom, text, APICalls)
+export function CreateSlide(chapterID, slideName, slideVoice, slideDom, text, APICalls, ordinalValue)
 {
     return new Promise((resolve, reject) => {
     
-    APICalls.CreateSlide({ChapterID:chapterID, SlideName:slideName, DefaultVoice: slideVoice, SlideText: text}).then(slide => {
+    APICalls.CreateSlide({ChapterID:chapterID, SlideName:slideName, DefaultVoice: slideVoice, SlideText: text, OrdinalValue: ordinalValue}).then(slide => {
 
         try {
             //<Voice VoiceID="1"></Slide>

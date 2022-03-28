@@ -17,7 +17,7 @@ import { SimpleAudioPlayer } from '../Elements/SimpleAudioPlayer';
 import { SimpleTextArea } from '../Elements/SimpleTextArea';
 import { useAuthTools } from '../Hooks/Auth';
 import { MidLogo } from '../Elements/Logos';
-import { getUrlPath } from '../Hooks/APICalls';
+import { getUrlPath, UpdateClipAudio } from '../Hooks/APICalls';
 import { SimpleButton } from '../Elements/SimpleButton';
 import { IconButton } from '../Elements/IconButton';
 import { ButtonGroup, Icon } from '@blueprintjs/core';
@@ -33,6 +33,7 @@ import { DelaySelect } from '../Components/DelaySelect';
 import {Breadcrumbs} from '@blueprintjs/core';
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
+import {LoadingSpinner} from "../Elements/LoadingSpinner";
 
 
 const SlideDetailsPage = (props) => {
@@ -50,22 +51,14 @@ const SlideDetailsPage = (props) => {
     const [selectedClip, setSelectedClip] = useState(null);
     const [selectedClipEdited, setSelectedClipEdited] = useState(false);
     const [selectedClipPostEdited, setSelectedClipPostEdited] = useState(false);
+    const [slideProcessing, setSlideProcessing] = useState(false);
     const {token, APICalls} = useAuthTools();
 
     const [isPronunciationOpen, setIsPronunciationOpen] = useState(false);
     const handlePronunciationClose = useCallback(() => setIsPronunciationOpen(false), []);
     
     useEffect( () => {
-        APICalls.GetSlideDetails(slideID)
-        .then(
-            data => {
-                setSlide(data); //TODO Query organization doesn't support single responses.  Do we care?
-                setSelectedClip(null);
-                setSlideHasAudio(data.HasAudio)
-                if (data.HasAudio) {
-                    getSlideAudio(data.ID);
-                }
-            })
+        LoadSlide();
         APICalls.GetChapterDetails(ChapterID)
         .then(
             data => {
@@ -81,6 +74,21 @@ const SlideDetailsPage = (props) => {
     
      },[token, ChapterID, CourseID, slideID]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
     
+     const LoadSlide = () => {
+
+        APICalls.GetSlideDetails(slideID)
+            .then(
+                data => {
+                    setSlide(data);
+                    setSelectedClip(null);
+                    setSlideHasAudio(data.HasAudio)
+                    if (data.HasAudio) {
+                        getSlideAudio(data.ID);
+                    }
+                    setSlideProcessing(false);
+                })
+     }
+
      const changeSelectedClip = (clip) =>
      {
          setSelectedClipEdited(false);
@@ -162,9 +170,34 @@ const SlideDetailsPage = (props) => {
     function sortByOrdinalValue(a,b) {
         return a.OrdinalValue - b.OrdinalValue;
     }
+    function UpdateAllClipAudio() {
+        //Lock down the screen
+        setSlideProcessing(true);
+
+        //Submit a separate call for each clip that isn't submitted
+        const promiseArray = [];
+        const processClips = slide.Clips.filter(clip => !clip.HasAudio)
+        //console.log('Process Clips: ' + processClips);
+        processClips.forEach(clip => {
+            //console.log('Updating an audio clip');
+            //console.log(clip);
+            const promise = new Promise((resolve, reject) => {
+            APICalls.UpdateClipAudio(clip.ID).then(returnClip => resolve())
+            
+            })
+        promiseArray.push( promise);
+        });
+        //Reload the entire slide
+        Promise.all(promiseArray).then(()=>{
+            LoadSlide();
+        });
+    }
 
     function DisplayClipsList(passedSlide) {
-        if (passedSlide.Clips){
+        if (slideProcessing) {
+            return <LoadingSpinner/>
+        }
+        else if (passedSlide.Clips){
             return passedSlide.Clips.sort(sortByOrdinalValue).map((clip,index) => ( 
                 <ClipListCard className="ClipsCard" key={clip.ID} clip = {clip} ordinal = {clip.OrdinalValue} setSelectedClip={changeSelectedClip} updateClip={UpdateClip} MoveClipCard = {MoveClipCard}/>
             ))
@@ -189,18 +222,19 @@ const SlideDetailsPage = (props) => {
                         <SimpleTextArea className="simpleTextArea-smallbox"
                             value={selectedClip.ClipText}
                             onChange={event => selectedClipTextModified(event)}
+                            disabled = {slideProcessing}
                             />
                         <div className="div-ClipEditButtonRow">
-                        {(selectedClipEdited || selectedClipPostEdited) && <SimpleButton onClick= {()=> pushChangedClip(selectedClip)} Text="Save Changes" className="simpleButtonSlideButtonGroup" />}
-                        <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => changeSelectedClip(null)} Text="Deselect Clip"/>
+                        {(selectedClipEdited || selectedClipPostEdited) && <SimpleButton onClick= {()=> pushChangedClip(selectedClip)} Text="Save Changes" className="simpleButtonSlideButtonGroup" disabled = {slideProcessing} />}
+                        <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => changeSelectedClip(null)} Text="Deselect Clip" disabled = {slideProcessing}/>
                         <VoiceSelect className ="simpleButtonSlideButtonGroup" clip = {selectedClip} onChange={(newClip) => UpdateSelectedClip(newClip)}/>
-                        {!selectedClip.Approved && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipApproved()} Text="Approve Clip"/>}
-                        {selectedClip.Approved && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipDisapproved()} Text="Disapprove Clip"/>}
+                        {!! !selectedClip.Approved && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipApproved()} Text="Approve Clip" disabled = {slideProcessing}/>}
+                        {!!selectedClip.Approved && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipDisapproved()} Text="Disapprove Clip" disabled = {slideProcessing}/>}
                         </div>
                         <div className="div-ClipEditButtonRow">
-                        <VolumeSelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClipPost(newClip)}/>
-                        <PaceSelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClipPost(newClip)}/>
-                        <DelaySelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClipPost(newClip)}/>
+                        <VolumeSelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClipPost(newClip)} disabled = {slideProcessing}/>
+                        <PaceSelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClipPost(newClip)} disabled = {slideProcessing}/>
+                        <DelaySelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClipPost(newClip)} disabled = {slideProcessing}/>
                         </div>
                         <SimpleTextArea className="simpleTextArea-midbox"
                         value={slide.SlideText} 
@@ -261,10 +295,10 @@ const SlideDetailsPage = (props) => {
             ClipText: "",
             OrdinalValue: ordinalValue,
             VoiceID: 3,
-            Volume: 100,
-            Speed: 100,
+            Volume: 150,
+            Speed: 105,
             Approved: false,
-            Delay: 0.2          
+            Delay: 1          
         }
         APICalls.CreateClip(Clip).then(
             data => {
@@ -330,7 +364,7 @@ const SlideDetailsPage = (props) => {
                             openOnTargetFocus={false}
                             usePortal={false}
                         >
-                        <IconButton icon="refresh"/>
+                        <IconButton icon="refresh" onClick = {() => UpdateAllClipAudio()}/>
                 </Tooltip>
                 <p> </p>
                 <Tooltip

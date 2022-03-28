@@ -29,10 +29,12 @@ async function ProcessFile (origFile, procFile, volume, speed, padding) {
             .output(procFile) 
             .audioCodec('libmp3lame')
             .on('error', function(err, stdout, stderr) {
-                console.log(`Cannot process clip :` + err.message);
+                console.log(`ProncessFile error with file ` + origFile + '\n')
+                console.log(`Cannot process clip :` + err.message +`\n`);
                 try {
-                    const arrayOfFiles = fs.readdirSync("/opt")
-                    console.log(arrayOfFiles)
+                    console.log('Existing files (Should include the above file):\n')
+                    const arrayOfFiles = fs.readdirSync(originalDir);
+                        console.log(arrayOfFiles);
                 } catch(e) {
                     console.log(e)
                 }
@@ -156,6 +158,12 @@ async function CleanupTmp() {
         }
     }
     console.log('Finished Cleanup');
+    const arrayOfFiles = fs.readdirSync(originalDir);
+    console.log(`Files that are still in original \n` + 
+        console.log(arrayOfFiles));
+    const arrayOfFiles2 = fs.readdirSync(processedDir);
+    console.log(`Files that are still in processed \n` + 
+        console.log(arrayOfFiles2));
 
 }
 async function ProcessClip(clip) {
@@ -170,6 +178,10 @@ async function ProcessClip(clip) {
     const clipData = await GetClipAudio(clip.ID);
     var origBuffer = Buffer.from(clipData.AudioClip);
     await fs.createWriteStream(origFile).write(origBuffer);
+    console.log(`Created File: ` + origFile);
+    const arrayOfFiles = fs.readdirSync(originalDir);
+    console.log(`Files that are in the original directory (which should include the file above)\n` + 
+        console.log(arrayOfFiles));
 
     //This method doesn't allow tempo changes greater than *2 /2, but since that's chipmunk range already, it's ok.
     console.log('Starting Clip ' +clip.ID)

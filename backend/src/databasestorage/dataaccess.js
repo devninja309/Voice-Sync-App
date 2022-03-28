@@ -98,7 +98,7 @@ export function GetPronunciations ()
 export function CreateCourse(course)
 {
   //Check course
-  if (!course.CourseName){
+  if (!course.CourseName){    
     //Blow up?
   }
   return new Promise( function (resolve, reject) {
@@ -161,7 +161,7 @@ export function CreateSlide(slide)
   let errorString = "";
   if (!slide.SlideName){
     error = true;
-    errorString += "Invalid Slide Name2\n";
+    errorString += "Invalid Slide Name\n";
   }
   if (!slide.ChapterID){
     error = true;
@@ -179,8 +179,8 @@ export function CreateSlide(slide)
       if (err) console.log( err);
     });
 
-    let insert = 'Insert into IA_VoiceSynth.Slides (SlideName,SlideText, VoiceID, ChapterID) Values (?,?,?,?)';
-    let values = [slide.SlideName, slide.SlideText,slide.VoiceID, slide.ChapterID];
+    let insert = 'Insert into IA_VoiceSynth.Slides (SlideName,SlideText, VoiceID, ChapterID, OrdinalValue) Values (?,?,?,?,?)';
+    let values = [slide.SlideName, slide.SlideText,slide.VoiceID, slide.ChapterID, slide.OrdinalValue];
 
     con.query(insert,values, (err, results, fields) => {
       if (err) {
@@ -250,8 +250,8 @@ export function UpdateSlide(slide, resetAudio = true)
       if (err) console.log( err);
     });
 
-     let update = 'Update  IA_VoiceSynth.Slides set SlideName = ?,SlideText = ?, VoiceID = ?, ChapterID = ? Where ID = ?';
-     let values = [slide.SlideName, slide.SlideText,slide.VoiceID, slide.ChapterID, slide.ID];
+     let update = 'Update  IA_VoiceSynth.Slides set SlideName = ?,SlideText = ?, VoiceID = ?, ChapterID = ?, OrdinalValue = ? Where ID = ?';
+     let values = [slide.SlideName, slide.SlideText,slide.VoiceID, slide.ChapterID, slide.OrdinalValue, slide.ID];
  
      con.query(update,values, (err, results, fields) => {
        if (err) {

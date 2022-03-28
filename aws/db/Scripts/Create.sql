@@ -76,3 +76,14 @@ Create Table `IA_VoiceSynth`.`SlideAudio` (
 
   Alter Table  `IA_VoiceSynth`.`Clips` 
     ADD COLUMN Delay int null default .2
+
+  Alter Table  `IA_VoiceSynth`.`Slides` 
+    ADD COLUMN OrdinalValue int null default null
+
+    
+    ALTER TABLE `IA_VoiceSynth`.Slides ALTER VoiceID SET DEFAULT 61137774;
+    ALTER TABLE `IA_VoiceSynth`.Clips ALTER VoiceID SET DEFAULT 61137774;
+    ALTER TABLE `IA_VoiceSynth`.Clips ALTER Delay SET DEFAULT 1;
+    ALTER TABLE `IA_VoiceSynth`.Clips ALTER Speed SET DEFAULT 105;
+    ALTER TABLE `IA_VoiceSynth`.Clips ALTER Volume SET DEFAULT 150;
+    

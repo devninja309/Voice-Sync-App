@@ -27,7 +27,7 @@ import{useAuthTools} from '../Hooks/Auth';
  function DisplaySlideList() {
     if (slides)
     {
-        return slides.map(slide => (<SlideListCard key={slide.ID} slide = {slide}/>))
+        return slides.sort((a,b) => {return a.OrdinalValue < b.OrdinalValue}).map(slide => (<SlideListCard key={slide.ID} slide = {slide}/>))
     }
     else {
     }
