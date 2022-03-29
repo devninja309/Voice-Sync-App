@@ -68000,10 +68000,10 @@ function GetPronunciations ()
     return SQLQuery(query);
 }
 
-function CreateCourse(course)
+async function CreateCourse(course)
 {
   //Check course
-  if (!course.CourseName){
+  if (!course.CourseName){    
     //Blow up?
   }
   return new Promise( function (resolve, reject) {
@@ -68027,7 +68027,7 @@ function CreateCourse(course)
     });
   });
 }
-function CreateChapter(chapter)
+async function CreateChapter(chapter)
 {
   //Check chapter
   if (!chapter.ChapterName){
@@ -68059,14 +68059,14 @@ function CreateChapter(chapter)
   });
 }
 
-function CreateSlide(slide)
+async function CreateSlide(slide)
 {
   //Check Slide
   let error = false;
   let errorString = "";
   if (!slide.SlideName){
     error = true;
-    errorString += "Invalid Slide Name2\n";
+    errorString += "Invalid Slide Name\n";
   }
   if (!slide.ChapterID){
     error = true;
@@ -68084,8 +68084,8 @@ function CreateSlide(slide)
       if (err) console.log( err);
     });
 
-    let insert = 'Insert into IA_VoiceSynth.Slides (SlideName,SlideText, VoiceID, ChapterID) Values (?,?,?,?)';
-    let values = [slide.SlideName, slide.SlideText,slide.VoiceID, slide.ChapterID];
+    let insert = 'Insert into IA_VoiceSynth.Slides (SlideName,SlideText, VoiceID, ChapterID, OrdinalValue) Values (?,?,?,?,?)';
+    let values = [slide.SlideName, slide.SlideText,slide.VoiceID, slide.ChapterID, slide.OrdinalValue];
 
     con.query(insert,values, (err, results, fields) => {
       if (err) {
@@ -68128,7 +68128,7 @@ function CreatePronunciation(pronunciation)
   });
 }
 
-function UpdateSlide(slide, resetAudio = true)
+async function UpdateSlide(slide, resetAudio = true)
 {
   //Check Clip
   let error = false;
@@ -68155,8 +68155,8 @@ function UpdateSlide(slide, resetAudio = true)
       if (err) console.log( err);
     });
 
-     let update = 'Update  IA_VoiceSynth.Slides set SlideName = ?,SlideText = ?, VoiceID = ?, ChapterID = ? Where ID = ?';
-     let values = [slide.SlideName, slide.SlideText,slide.VoiceID, slide.ChapterID, slide.ID];
+     let update = 'Update  IA_VoiceSynth.Slides set SlideName = ?,SlideText = ?, VoiceID = ?, ChapterID = ?, OrdinalValue = ? Where ID = ?';
+     let values = [slide.SlideName, slide.SlideText,slide.VoiceID, slide.ChapterID, slide.OrdinalValue, slide.ID];
  
      con.query(update,values, (err, results, fields) => {
        if (err) {
@@ -68191,7 +68191,7 @@ async function GetClipAudio(clipID)
   let clip = clips[0];
   return clip;
 }
-function CreateClip(clip)
+async function CreateClip(clip)
 {
   //Check Clip
   let error = false;
@@ -68537,13 +68537,13 @@ const LogTypes = {
   ClipGenerated: 1,
 }
 
-function LogClipGeneration(User, Text) {
+async function LogClipGeneration(User, Text) {
   return CreateLogEntry(LogTypes.ClipGenerated, User, Text);
 }
-function LogError(Err) {
+async function LogError(Err) {
   return LogErrorMessage(Err.message)
 }
-function LogErrorMessage(Message) {
+async function LogErrorMessage(Message) {
   return CreateLogEntry(LogTypes.Error, `Unknown`, Message);
 }
 

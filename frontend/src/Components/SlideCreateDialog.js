@@ -26,9 +26,11 @@ export function SlideCreateDialog (props)
     const {token,APICalls} = useAuthTools();
 
     function AddSlide(){
-        //defaultSlideName, defaultVoice, text, APICalls
-        ImportNewSlideText(ChapterID, slideName, 3, slideText,APICalls).then(
+        let promise = ImportNewSlideText(ChapterID, slideName, 3, slideText,APICalls)
+        console.log('Promise:' , promise);
+        promise.then(
             data => {
+                console.log('Navigating');
                 navigate(`/courses/${CourseID}/chapters/${ChapterID}/slides/` + data.ID)
             }
          );

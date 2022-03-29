@@ -95,7 +95,7 @@ export function GetPronunciations ()
     return SQLQuery(query);
 }
 
-export function CreateCourse(course)
+export async function CreateCourse(course)
 {
   //Check course
   if (!course.CourseName){    
@@ -122,7 +122,7 @@ export function CreateCourse(course)
     });
   });
 }
-export function CreateChapter(chapter)
+export async function CreateChapter(chapter)
 {
   //Check chapter
   if (!chapter.ChapterName){
@@ -154,7 +154,7 @@ export function CreateChapter(chapter)
   });
 }
 
-export function CreateSlide(slide)
+export async function CreateSlide(slide)
 {
   //Check Slide
   let error = false;
@@ -223,7 +223,7 @@ export function CreatePronunciation(pronunciation)
   });
 }
 
-export function UpdateSlide(slide, resetAudio = true)
+export async function UpdateSlide(slide, resetAudio = true)
 {
   //Check Clip
   let error = false;
@@ -286,7 +286,7 @@ export async function GetClipAudio(clipID)
   let clip = clips[0];
   return clip;
 }
-export function CreateClip(clip)
+export async function CreateClip(clip)
 {
   //Check Clip
   let error = false;
@@ -632,13 +632,13 @@ const LogTypes = {
   ClipGenerated: 1,
 }
 
-export function LogClipGeneration(User, Text) {
+export async function LogClipGeneration(User, Text) {
   return CreateLogEntry(LogTypes.ClipGenerated, User, Text);
 }
-export function LogError(Err) {
+export async function LogError(Err) {
   return LogErrorMessage(Err.message)
 }
-export function LogErrorMessage(Message) {
+export async function LogErrorMessage(Message) {
   return CreateLogEntry(LogTypes.Error, `Unknown`, Message);
 }
 
