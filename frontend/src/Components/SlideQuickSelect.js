@@ -31,7 +31,7 @@ export function SlideQuickSelect (props)
     function drawColumn(index, ColumnCount) {
         return (
         <div className="div-SlideQuickSelectColumn">
-            {slideList.map((slide, slideNum) => {
+            {slideList.sort((a,b) => {return a.OrdinalValue < b.OrdinalValue}).map((slide, slideNum) => {
                 const LinkAddress = '/courses/' + slide.CourseID + '/chapters/' + slide.ChapterID + '/slides/' + slide.ID
                 const item = ((slideNum)%ColumnCount == index) ? (<Link to={LinkAddress}><p>{slide.SlideName}</p></Link>) : '';
                 return item;

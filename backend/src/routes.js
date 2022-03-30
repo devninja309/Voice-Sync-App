@@ -362,55 +362,63 @@ router.get('/test', (ctx) => {
 
 
     .get('/clips/:clipID/generateaudio', async (ctx) => {
-      if (!RequirePermission(ctx,['read:courses'])) {
-        return;
+      try {
+        if (!RequirePermission(ctx,['read:courses'])) {
+          return;
+        }
+        let clip = await GetClipDetails(ctx.params.clipID);
+
+        const avatarId = clip.VoiceID;
+        const rawText = clip.ClipText;
+
+        const pronunciations  = await GetPronunciations();
+
+        const text = ConvertPronunciationFast(pronunciations, rawText);
+
+        const ttsResponse = await fetch(ttsEndPoint, {
+          //signal: abortController.signal,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Api-Key': process.env.WELLSAID_API_KEY,
+          },
+          body: JSON.stringify({
+            speaker_id: avatarId,
+            text: text,
+          }),
+        });
+
+        let status = ttsResponse.status;
+        //TODO handle invalid responses here
+        if (status != 200)
+        {
+          console.log('Failed to get audio file');
+          console.log('tts Response Status was invalid');
+          console.log(ttsResponse.status);
+          ctx.status = 500;
+          console.log(ttsResponse);
+        }
+        else {
+          console.log('Successful audio generation');
+          console.log(ttsResponse.headers);
+        }
+
+        //https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
+        const responseBlob = await ttsResponse.blob()
+        const responseArray = await responseBlob.arrayBuffer();
+        const buffer = await Buffer.from(responseArray);
+        clip.AudioClip = buffer;
+
+        await LogClipGeneration(GetUserName(ctx), text);
+
+        await UpdateClipAudio(ctx.params.clipID, buffer);
+        clip.HasAudio = 1;
+        ctx.body = JSON.stringify(clip);
       }
-      let clip = await GetClipDetails(ctx.params.clipID);
-
-      //const abortController = new AbortController();
-      const avatarId = clip.VoiceID;
-      const rawText = clip.ClipText;
-      console.log(avatarId);
-
-      const pronunciations  = await GetPronunciations();
-
-      //const text = ConvertPronunciation(pronunciations, rawText);
-      const text = ConvertPronunciationFast(pronunciations, rawText);
-
-      const ttsResponse = await fetch(ttsEndPoint, {
-        //signal: abortController.signal,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Api-Key': process.env.WELLSAID_API_KEY,
-        },
-        body: JSON.stringify({
-          speaker_id: avatarId,
-          text: text,
-        }),
-      });
-
-      let status = ttsResponse.status;
-      //TODO handle invalid responses here
-      if (status != 200)
-      {
-        console.log('tts Response Status was invalid');
-        console.log(ttsResponse.status);
-        ctx.status = 500;
-        console.log(ttsResponse);
+      catch (exp) {
+        console.log('Error Generating Clip')
+        console.log(exp);
       }
-
-      //https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
-      const responseBlob = await ttsResponse.blob()
-      const responseArray = await responseBlob.arrayBuffer();
-      const buffer = await Buffer.from(responseArray);
-      clip.AudioClip = buffer;
-
-      await LogClipGeneration(GetUserName(ctx), text);
-
-      await UpdateClipAudio(ctx.params.clipID, buffer);
-      clip.HasAudio = 1;
-      ctx.body = JSON.stringify(clip);
       })
 
     .post('/clips', async (ctx) => {
@@ -459,7 +467,6 @@ router.get('/test', (ctx) => {
     })
 
     .put('/clips_reorder', async (ctx) => {
-      console.log('Reorder firing');
       if (!RequirePermission(ctx,['read:courses'])) {
         return;
       }
@@ -470,8 +477,6 @@ router.get('/test', (ctx) => {
         ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
         return;
       }
-      console.log('Received Clips');
-      console.log(clips);
       await UpdateClipOrder(clips);
       ctx.body = JSON.stringify('Success');
 
