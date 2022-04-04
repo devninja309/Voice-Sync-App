@@ -18,7 +18,6 @@ export function SlideQuickSelect (props)
         .then(
             data => {
                 setSlideList(data); 
-                console.log(data);
             })    
      },[token, ChapterID]); 
 
@@ -26,12 +25,25 @@ export function SlideQuickSelect (props)
      {
          return (<div></div>)
      }
+
+     function slideSort(a,b) {
+         if (a.OrdinalValue && b.OrdinalValue) {
+             const val =  a.OrdinalValue - b.OrdinalValue;
+             if (val === 0 ) {
+                return a.ID - b.ID
+             }
+             else return val;
+         }
+         else return a.ID - b.ID
+     }
     
 
     function drawColumn(index, ColumnCount) {
+        let data = [...slideList];
+        data = [...data.sort(slideSort)];
         return (
         <div className="div-SlideQuickSelectColumn">
-            {slideList.sort((a,b) => {return a.OrdinalValue < b.OrdinalValue}).map((slide, slideNum) => {
+            {data.map((slide, slideNum) => {
                 const LinkAddress = '/courses/' + slide.CourseID + '/chapters/' + slide.ChapterID + '/slides/' + slide.ID
                 const item = ((slideNum)%ColumnCount == index) ? (<Link to={LinkAddress}><p>{slide.SlideName}</p></Link>) : '';
                 return item;

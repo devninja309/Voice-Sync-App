@@ -54,7 +54,7 @@ export function ImportNewSlideText(chapterID, defaultSlideName, defaultVoice, te
           throw 'Bad XML'
         } 
         let slides = dom.getElementsByTagName('Slide');
-        let ordinalValue = 0;
+        let ordinalValue = 1;
         if (slides.length === 0 )
         {
             console.log('Single Slide File');

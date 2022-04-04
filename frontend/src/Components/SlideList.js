@@ -24,14 +24,29 @@ import{useAuthTools} from '../Hooks/Auth';
         })
 
  },[token, ChapterID]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
+ 
+ function slideSort(a,b) {
+    if (a.OrdinalValue && b.OrdinalValue) {
+        const val =  a.OrdinalValue - b.OrdinalValue;
+        if (val === 0 ) {
+           return a.ID - b.ID
+        }
+        else return val;
+    }
+    else return a.ID - b.ID
+}
+ 
  function DisplaySlideList() {
     if (slides)
     {
-        return slides.sort((a,b) => {return a.OrdinalValue < b.OrdinalValue}).map(slide => (<SlideListCard key={slide.ID} slide = {slide}/>))
+        let data = [...slides];
+        data.sort(slideSort);
+        return data.sort(slideSort).map(slide => (<SlideListCard key={slide.ID} slide = {slide}/>))
     }
     else {
     }
 }
+
     return (
         <div className = "courseListBox"> 
         <div className = 'info-row'><h3>Slides </h3> <ButtonGroup height = '10px'><SlideCreateButton CourseID = {CourseID} ChapterID = {ChapterID}/>

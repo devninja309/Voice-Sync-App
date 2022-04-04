@@ -6,6 +6,8 @@ import {IconButton} from "./IconButton";
 
 export function SimpleAudioPlayer(props) {
     const [url, setUrl] = useState('');
+    const [playing, setPlaying] = useState(false);
+    const [audioControl, setAudioControl] = useState(null);
 
 
 
@@ -20,6 +22,12 @@ if (!file) {
     )
 }
 async function  PlayAudio() {
+    if (audioControl != null && ! audioControl.ended) {
+        audioControl.play();
+        setPlaying(true);
+        return;
+    }
+
     const vol = (props.volume||100) /100;
     const pace = (props.pace||100) /100;
     console.log('Volume' + vol);
@@ -29,35 +37,51 @@ async function  PlayAudio() {
         const audio = new Audio(file);
         audio.playbackRate = pace;
         audio.volume = vol;
-        //const track = audioCtx.createBufferSource(file);
 
-        // let arrayBuffer = await fetch(file).then(r => r.arrayBuffer());
-    
-        // const clipAudioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-
-        // const track = audioCtx.createBufferSource();
-        // track.buffer = clipAudioBuffer;
-
-        // track.playbackRate.value = pace;
-        // const gainNode = audioCtx.createGain();
-        // gainNode.gain.value = vol;
-
-        //track.connect(gainNode).connect(audioCtx.destination);
+        setAudioControl(audio);
+        setPlaying(true);     
+        
+        audio.addEventListener("ended", function() 
+        {
+             setPlaying(false);
+        });
 
         audio.play();
-        //track.start();
     }
     catch (err) {
         console.log('Audio error')
         console.log(err);
     }
 }
+async function PauseAudio() {
+    if (audioControl != null) {
+        audioControl.pause();
+        setPlaying(false);
+    }
+}
+async function StopAudio() {
+    if (audioControl != null) {
+        audioControl.pause();
+        setAudioControl(null);
+        setPlaying(false)
+    }
+}
 console.log('url')
 //<audio controls src={props.audiofile} />
 console.log(props.audiofile)
+if (!playing || audioControl && audioControl.ended) {
     return (
         <div>
             <IconButton icon='play' onClick={PlayAudio}/>
         </div>
     )
+}
+else{
+    return (
+        <div className = "div-HorizontalContainer">
+        <IconButton icon='pause' onClick={PauseAudio}/>
+        <IconButton icon='stop' onClick={StopAudio}/>
+        </div>
+    )
+}
 }
