@@ -102,6 +102,10 @@ export function CreateSlide(chapterID, slideName, slideVoice, slideDom, text, AP
     
     APICalls.CreateSlide({ChapterID:chapterID, SlideName:slideName, DefaultVoice: slideVoice, SlideText: text, OrdinalValue: ordinalValue}).then(slide => {
 
+        if (slide.ID == null) {
+            alert(`Invalid slide creation.  Aborting`);
+            return;
+        }
         try {
             //<Voice VoiceID="1"></Slide>
             //Start by splitting on voices.

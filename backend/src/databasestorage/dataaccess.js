@@ -291,11 +291,11 @@ export async function CreateClip(clip)
   //Check Clip
   let error = false;
   let errorString = "";
-  if (!clip.SlideID){
+  if (!clip.SlideID || clip.SlideID == null){
     error = true;
     errorString += "Invalid SlideID\n";
   }
-  if (!clip.VoiceID) {
+  if (!clip.VoiceID|| clip.VoiceID == null) {
     error = true;
     errorString += "Invalid VoiceID\n";
   }
@@ -303,24 +303,29 @@ export async function CreateClip(clip)
 
     let con = getCon();
 
-    let voiceID = clip.VoiceID || 3
+    try {
 
-    con.connect(function(err) {
-      if (err) console.log( err);
-    });
+      let voiceID = clip.VoiceID || 3
 
-    let insert = 'Insert into IA_VoiceSynth.Clips (SlideID,ClipText, VoiceID, OrdinalValue) Values (?,?,?,?)';
-    let values = [clip.SlideID, clip.ClipText, voiceID,clip.OrdinalValue];
+      con.connect(function(err) {
+        if (err) console.log( err);
+      });
 
-    con.query(insert,values, (err, results, fields) => {
-      if (err) {
-        return console.error(err.message);
-      }
+      let insert = 'Insert into IA_VoiceSynth.Clips (SlideID,ClipText, VoiceID, OrdinalValue) Values (?,?,?,?)';
+      let values = [clip.SlideID, clip.ClipText, voiceID,clip.OrdinalValue];
+
+      con.query(insert,values, (err, results, fields) => {
+        if (err) {
+          return console.error(err.message);
+        }
+        clip.ID = results.insertId
+        resolve( clip);
+      });
+    }
+    finally {
       con.end();
-      clip.ID = results.insertId
-      resolve( clip);
-    });
-  });
+    }
+   } );
 }
 
 //this function updates the entire clip AND resets the audio to null.

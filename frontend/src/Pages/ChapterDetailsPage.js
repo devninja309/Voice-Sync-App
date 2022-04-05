@@ -9,6 +9,7 @@ import{useAuthTools} from '../Hooks/Auth';
 
 import SlideList from '../Components/SlideList';
 import { MidLogo } from '../Elements/Logos';
+import { LoadingSpinner } from '../Elements/LoadingSpinner';
 
 //useparams here react-router-dom
 
@@ -29,6 +30,9 @@ const ChapterDetailsPage = (props) => {
     
      },[token, ChapterID]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
      
+     if (!chapter.ID) {
+         return (<LoadingSpinner/>)
+     }
 
     return  (     
         <PageWrapper>

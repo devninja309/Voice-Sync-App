@@ -17,11 +17,13 @@ import{useAuthTools} from '../Hooks/Auth';
  const {token, APICalls} = useAuthTools();
  
  useEffect( () => {
-    APICalls.GetSlides(ChapterID)
-    .then(
-        data => {
-            setSlides(data);
-        })
+     if (ChapterID) {
+        APICalls.GetSlides(ChapterID)
+        .then(
+            data => {
+                setSlides(data);
+            })
+    }
 
  },[token, ChapterID]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
  
