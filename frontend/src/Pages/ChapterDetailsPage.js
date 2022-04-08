@@ -10,6 +10,7 @@ import{useAuthTools} from '../Hooks/Auth';
 import SlideList from '../Components/SlideList';
 import { MidLogo } from '../Elements/Logos';
 import { LoadingSpinner } from '../Elements/LoadingSpinner';
+import { ChapterDownloadAllClipsButton } from '../Components/ChapterDownloadAllClipsButton';
 
 //useparams here react-router-dom
 
@@ -43,6 +44,7 @@ const ChapterDetailsPage = (props) => {
             <h3>
             {chapter.ChapterName}
             </h3>
+            <ChapterDownloadAllClipsButton/>
             <hr width='80%'/>
             </div>
             <SlideList CourseID = {CourseID} ChapterID = {ChapterID}></SlideList>           

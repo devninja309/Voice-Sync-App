@@ -47,8 +47,6 @@ export const useAuthTools = () => {
         if (token === null) return Promise.resolve({json:()=>{return''}});
         return fetch(resource,merge(authInit(token),init??{})).then(response => {
             if (!response.ok) {
-                console.log('Token for call');
-                console.log(token);
                 alert('There was a problem with the server');
                 var change = 0;
             }

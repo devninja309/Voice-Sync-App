@@ -312,12 +312,14 @@ router.get('/test', (ctx) => {
         //Load slide
           let slideAudio = await GetSlideAudio(slideID);
       
+          if (slideAudio != null) { //Don't really return anything if the slide audio is null
         //return slide
           ctx.isBase64Encoded = true; 
           ctx.body = slideAudio.AudioFile;  
           //ctx.set('Content-Type', 'audio/mpeg');
           ctx.set('Content-Type', 'application/octet-stream');
           ctx.set('Content-Disposition', `attachment; filename=slide-${slideID}.mp3`)
+          }
         })
       .get('/slides/:slideID/audio', async (ctx) => {
           //Load slide

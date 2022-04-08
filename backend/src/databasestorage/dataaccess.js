@@ -54,8 +54,10 @@ export async function GetChapterDetails(chapterID)
 
 export function GetSlides(chapterID)
 {
-    let query = `SELECT Slides.* , Chapters.CourseID as CourseID FROM IA_VoiceSynth.Slides 
-                  Left Join Chapters on Chapters.ID = Slides.ChapterID Where ChapterID = ?`;
+    let query = `SELECT Slides.* , Chapters.CourseID as CourseID, (SlideAudio.SlideID is not null) as HasAudio  FROM IA_VoiceSynth.Slides 
+                  Left Join Chapters on Chapters.ID = Slides.ChapterID 
+                  Left Join SlideAudio on Slides.ID = SlideAudio.SlideID
+                  Where ChapterID = ?`;
     let values = [chapterID];
     try{
     return SQLQuery(query, values)
@@ -74,7 +76,7 @@ export async function GetSlideDetails(slideID)
   
   slides.forEach(slide => {
     
-      let queryClips = `Select ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, (audioclip is not null) as HasAudio from Clips where Clips.SlideID = ?`;
+      let queryClips = `Select ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved from Clips where Clips.SlideID = ?`;
 
       promises.push(SQLQuery(queryClips, valuesSlides).then(clips => {
         slide.Clips = clips
