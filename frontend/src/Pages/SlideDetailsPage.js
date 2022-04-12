@@ -107,8 +107,6 @@ const SlideDetailsPage = (props) => {
     }
      const selectedClipTextModified = (event) => {
         const updatedClip = {...selectedClip, ClipText: event.target.value}
-        console.log('Clip Text');
-        console.log(updatedClip.ClipText)
         setSelectedClipEdited(true);
         setSelectedClip(updatedClip)
      }
@@ -203,8 +201,11 @@ const SlideDetailsPage = (props) => {
         }      
     }
     function allClipsApproved() {
-        if (!Array.isArray(slide.Clips)) return false;
-        return slide.Clips.every((clip) => clip.ClipsStatus == 2);
+        if (!Array.isArray(slide.Clips)){ 
+            return false;
+        }
+        const approved = slide.Clips.every((clip) => clip.ClipStatusID == 2);
+        return approved;
     }
 
     function TextEditArea() {
@@ -255,12 +256,10 @@ const SlideDetailsPage = (props) => {
     }
     function MoveClipCard(fromOrdinal, toOrdinal)
     {
-        console.log('From:' + fromOrdinal + '   To:' + toOrdinal);
         //start spinner
         const clipsToUpdate = [];
         const movingClip = slide.Clips.find(clip => clip.OrdinalValue === fromOrdinal);
         slide.Clips.filter(clip=> (clip.OrdinalValue > fromOrdinal && clip.OrdinalValue <=toOrdinal)).forEach(clip => {
-            console.log('Moving ' + clip.ClipText + ' from ' + clip.OrdinalValue + ' down 1');
             clip.OrdinalValue -=1;  
             slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = {...clip}; 
             clipsToUpdate.push(clip);
@@ -268,7 +267,6 @@ const SlideDetailsPage = (props) => {
             //Save Clip here  
         });
         slide.Clips.filter(clip=> (clip.OrdinalValue < fromOrdinal && clip.OrdinalValue >=toOrdinal)).forEach(clip => {
-            console.log('Moving ' + clip.ClipText + ' from ' + clip.OrdinalValue + ' up 1');
             clip.OrdinalValue +=1;      
             slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = {...clip}; 
             clipsToUpdate.push(clip);
@@ -283,7 +281,6 @@ const SlideDetailsPage = (props) => {
         if (selectedClip) {
             selectedClip.OrdinalValue = slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == selectedClip.ID)].OrdinalValue;
         }
-        console.log('UpdatingClipOrder');
         //TODO This will reload all clip audios
         APICalls.UpdateClipOrder(clipsToUpdate).then( setSlide({...slide}))
         

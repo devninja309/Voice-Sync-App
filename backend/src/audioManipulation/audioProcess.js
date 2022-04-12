@@ -15,13 +15,12 @@ let files = [];
 
 //padding is in seconds
 async function ProcessFile (origFile, procFile, volume, speed, padding) {
-    console.log(`Padding= ${padding}`)
     return new Promise((resolve, reject) => {
         const command = fluent(origFile)
-            .on('codecData', function(data) {
-            console.log('Input is ' + data.audio + ' audio ' +
-                'with ' + data.video|| 'no' + ' video');
-            })
+            // .on('codecData', function(data) {
+            // console.log('Input is ' + data.audio + ' audio ' +
+            //     'with ' + data.video|| 'no' + ' video');
+            // })
             .audioCodec('libmp3lame')
             .audioFilters(`volume=${volume}`)
             .audioFilters(`atempo=${speed}`)
@@ -41,7 +40,6 @@ async function ProcessFile (origFile, procFile, volume, speed, padding) {
                 reject();
               })
               .on('end', function(stdout, stderr) {
-                console.log(`Transcoding clip succeeded !`);
                 resolve();
               })
             .run();
@@ -89,7 +87,6 @@ export async function ProcessSlide(slide) {
             const clipFile = await ProcessClip(slideClips[i]);
             clips.push(clipFile);
         }
-        console.log(clips);
 
         const slideUUID = uuidv4();
         const slideFileName = "".concat('output', '-', slideUUID);
@@ -105,7 +102,6 @@ export async function ProcessSlide(slide) {
                     reject();
                 })
                 .on('end', function(stdout, stderr) {
-                    console.log('Transcoding succeeded !');
                     resolve();
                 })
                 .mergeToFile(slideFile);
@@ -139,10 +135,8 @@ async function SetupTmp() {
 }
 
 async function CleanupTmp() {
-    console.log('Cleanup');
     while(files.length > 0) {
         const file = files.pop();
-        console.log(file);
         try {
             fs.unlink(file, (err) => {
                 if (err) { 
@@ -157,17 +151,11 @@ async function CleanupTmp() {
             //Don't really care
         }
     }
-    console.log('Finished Cleanup');
     const arrayOfFiles = fs.readdirSync(originalDir);
-    console.log(`Files that are still in original \n` + 
-        console.log(arrayOfFiles));
     const arrayOfFiles2 = fs.readdirSync(processedDir);
-    console.log(`Files that are still in processed \n` + 
-        console.log(arrayOfFiles2));
 
 }
 async function ProcessClip(clip) {
-    console.log('Processing Clip ' + clip.ID)
     const clipUUID = uuidv4();
     const clipFileName = "".concat(clip.ID, '-', clipUUID);
     var origFile = `${originalDir}/${clipFileName}.mp3`;
@@ -178,15 +166,12 @@ async function ProcessClip(clip) {
     const clipData = await GetClipAudio(clip.ID);
     var origBuffer = Buffer.from(clipData.AudioClip);
     await fs.createWriteStream(origFile).write(origBuffer);
-    console.log(`Created File: ` + origFile);
     const arrayOfFiles = fs.readdirSync(originalDir);
-    console.log(`Files that are in the original directory (which should include the file above)\n` + 
-        console.log(arrayOfFiles));
+
 
     //This method doesn't allow tempo changes greater than *2 /2, but since that's chipmunk range already, it's ok.
-    console.log('Starting Clip ' +clip.ID)
+
     const finished = ProcessFile(origFile, procFile, clip.Volume/200, clip.Speed/100, clip.Delay || .2);
     await finished;
-    console.log('Finished Clip ' +clip.ID)
     return procFile;
 }

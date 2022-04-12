@@ -51,8 +51,6 @@ export function GetChapters(fetchWithAuth, CourseID)
 }
 export function GetChapterDetails(fetchWithAuth, chapterID)
 {
-    console.log ('GetChapterDetails')
-    console.log(chapterID)
     return fetchWithAuth(getUrlPath(`chapters/${chapterID}`))
     .then(response => response.json());
 }

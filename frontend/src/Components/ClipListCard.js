@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import {Tooltip} from "@blueprintjs/core";
-import { ButtonGroup, Icon } from '@blueprintjs/core';
 import { useState, useEffect,useCallback } from 'react';
 import { useAuthTools } from '../Hooks/Auth';
 import { useLocation} from "react-router-dom";
@@ -15,7 +14,6 @@ import {LoadingSpinner} from "../Elements/LoadingSpinner";
 import {ClipDeleteButton} from "./ClipDeleteButton";
 import {ItemTypes} from "./DnDItemTypes";
 import {SimpleDropCardWrapper} from "../Elements/SimpleDropCardWrapper";
-import { SlideQuickSelect } from "./SlideQuickSelect";
 import {GetClipStatus} from "../Etc/ClipStatus";
 
 export function ClipListCard (props) 

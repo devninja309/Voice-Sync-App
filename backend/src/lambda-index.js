@@ -8,8 +8,8 @@ const handler = serverless(app,{
 // Lambda can't consume ES6 exports
 module.exports.handler = async (evt, ctx) => {
   ctx.callbackWaitsForEmptyEventLoop = false; 
-  console.log('Request');
-  console.log(evt)
+  //console.log('Request');
+  //console.log(evt)
   
   //return evt; //I return whatever is passed in when the lambda is called straight.
 
@@ -17,8 +17,8 @@ module.exports.handler = async (evt, ctx) => {
 
   const res = await handler(evt, ctx)
 
-  console.log('Response')
-  console.log(res)
+  //console.log('Response')
+  //console.log(res)
 
   return res
 }

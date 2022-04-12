@@ -333,7 +333,6 @@ export async function CreateClip(clip)
 //this function updates the entire clip AND resets the audio to null.
 export async function UpdateClip(clip)
 {
-  console.log('UpdateClip');
   //Check Clip
   let error = false;
   let errorString = "";
@@ -361,7 +360,6 @@ export async function UpdateClip(clip)
      let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, Volume =?, Speed=?, Delay=?, ClipStatusID =?, AudioClip = null Where ID = ?`;
      let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Delay, clip.ClipStatusID, clip.ID];
 
-     console.log(clip.ClipText);
     con.query(insert,values, (err, results, fields) => {
       if (err) {
         return console.error(err.message);

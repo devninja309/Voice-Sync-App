@@ -21,11 +21,8 @@ export function ChapterCreateDialog (props)
     const { APICalls} = useAuthTools();
 
     function AddChapter(){
-        console.log(chapterName);
-        console.log(CourseID);
         APICalls.CreateChapter({"ChapterName":chapterName, "CourseID": CourseID}).then(
             data => {
-                console.log(data);
                 navigate(`/courses/${CourseID}/chapters/` + data.ID)
             }
         );

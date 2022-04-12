@@ -57,13 +57,10 @@ export function ImportNewSlideText(chapterID, defaultSlideName, defaultVoice, te
         let ordinalValue = 1;
         if (slides.length === 0 )
         {
-            console.log('Single Slide File');
             // There are no slide labels, this is all one slide
             const promise = new Promise((resolve, reject) => {
-                console.log('Parsing as single string');
                 CreateSlide(chapterID, defaultSlideName, defaultVoice, null, text, APICalls, ordinalValue++).then(result => {resolve(result)});
             });
-            console.log('ImportNewSlideText Promise: ' , promise);
         
             return promise
         }
@@ -74,9 +71,7 @@ export function ImportNewSlideText(chapterID, defaultSlideName, defaultVoice, te
             var promiseArray = [];
             Array.from(slides).forEach(slide => {
                 let name = slide.getAttribute('name') || slide.getAttribute('Name') || defaultSlideName;
-                console.log(slide.getAttribute('name') )
                 let voice = parseInt(slide.getAttribute('voiceid')) || parseInt(slide.getAttribute('VoiceID')) || defaultVoice;
-                console.log(slide.getAttribute('voiceid') )
                 promiseArray.push( new Promise((resolve, reject) => {
                     CreateSlide(chapterID, name, voice, slide, slide.textContent, APICalls, ordinalValue++)
                         .then(result => {resolve(result)}); //.childNodes[0].nodeValue seems wrong?)
@@ -144,7 +139,6 @@ export function CreateSlide(chapterID, slideName, slideVoice, slideDom, text, AP
         }})
     });
     
-    console.log('CreateSlide:', promise);
 
     return promise
 }
@@ -169,16 +163,13 @@ export async function SplitVoiceIntoClips(slide, voice, text, APICalls ,ordinalV
             //     resolve()
             // })
         })
-        console.log('SplitVoiceIntoClips Many Promises:', promise, promise.state, promise.State, promise.PromiseState)
         promiseArray.push(promise);
     })
 
     //const sleep = ms => new Promise(r => setTimeout(r, ms));
     //promiseArray.push(sleep(10000).then(x => {console.log('nanny nanny boo boo')}));
-    console.log('Array', promiseArray)
-    const allPromise = Promise.all(promiseArray);
 
-    console.log('SplitVoiceIntoClips', allPromise)
+    const allPromise = Promise.all(promiseArray);
 
     return allPromise;
     

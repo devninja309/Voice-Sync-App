@@ -401,8 +401,8 @@ router.get('/test', (ctx) => {
           console.log(ttsResponse);
         }
         else {
-          console.log('Successful audio generation');
-          console.log(ttsResponse.headers);
+          //console.log('Successful audio generation');
+          //console.log(ttsResponse.headers);
         }
 
         //https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams

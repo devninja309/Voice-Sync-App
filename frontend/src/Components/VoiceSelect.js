@@ -13,9 +13,6 @@ import { Avatars } from '../Etc/Avatars';
      const avatars = Avatars;
 
      const [voiceID, setVoiceID] = useState('')
-     console.log('Checking voice ids')
-     console.log(voiceID);
-     console.log(clip.VoiceID);
 
     useEffect( () => {
         setVoiceID(clip.VoiceID);  

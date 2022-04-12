@@ -30,7 +30,6 @@ async function  PlayAudio() {
 
     const vol = (props.volume||100) /100;
     const pace = (props.pace||100) /100;
-    console.log('Volume' + vol);
 
     try {
         const audioCtx = new window.AudioContext();
@@ -66,9 +65,6 @@ async function StopAudio() {
         setPlaying(false)
     }
 }
-console.log('url')
-//<audio controls src={props.audiofile} />
-console.log(props.audiofile)
 if (!playing || audioControl && audioControl.ended) {
     return (
         <div>

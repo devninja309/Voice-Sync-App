@@ -3,7 +3,6 @@
 import * as React from "react";
 import {useState, useEffect} from 'react';
 import { useParams } from 'react-router';
-import { useAuth0 } from "@auth0/auth0-react";
 
 import { IconButton } from "../Elements/IconButton";
 import{useAuthTools} from '../Hooks/Auth';

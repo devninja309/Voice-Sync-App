@@ -20,10 +20,8 @@ export function CourseCreateDialog (props)
     const { APICalls} = useAuthTools();
 
     function Addcourse(){
-        console.log(courseName);
         APICalls.Createcourse({"CourseName":courseName}).then(
             data => {
-                console.log(data);
                 navigate('/courses/' + data.ID)
             }
         );
