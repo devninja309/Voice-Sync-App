@@ -36,6 +36,7 @@ export function ClipListCard (props)
     function LoadClipAudio(audioClip) //from database
     {
         setUrl(null);
+        console.log('Checking for audio on: ', audioClip)
         if (audioClip.HasAudio)
         {
         APICalls.GetClipAudio(audioClip.ID)

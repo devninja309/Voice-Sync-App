@@ -67959,8 +67959,10 @@ async function GetChapterDetails(chapterID)
 
 function GetSlides(chapterID)
 {
-    let query = `SELECT Slides.* , Chapters.CourseID as CourseID FROM IA_VoiceSynth.Slides 
-                  Left Join Chapters on Chapters.ID = Slides.ChapterID Where ChapterID = ?`;
+    let query = `SELECT Slides.* , Chapters.CourseID as CourseID, (SlideAudio.SlideID is not null) as HasAudio  FROM IA_VoiceSynth.Slides 
+                  Left Join Chapters on Chapters.ID = Slides.ChapterID 
+                  Left Join SlideAudio on Slides.ID = SlideAudio.SlideID
+                  Where ChapterID = ?`;
     let values = [chapterID];
     try{
     return SQLQuery(query, values)
@@ -67979,7 +67981,7 @@ async function GetSlideDetails(slideID)
   
   slides.forEach(slide => {
     
-      let queryClips = `Select ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, (audioclip is not null) as HasAudio from Clips where Clips.SlideID = ?`;
+      let queryClips = `Select ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, ClipStatusID, (audioclip is not null) as HasAudio from Clips where Clips.SlideID = ?`;
 
       promises.push(SQLQuery(queryClips, valuesSlides).then(clips => {
         slide.Clips = clips
@@ -68172,7 +68174,7 @@ async function GetClipDetails(clipID)
 {
   //This is everything except AudioClip, which is binary data.
   //Consider moving AudioClip to a filestore (S3) or a separate table.
-  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, (audioclip is not null) as HasAudio
+  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, (audioclip is not null) as HasAudio, ClipStatusID
      FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
   let valuesSlides = [clipID];
   let clips = await SQLQuery(querySlides, valuesSlides);
@@ -68216,7 +68218,7 @@ async function CreateClip(clip)
         if (err) console.log( err);
       });
 
-      let insert = 'Insert into IA_VoiceSynth.Clips (SlideID,ClipText, VoiceID, OrdinalValue) Values (?,?,?,?)';
+      let insert = 'Insert into IA_VoiceSynth.Clips (SlideID,ClipText, VoiceID, OrdinalValue, ClipStatusID) Values (?,?,?,?,1)';
       let values = [clip.SlideID, clip.ClipText, voiceID,clip.OrdinalValue];
 
       con.query(insert,values, (err, results, fields) => {
@@ -68261,8 +68263,8 @@ async function UpdateClip(clip)
     });
 
 
-     let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, Volume =?, Speed=?, Delay=?, Approved=?, AudioClip = null Where ID = ?`;
-     let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Delay, clip.Approved, clip.ID];
+     let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, Volume =?, Speed=?, Delay=?, ClipStatusID =?, AudioClip = null Where ID = ?`;
+     let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Delay, clip.ClipStatusID, clip.ID];
 
      console.log(clip.ClipText);
     con.query(insert,values, (err, results, fields) => {
@@ -68367,8 +68369,8 @@ async function UpdateClipPost(clip)
       if (err) console.log( err);
     });
 
-     let insert = `Update IA_VoiceSynth.Clips set Volume = ?, Speed = ?, Delay = ?, Approved =? Where ID = ?`;
-     let values = [clip.Volume, clip.Speed, clip.Delay, clip.Approved, clip.ID];
+     let insert = `Update IA_VoiceSynth.Clips set Volume = ?, Speed = ?, Delay = ?, ClipStatusID =? Where ID = ?`;
+     let values = [clip.Volume, clip.Speed, clip.Delay, clip.ClipStatusID, clip.ID];
 
     con.query(insert,values, (err, results, fields) => {
       if (err) {
@@ -71173,7 +71175,7 @@ async function ProcessClip(clip) {
 const routes_ttsEndPoint = "https://api.wellsaidlabs.com/v1/tts/stream"
 const auth0EndPoint = "https://dev-l3ao-nin.us.auth0.com/.well-known/jwks.json"
 const auth0NameSpace = "https://industryacademy.com/"
-const defaultPageSize = 5;
+const defaultPageSize = 20;
 
 const routes_router = new router({
   prefix: '/v1'
@@ -71465,12 +71467,14 @@ routes_router.get('/test', (ctx) => {
         //Load slide
           let slideAudio = await GetSlideAudio(slideID);
       
+          if (slideAudio != null) { //Don't really return anything if the slide audio is null
         //return slide
           ctx.isBase64Encoded = true; 
           ctx.body = slideAudio.AudioFile;  
           //ctx.set('Content-Type', 'audio/mpeg');
           ctx.set('Content-Type', 'application/octet-stream');
           ctx.set('Content-Disposition', `attachment; filename=slide-${slideID}.mp3`)
+          }
         })
       .get('/slides/:slideID/audio', async (ctx) => {
           //Load slide

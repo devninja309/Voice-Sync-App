@@ -76,7 +76,7 @@ export async function GetSlideDetails(slideID)
   
   slides.forEach(slide => {
     
-      let queryClips = `Select ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, ClipStatusID from Clips where Clips.SlideID = ?`;
+      let queryClips = `Select ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, ClipStatusID, (audioclip is not null) as HasAudio from Clips where Clips.SlideID = ?`;
 
       promises.push(SQLQuery(queryClips, valuesSlides).then(clips => {
         slide.Clips = clips
