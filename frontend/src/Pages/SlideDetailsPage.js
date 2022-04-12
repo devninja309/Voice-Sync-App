@@ -112,21 +112,20 @@ const SlideDetailsPage = (props) => {
         setSelectedClipEdited(true);
         setSelectedClip(updatedClip)
      }
+     const selectedClipStatus = (clipStatusID) => {
+        const updatedClip = {...selectedClip, ClipStatusID: clipStatusID}
+        setSelectedClipPostEdited(true);
+        setSelectedClip(updatedClip);
+        pushChangedClip(updatedClip);
 
-     const selectedClipApproved = () => {
-         const updatedClip = {...selectedClip, Approved: true}
-         setSelectedClipPostEdited(true);
-         setSelectedClip(updatedClip);
-     }
-     const selectedClipDisapproved = () => {
-         const updatedClip = {...selectedClip, Approved: false}
-         setSelectedClipPostEdited(true);
-         setSelectedClip(updatedClip);
      }
      const pushChangedClip = (clip) => {
         if (selectedClipEdited) {
             clip.AudioClip = null;
             clip.HasAudio = false;
+            if (clip.ClipStatusID == 2) {
+                clip.ClipStatusID = 1;
+            }
             APICalls.UpdateClip(clip)
         }
         else {
@@ -205,7 +204,7 @@ const SlideDetailsPage = (props) => {
     }
     function allClipsApproved() {
         if (!Array.isArray(slide.Clips)) return false;
-        return slide.Clips.every((clip) => clip.Approved);
+        return slide.Clips.every((clip) => clip.ClipsStatus == 2);
     }
 
     function TextEditArea() {
@@ -228,8 +227,9 @@ const SlideDetailsPage = (props) => {
                         {(selectedClipEdited || selectedClipPostEdited) && <SimpleButton onClick= {()=> pushChangedClip(selectedClip)} Text="Save Changes" className="simpleButtonSlideButtonGroup" disabled = {slideProcessing} />}
                         <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => changeSelectedClip(null)} Text="Deselect Clip" disabled = {slideProcessing}/>
                         <VoiceSelect className ="simpleButtonSlideButtonGroup" clip = {selectedClip} onChange={(newClip) => UpdateSelectedClip(newClip)}/>
-                        {!! !selectedClip.Approved && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipApproved()} Text="Approve Clip" disabled = {slideProcessing}/>}
-                        {!!selectedClip.Approved && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipDisapproved()} Text="Disapprove Clip" disabled = {slideProcessing}/>}
+                        {selectedClip.ClipStatusID != 2 && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipStatus(2)} Text="Approve Clip and Save" disabled = {slideProcessing} rightIcon ="thumbs-up"/>}
+                        {selectedClip.ClipStatusID == 2 && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipStatus(1)} Text="Disapprove Clip and Save" disabled = {slideProcessing} rightIcon ="thumbs-down"/>}
+                        {selectedClip.ClipStatusID != 3 && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipStatus(3)} Text="Request Review and Save" disabled = {slideProcessing} rightIcon ="warning-sign"/>}
                         </div>
                         <div className="div-ClipEditButtonRow">
                         <VolumeSelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClipPost(newClip)} disabled = {slideProcessing}/>
@@ -297,7 +297,6 @@ const SlideDetailsPage = (props) => {
             VoiceID: 3,
             Volume: 150,
             Speed: 105,
-            Approved: false,
             Delay: 1          
         }
         APICalls.CreateClip(Clip).then(
@@ -310,7 +309,7 @@ const SlideDetailsPage = (props) => {
     const BreadCrumbsList = [
         { href: `/courses/${CourseID}`, text: `${courseName}` },
         { href:  `/courses/${CourseID}/chapters/${slide.ChapterID}`, text: `${chapterName}` },
-        { icon: `/courses/${CourseID}/chapters/${slide.ChapterID}/slides/${slideID}`, text: `${slide.SlideName}` },
+        { href: `/courses/${CourseID}/chapters/${slide.ChapterID}/slides/${slideID}`, text: `${slide.SlideName}` },
     ];
 
     return  (     
@@ -348,38 +347,46 @@ const SlideDetailsPage = (props) => {
                     </a>}
                     </ButtonGroup>
                 </div>
-                <div class = "div-Slide-Details-ClipsList-Column">
-                    <ButtonGroup className = "buttonGroup-row">
-                
-                <Tooltip
-                            content={<span>Add New Clip</span>}
-                            openOnTargetFocus={false}
-                            usePortal={false}
-                        >
-                        <IconButton icon="plus" onClick = {() => addClip()}/>
-                </Tooltip>
-                <p> </p>
-                <Tooltip
-                            content={<span>Submit all unsubmitted clips</span>}
-                            openOnTargetFocus={false}
-                            usePortal={false}
-                        >
-                        <IconButton icon="refresh" onClick = {() => UpdateAllClipAudio()}/>
-                </Tooltip>
-                <p> </p>
-                <Tooltip
-                            content={<span>Add new Pronunciation</span>}
-                            openOnTargetFocus={false}
-                            usePortal={false}
-                        >
-                        <IconButton icon="translate" onClick={() => setIsPronunciationOpen(true)}/>
-                </Tooltip>
-                    </ButtonGroup>
-                    <div class = "div-Slide-Details-ClipsList">
-                    {DisplayClipsList(slide) }
+                <div className = "div-Slide-Details-ClipsList-Column">
+                    <div className = "buttonGroup-row">
+                        <ButtonGroup className = "buttonGroup-row buttonGroup-row-left">     
+                            <Tooltip
+                                content={<span>Add New Clip</span>}
+                                openOnTargetFocus={false}
+                                usePortal={false}
+                            >
+                            <IconButton icon="plus" onClick = {() => addClip()}/>
+                            </Tooltip>
+                            <p> </p>
+                            <Tooltip
+                                        content={<span>Submit all unsubmitted clips</span>}
+                                        openOnTargetFocus={false}
+                                        usePortal={false}
+                                    >
+                                    <IconButton icon="refresh" onClick = {() => UpdateAllClipAudio()}/>
+                            </Tooltip>
+                            <p> </p>
+                            <Tooltip
+                                        content={<span>Add new Pronunciation</span>}
+                                        openOnTargetFocus={false}
+                                        usePortal={false}
+                                    >
+                                    <IconButton icon="translate" onClick={() => setIsPronunciationOpen(true)}/>
+                            </Tooltip>
+                        </ButtonGroup>
+                        <ButtonGroup className = "buttonGroup-row buttonGroup-row-right">     
+                                {allClipsApproved() && <button className="input" onClick={mergeSlide}>Merge all clips</button>}
+                                <SimpleAudioPlayer audiofile = {slideAudioURL} updating={slideAudioUpdating}/>  
+                                {slideHasAudio && <a href={slideAudioURL} download={'Slide-' + slide.ID + '-Audio.mp3'}>
+                                    <IconButton icon="cloud-download" text="Download Slide Audio" download/>
+                                    </a>}
+                        </ButtonGroup>
                     </div>
+                <div class = "div-Slide-Details-ClipsList">
+                    {DisplayClipsList(slide) }
                 </div>
             </div>
+                </div>
             </header>
         </div>
         </DndProvider>

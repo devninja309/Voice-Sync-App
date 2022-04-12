@@ -75,13 +75,16 @@ function paginationControls() {
 const messageStyle = {
     width: '75%'
   };
+  const dateStyle = {
+      width: '15%'
+    };
 
     return (
         <div className = "logListBox"> 
             <table className = "LogListTable">
                 <thead>
                     <tr className = "LogListTable-HeaderRow">
-                        <th>Date</th>
+                        <th style={dateStyle}>Date</th>
                         <th>User</th>
                         <th style={messageStyle}>Message</th>
                     </tr>

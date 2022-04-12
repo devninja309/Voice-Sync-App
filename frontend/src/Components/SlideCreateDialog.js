@@ -26,7 +26,7 @@ export function SlideCreateDialog (props)
     const {token,APICalls} = useAuthTools();
 
     function AddSlide(){
-        let promise = ImportNewSlideText(ChapterID, slideName, 3, slideText,APICalls)
+        let promise = ImportNewSlideText(ChapterID, slideName, 61137774, slideText,APICalls)
         console.log('Promise:' , promise);
         promise.then(
             data => {

@@ -86,4 +86,25 @@ Create Table `IA_VoiceSynth`.`SlideAudio` (
     ALTER TABLE `IA_VoiceSynth`.Clips ALTER Delay SET DEFAULT 1;
     ALTER TABLE `IA_VoiceSynth`.Clips ALTER Speed SET DEFAULT 105;
     ALTER TABLE `IA_VoiceSynth`.Clips ALTER Volume SET DEFAULT 150;
-    
+
+
+Create Table `IA_VoiceSynth`.`ClipStatus` (
+  `ID` INT NOT NULL AUTO_INCREMENT,
+  `Description` VARCHAR(45) Not NULL,
+  PRIMARY KEY (`ID`))
+
+INSERT INTO `IA_VoiceSynth`.`ClipStatus` (`Description`, `ID`) 
+VALUES 
+("Unapproved", 1),
+("Approved", 2),
+("Needs Review", 3);
+
+Alter Table `IA_VoiceSynth`.`Clips`
+    ADD COLUMN `ClipStatusID` int not null default 1
+
+Alter Table `IA_VoiceSynth`.`Clips`
+    ADD FOREIGN KEY (`ClipStatusID`) REFERENCES `IA_VoiceSynth`.`ClipStatus`(`ID`);
+
+Update `IA_VoiceSynth`.`Clips`
+Set `ClipStatusID` = 2 
+Where `Approved` = true;

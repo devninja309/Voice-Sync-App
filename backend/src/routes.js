@@ -20,7 +20,7 @@ import {ProcessSlide} from './audioManipulation/audioProcess.js';
 const ttsEndPoint = "https://api.wellsaidlabs.com/v1/tts/stream"
 const auth0EndPoint = "https://dev-l3ao-nin.us.auth0.com/.well-known/jwks.json"
 const auth0NameSpace = "https://industryacademy.com/"
-const defaultPageSize = 5;
+const defaultPageSize = 20;
 
 export const router = new Router({
   prefix: '/v1'

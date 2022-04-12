@@ -16,6 +16,7 @@ import {ClipDeleteButton} from "./ClipDeleteButton";
 import {ItemTypes} from "./DnDItemTypes";
 import {SimpleDropCardWrapper} from "../Elements/SimpleDropCardWrapper";
 import { SlideQuickSelect } from "./SlideQuickSelect";
+import {GetClipStatus} from "../Etc/ClipStatus";
 
 export function ClipListCard (props) 
 {
@@ -64,9 +65,9 @@ export function ClipListCard (props)
         if (clip === null) {
             return base;
         }
-        const approved = (clip.Approved) ? " SimpleCard-ClipListCard-Approved": "";
+        const statusCSS =  " SimpleCard-ClipListCard-"+GetClipStatus(clip).label;
 
-        return base + approved;
+        return base + statusCSS;
     }
     
     if (clip === null){
@@ -86,29 +87,31 @@ export function ClipListCard (props)
                     <p class = "p-clip-card-text">
                         Clip: {clip.OrdinalValue}
                     </p>
-                                           
                     <IconButton icon="refresh" onClick={()=>UpdateClipAudio(clip.ID)}/>
-                    <SimpleAudioPlayer pace = {clip.Speed} volume = {clip.Volume/2} audiofile = {url} updating={updating}/>  
-                <Tooltip
-                            content={<span>{clip.ClipText}</span>}
-                            openOnTargetFocus={false}
-                            usePortal={false}
-                        >
-                            ... 
-                </Tooltip>
-                        <p class = "p-clip-card-text">
-                </p>
-                <ClipDeleteButton 
-                        ItemID = {clip.ID}
-                        SlideID = {clip.SlideID}
-                        Redirect = {currentLocation.pathname}
-                        />
+                    <ClipDeleteButton 
+                            ItemID = {clip.ID}
+                            SlideID = {clip.SlideID}
+                            Redirect = {currentLocation.pathname}
+                            />
                 </div>
-                <p class = "p-clip-card-text">
-                    Voice: {clip.VoiceID}
-                </p>
-                
-                
+                <div class="div-Slide-Details-Container">                               
+                    <SimpleAudioPlayer pace = {clip.Speed} volume = {clip.Volume/2} audiofile = {url} updating={updating}/>  
+                    
+                </div>
+                <div class="div-Slide-Details-Container">     
+                    <Tooltip
+                                content={<span>{clip.ClipText}</span>}
+                                openOnTargetFocus={false}
+                                usePortal={false}
+                            >
+                            <p class = "p-clip-card-text">
+                                ... 
+                                </p>
+                    </Tooltip>
+                    <p class = "p-clip-card-text">
+                        Voice: {clip.VoiceID}
+                    </p>
+                </div>            
             </SimpleCard>
         </div>);
     }   

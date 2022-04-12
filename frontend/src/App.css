@@ -72,13 +72,15 @@
   word-break: break-word;
   white-space: nowrap;
   text-align: left;
-  font-size: .8vw;
+  font-size: .7vw;
   color:brown;
+  margin: auto;
 
 }
 .p-no-audio{
   color:red;
   font-size:x-small;
+  margin: auto;
 }
 
 .InlineDivStyle {
@@ -100,15 +102,24 @@
 }
 .SimpleCard-ClipListCard {
   min-height: 80px;
+  padding:10px;
   /*max-height: 130px;*/
 
+}
+.SimpleCard-ClipListCard-Unapproved {
+  background-color: #ffffff
+  ;
 }
 .SimpleCard-ClipListCard-Approved {
   background-color: #e6ffe6
   ;
 }
+.SimpleCard-ClipListCard-NeedsReview {
+  background-color: #ffe6e6
+  ;
+}
 .SimpleCardDiv {
-  padding:10px;
+  padding:7px;
 }
 .courseListBox {
   width: 50%;
@@ -142,14 +153,14 @@
   width: 90%;
   border-width: 1px;
   border-style: solid;
-  font-size:smaller;
+  font-size: 1vw;
   font-weight:bolder;
   
 }
 .LogListTable-DataRow {
   border-width: 0px;
   border-style: solid;
-  font-size:small;
+  font-size: .8vw;
   
 }
 .LogListTable-DataRow:nth-child(even) {background-color: #f2f2f2;}
@@ -215,6 +226,7 @@
 }
 .div-SlideHeader {
   width: 100%;
+  justify-content:space-between;
   display: flex;
 }
 .div-ClipListCard {
@@ -270,14 +282,29 @@
   /*height: 80px;*/
   
 }
+.buttonGroup-row {
+
+  justify-items: left;
+  min-height: 40px;
+}
+.buttonGroup-row-left {
+ float:left
+
+}
+.buttonGroup-row-right {
+  float:right
+
+}
 .buttonGroup-row>*{
   padding: 5px;
 }
 .button-Simple {
   padding: 5px;
+  font-size: .8vw;
 }
 .button-Link {
   margin: 5px;
+  font-size: .8vw;
 }
 .info-row {
   display: flex;
