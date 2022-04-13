@@ -17,10 +17,13 @@ let files = [];
 async function ProcessFile (origFile, procFile, volume, speed, padding) {
     return new Promise((resolve, reject) => {
         const command = fluent(origFile)
-            // .on('codecData', function(data) {
+            .on('start', function(commandLine) {
+                console.log('Spawned Ffmpeg with command: ' + commandLine);
+            })
+            .on('codecData', function(data) {
             // console.log('Input is ' + data.audio + ' audio ' +
             //     'with ' + data.video|| 'no' + ' video');
-            // })
+            })
             .audioCodec('libmp3lame')
             .audioFilters(`volume=${volume}`)
             .audioFilters(`atempo=${speed}`)
@@ -28,12 +31,21 @@ async function ProcessFile (origFile, procFile, volume, speed, padding) {
             .output(procFile) 
             .audioCodec('libmp3lame')
             .on('error', function(err, stdout, stderr) {
-                console.log(`ProncessFile error with file ` + origFile + '\n')
+                console.log(`ProcessFile error with file ` + origFile + '\n')
                 console.log(`Cannot process clip :` + err.message +`\n`);
+                console.log(err);
+                console.log('Volume:', volume, 'atempo:', speed, 'padding:', padding);
                 try {
                     console.log('Existing files (Should include the above file):\n')
                     const arrayOfFiles = fs.readdirSync(originalDir);
-                        console.log(arrayOfFiles);
+                    console.log(arrayOfFiles);
+                    fs.stat(origFile, (err, stats) => {
+                            if (err) {
+                                console.log(origFile, `File doesn't exist.`);
+                            } else {
+                                console.log(origFile, ' : ', stats);
+                            }
+                        });
                 } catch(e) {
                     console.log(e)
                 }
@@ -60,6 +72,12 @@ export async function PreProcessClip(clipID, clipAudio) {
         
         var origBuffer = Buffer.from(clipData.AudioClip);
         await fs.createWriteStream(origFile).write(origBuffer);
+        // const origFileStream =  fs.createWriteStream(origFile).write(origBuffer);
+        // origFileStream.on('open', function(fd) {
+            
+        //     await origFileStream.write(origBuffer);
+
+        // });
 
         //This method doesn't allow tempo changes greater than *2 /2, but since that's chipmunk range already, it's ok.
         console.log('Starting Clip ' +clip.ID)
@@ -67,6 +85,7 @@ export async function PreProcessClip(clipID, clipAudio) {
         await finished;
         console.log('Finished Clip ' +clip.ID)
         return procFile;
+
     }
     finally {
         CleanupTmp();
@@ -141,6 +160,7 @@ async function CleanupTmp() {
             fs.unlink(file, (err) => {
                 if (err) { 
                     console.log('Error Deleting file');
+                    console.log(err);
                     //Don't really care
                 }
             } );
@@ -148,6 +168,7 @@ async function CleanupTmp() {
         catch(err)
         {
             console.log('Error Deleting file');
+            console.log(err);
             //Don't really care
         }
     }
@@ -165,13 +186,28 @@ async function ProcessClip(clip) {
 
     const clipData = await GetClipAudio(clip.ID);
     var origBuffer = Buffer.from(clipData.AudioClip);
-    await fs.createWriteStream(origFile).write(origBuffer);
-    const arrayOfFiles = fs.readdirSync(originalDir);
+    //await fs.createWriteStream(origFile).write(origBuffer);
+    
+    var processFilePromise = new Promise((resolve, reject) => {
+        const origFileStream =  fs.createWriteStream(origFile)
+        origFileStream.on('open', async function(fd) {
+            
+            await origFileStream.write(origBuffer);
+            // fs.stat(origFile, (err, stats) => {
+            //     if (err) {
+            //         console.log(origFile, `File doesn't exist.`);
+            //     } else {
+            //         console.log('Creating File');
+            //         console.log(origFile, ' : ', stats);
+            //     }
+            // });
+            const finished = ProcessFile(origFile, procFile, clip.Volume/200, clip.Speed/100, clip.Delay || .2);
+            await finished;
+            resolve();
 
-
-    //This method doesn't allow tempo changes greater than *2 /2, but since that's chipmunk range already, it's ok.
-
-    const finished = ProcessFile(origFile, procFile, clip.Volume/200, clip.Speed/100, clip.Delay || .2);
-    await finished;
+        });
+     
+    });
+    await processFilePromise;
     return procFile;
 }

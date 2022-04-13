@@ -523,6 +523,7 @@ export async function UpdateClipOrder(clips) {
       })
     }
     )
+  con.end();
   return;
 }
 

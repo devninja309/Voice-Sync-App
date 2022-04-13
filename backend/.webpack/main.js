@@ -68238,7 +68238,6 @@ async function CreateClip(clip)
 //this function updates the entire clip AND resets the audio to null.
 async function UpdateClip(clip)
 {
-  console.log('UpdateClip');
   //Check Clip
   let error = false;
   let errorString = "";
@@ -68266,7 +68265,6 @@ async function UpdateClip(clip)
      let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, Volume =?, Speed=?, Delay=?, ClipStatusID =?, AudioClip = null Where ID = ?`;
      let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Delay, clip.ClipStatusID, clip.ID];
 
-     console.log(clip.ClipText);
     con.query(insert,values, (err, results, fields) => {
       if (err) {
         return console.error(err.message);
@@ -68430,6 +68428,7 @@ async function UpdateClipOrder(clips) {
       })
     }
     )
+  con.end();
   return;
 }
 
@@ -70983,12 +70982,14 @@ let files = [];
 
 //padding is in seconds
 async function ProcessFile (origFile, procFile, volume, speed, padding) {
-    console.log(`Padding= ${padding}`)
     return new Promise((resolve, reject) => {
         const command = fluent_ffmpeg(origFile)
+            .on('start', function(commandLine) {
+                console.log('Spawned Ffmpeg with command: ' + commandLine);
+            })
             .on('codecData', function(data) {
-            console.log('Input is ' + data.audio + ' audio ' +
-                'with ' + data.video|| 0);
+            // console.log('Input is ' + data.audio + ' audio ' +
+            //     'with ' + data.video|| 'no' + ' video');
             })
             .audioCodec('libmp3lame')
             .audioFilters(`volume=${volume}`)
@@ -70997,19 +70998,27 @@ async function ProcessFile (origFile, procFile, volume, speed, padding) {
             .output(procFile) 
             .audioCodec('libmp3lame')
             .on('error', function(err, stdout, stderr) {
-                console.log(`ProncessFile error with file ` + origFile + '\n')
+                console.log(`ProcessFile error with file ` + origFile + '\n')
                 console.log(`Cannot process clip :` + err.message +`\n`);
+                console.log(err);
+                console.log('Volume:', volume, 'atempo:', speed, 'padding:', padding);
                 try {
                     console.log('Existing files (Should include the above file):\n')
                     const arrayOfFiles = external_fs_.readdirSync(originalDir);
-                        console.log(arrayOfFiles);
+                    console.log(arrayOfFiles);
+                    external_fs_.stat(origFile, (err, stats) => {
+                            if (err) {
+                                console.log(origFile, `File doesn't exist.`);
+                            } else {
+                                console.log(origFile, ' : ', stats);
+                            }
+                        });
                 } catch(e) {
                     console.log(e)
                 }
                 reject();
               })
               .on('end', function(stdout, stderr) {
-                console.log(`Transcoding clip succeeded !`);
                 resolve();
               })
             .run();
@@ -71030,6 +71039,12 @@ async function PreProcessClip(clipID, clipAudio) {
         
         var origBuffer = Buffer.from(clipData.AudioClip);
         await fs.createWriteStream(origFile).write(origBuffer);
+        // const origFileStream =  fs.createWriteStream(origFile).write(origBuffer);
+        // origFileStream.on('open', function(fd) {
+            
+        //     await origFileStream.write(origBuffer);
+
+        // });
 
         //This method doesn't allow tempo changes greater than *2 /2, but since that's chipmunk range already, it's ok.
         console.log('Starting Clip ' +clip.ID)
@@ -71037,6 +71052,7 @@ async function PreProcessClip(clipID, clipAudio) {
         await finished;
         console.log('Finished Clip ' +clip.ID)
         return procFile;
+
     }
     finally {
         CleanupTmp();
@@ -71057,7 +71073,6 @@ async function ProcessSlide(slide) {
             const clipFile = await ProcessClip(slideClips[i]);
             clips.push(clipFile);
         }
-        console.log(clips);
 
         const slideUUID = esm_node_v4();
         const slideFileName = "".concat('output', '-', slideUUID);
@@ -71073,7 +71088,6 @@ async function ProcessSlide(slide) {
                     reject();
                 })
                 .on('end', function(stdout, stderr) {
-                    console.log('Transcoding succeeded !');
                     resolve();
                 })
                 .mergeToFile(slideFile);
@@ -71107,14 +71121,13 @@ async function SetupTmp() {
 }
 
 async function CleanupTmp() {
-    console.log('Cleanup');
     while(files.length > 0) {
         const file = files.pop();
-        console.log(file);
         try {
             external_fs_.unlink(file, (err) => {
                 if (err) { 
                     console.log('Error Deleting file');
+                    console.log(err);
                     //Don't really care
                 }
             } );
@@ -71122,20 +71135,15 @@ async function CleanupTmp() {
         catch(err)
         {
             console.log('Error Deleting file');
+            console.log(err);
             //Don't really care
         }
     }
-    console.log('Finished Cleanup');
     const arrayOfFiles = external_fs_.readdirSync(originalDir);
-    console.log(`Files that are still in original \n` + 
-        console.log(arrayOfFiles));
     const arrayOfFiles2 = external_fs_.readdirSync(processedDir);
-    console.log(`Files that are still in processed \n` + 
-        console.log(arrayOfFiles2));
 
 }
 async function ProcessClip(clip) {
-    console.log('Processing Clip ' + clip.ID)
     const clipUUID = esm_node_v4();
     const clipFileName = "".concat(clip.ID, '-', clipUUID);
     var origFile = `${originalDir}/${clipFileName}.mp3`;
@@ -71145,17 +71153,29 @@ async function ProcessClip(clip) {
 
     const clipData = await GetClipAudio(clip.ID);
     var origBuffer = external_buffer_.Buffer.from(clipData.AudioClip);
-    await external_fs_.createWriteStream(origFile).write(origBuffer);
-    console.log(`Created File: ` + origFile);
-    const arrayOfFiles = external_fs_.readdirSync(originalDir);
-    console.log(`Files that are in the original directory (which should include the file above)\n` + 
-        console.log(arrayOfFiles));
+    //await fs.createWriteStream(origFile).write(origBuffer);
+    
+    var processFilePromise = new Promise((resolve, reject) => {
+        const origFileStream =  external_fs_.createWriteStream(origFile)
+        origFileStream.on('open', async function(fd) {
+            
+            await origFileStream.write(origBuffer);
+            // fs.stat(origFile, (err, stats) => {
+            //     if (err) {
+            //         console.log(origFile, `File doesn't exist.`);
+            //     } else {
+            //         console.log('Creating File');
+            //         console.log(origFile, ' : ', stats);
+            //     }
+            // });
+            const finished = ProcessFile(origFile, procFile, clip.Volume/200, clip.Speed/100, clip.Delay || .2);
+            await finished;
+            resolve();
 
-    //This method doesn't allow tempo changes greater than *2 /2, but since that's chipmunk range already, it's ok.
-    console.log('Starting Clip ' +clip.ID)
-    const finished = ProcessFile(origFile, procFile, clip.Volume/200, clip.Speed/100, clip.Delay || .2);
-    await finished;
-    console.log('Finished Clip ' +clip.ID)
+        });
+     
+    });
+    await processFilePromise;
     return procFile;
 }
 ;// CONCATENATED MODULE: ./src/routes.js
@@ -71556,8 +71576,8 @@ routes_router.get('/test', (ctx) => {
           console.log(ttsResponse);
         }
         else {
-          console.log('Successful audio generation');
-          console.log(ttsResponse.headers);
+          //console.log('Successful audio generation');
+          //console.log(ttsResponse.headers);
         }
 
         //https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
@@ -71868,8 +71888,8 @@ const handler = serverless_http(src_app,{
 // Lambda can't consume ES6 exports
 module.exports.handler = async (evt, ctx) => {
   ctx.callbackWaitsForEmptyEventLoop = false; 
-  console.log('Request');
-  console.log(evt)
+  //console.log('Request');
+  //console.log(evt)
   
   //return evt; //I return whatever is passed in when the lambda is called straight.
 
@@ -71877,8 +71897,8 @@ module.exports.handler = async (evt, ctx) => {
 
   const res = await handler(evt, ctx)
 
-  console.log('Response')
-  console.log(res)
+  //console.log('Response')
+  //console.log(res)
 
   return res
 }

@@ -32,7 +32,7 @@ Resources:
   WebAPILambdaV1:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://s3-ia-cfg/f2bea96d5a2debf740bc0e0e0942c623
+      CodeUri: s3://s3-ia-cfg/50a0f23e0998472bf40447bd4db88e5a
       Handler: main.handler
       Layers:
       - Ref: FFMPEGLayer
