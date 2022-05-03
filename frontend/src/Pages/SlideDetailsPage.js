@@ -58,6 +58,8 @@ const SlideDetailsPage = (props) => {
     const handlePronunciationClose = useCallback(() => setIsPronunciationOpen(false), []);
     
     useEffect( () => {
+        setSlideHasAudio(false);
+        setSlideAudioURL(null)
         LoadSlide();
         APICalls.GetChapterDetails(ChapterID)
         .then(
@@ -285,6 +287,7 @@ const SlideDetailsPage = (props) => {
         APICalls.UpdateClipOrder(clipsToUpdate).then( setSlide({...slide}))
         
     }
+    //TODO This default clip definition is fragile
     function addClip() {
         const ordinalValue = Math.max(...slide.Clips.map(clip => clip.OrdinalValue)) + 1;
         const Clip = {
@@ -294,7 +297,8 @@ const SlideDetailsPage = (props) => {
             VoiceID: 3,
             Volume: 150,
             Speed: 105,
-            Delay: 1          
+            Delay: 1, 
+            ClipStatusID: 1     
         }
         APICalls.CreateClip(Clip).then(
             data => {
@@ -345,6 +349,8 @@ const SlideDetailsPage = (props) => {
                     </ButtonGroup>
                 </div>
                 <div className = "div-Slide-Details-ClipsList-Column">
+                    <div>
+                        <p></p>
                     <div className = "buttonGroup-row">
                         <ButtonGroup className = "buttonGroup-row buttonGroup-row-left">     
                             <Tooltip
@@ -378,6 +384,7 @@ const SlideDetailsPage = (props) => {
                                     <IconButton icon="cloud-download" text="Download Slide Audio" download/>
                                     </a>}
                         </ButtonGroup>
+                    </div>
                     </div>
                 <div class = "div-Slide-Details-ClipsList">
                     {DisplayClipsList(slide) }

@@ -15,6 +15,7 @@ import {ClipDeleteButton} from "./ClipDeleteButton";
 import {ItemTypes} from "./DnDItemTypes";
 import {SimpleDropCardWrapper} from "../Elements/SimpleDropCardWrapper";
 import {GetClipStatus} from "../Etc/ClipStatus";
+import { GetVoiceName } from "../Etc/Avatars";
 
 export function ClipListCard (props) 
 {
@@ -64,6 +65,7 @@ export function ClipListCard (props)
         if (clip === null) {
             return base;
         }
+
         const statusCSS =  " SimpleCard-ClipListCard-"+GetClipStatus(clip).label;
 
         return base + statusCSS;
@@ -83,7 +85,7 @@ export function ClipListCard (props)
         <div ordinal = {clip.OrdinalValue}>
             <SimpleCard  {...childProps} className={cardCSS()} ordinal = {clip.OrdinalValue}>
                 <div class="div-Slide-Details-Container">
-                    <p class = "p-clip-card-text">
+                    <p class = "p-clip-card-text-left">
                         Clip: {clip.OrdinalValue}
                     </p>
                     <IconButton icon="refresh" onClick={()=>UpdateClipAudio(clip.ID)}/>
@@ -98,7 +100,7 @@ export function ClipListCard (props)
                     
                 </div>
                 <div class="div-Slide-Details-Container">     
-                    <Tooltip
+                    {/* <Tooltip
                                 content={<span>{clip.ClipText}</span>}
                                 openOnTargetFocus={false}
                                 usePortal={false}
@@ -106,9 +108,9 @@ export function ClipListCard (props)
                             <p class = "p-clip-card-text">
                                 ... 
                                 </p>
-                    </Tooltip>
+                    </Tooltip> */}
                     <p class = "p-clip-card-text">
-                        Voice: {clip.VoiceID}
+                        {GetVoiceName(clip).label}
                     </p>
                 </div>            
             </SimpleCard>

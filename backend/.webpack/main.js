@@ -68091,7 +68091,9 @@ async function CreateSlide(slide)
 
     con.query(insert,values, (err, results, fields) => {
       if (err) {
-        return console.error(err.message);
+        console.log('Failed to insert slide: ', err);
+        console.error(err.message);
+        resolve(-1);
       }
       con.end();
       slide.ID = results.insertId
@@ -70992,11 +70994,11 @@ async function ProcessFile (origFile, procFile, volume, speed, padding) {
             //     'with ' + data.video|| 'no' + ' video');
             })
             .audioCodec('libmp3lame')
+            .audioBitrate('192k')
             .audioFilters(`volume=${volume}`)
             .audioFilters(`atempo=${speed}`)
             .audioFilters(`apad=pad_dur=${padding}`)
             .output(procFile) 
-            .audioCodec('libmp3lame')
             .on('error', function(err, stdout, stderr) {
                 console.log(`ProcessFile error with file ` + origFile + '\n')
                 console.log(`Cannot process clip :` + err.message +`\n`);
@@ -71083,6 +71085,8 @@ async function ProcessSlide(slide) {
         clips.map(clip => command.input(clip));
         const finished = new Promise((resolve, reject) => {
             command
+
+                .audioBitrate('192k')
                 .on('error', function(err, stdout, stderr) {
                     console.log('Cannot merge slide ' + err.message);
                     reject();
@@ -71160,14 +71164,6 @@ async function ProcessClip(clip) {
         origFileStream.on('open', async function(fd) {
             
             await origFileStream.write(origBuffer);
-            // fs.stat(origFile, (err, stats) => {
-            //     if (err) {
-            //         console.log(origFile, `File doesn't exist.`);
-            //     } else {
-            //         console.log('Creating File');
-            //         console.log(origFile, ' : ', stats);
-            //     }
-            // });
             const finished = ProcessFile(origFile, procFile, clip.Volume/200, clip.Speed/100, clip.Delay || .2);
             await finished;
             resolve();

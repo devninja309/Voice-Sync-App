@@ -18,7 +18,10 @@ if (props.updating)
 }
 if (!file) {
     return (
+        <div className = "div-HorizontalContainer">
+        <IconButton icon='disable'/>
         <p className="p-no-audio">No Audio</p>
+        </div>
     )
 }
 async function  PlayAudio() {

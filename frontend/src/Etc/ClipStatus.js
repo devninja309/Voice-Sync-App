@@ -7,5 +7,5 @@ export const ClipStatus = [
 
 export function GetClipStatus(clip) {
     console.log("ClipStatusID: ",clip.ClipStatusID)
-    return ClipStatus.find(cs => cs.value == clip.ClipStatusID)
+    return ClipStatus.find(cs => cs.value == clip.ClipStatusID) || { value: 1, label: 'Unapproved'}
 }

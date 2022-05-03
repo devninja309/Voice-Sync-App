@@ -39,3 +39,5 @@ deploy-prod: package
 	--parameter-overrides Env=prod \
 	--capabilities CAPABILITY_IAM 
 	@echo "🏗Deploying✅"
+
+	@echo "Don't forget to check the VPC to make sure it didn't get dropped"

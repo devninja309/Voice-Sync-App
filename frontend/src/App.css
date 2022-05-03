@@ -68,10 +68,17 @@
   font-size: calc(6px + 2vmin);
 }
 .p-clip-card-text{
-  width : 70%;
-  word-break: break-word;
-  white-space: nowrap;
+  overflow-wrap: normal;
   text-align: left;
+  font-size: .7vw;
+  color:brown;
+  margin: auto;
+
+}
+.p-clip-card-text-left{
+  word-break: break-all;
+  white-space: nowrap;
+  text-align: center;
   font-size: .7vw;
   color:brown;
   margin: auto;
@@ -185,7 +192,7 @@
     /* display: flex; */
     /* flex-direction: column; */
     overflow-y: scroll;
-    height: 800px;
+    max-height: 800px;
     /* height: 100%; */
     padding-right: 10px;
     columns: 6;
@@ -194,6 +201,11 @@
     /* overflow: auto; */
     flex-direction: row;
     flex-wrap: wrap;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+.div-Slide-Details-ClipsList::-webkit-scrollbar {
+  display: none;
 }
 .div-Slide-Details-ClipsList-Column {
   width: 65%;
@@ -230,7 +242,8 @@
   display: flex;
 }
 .div-ClipListCard {
-  width: 16%;
+  width: 16%;    
+  height: max-content;
 }
 .div-Slide-Details-Container-TextArea{
   /*height: 400px;*/
@@ -289,13 +302,16 @@
 }
 .buttonGroup-row-left {
  float:left
-
 }
 .buttonGroup-row-right {
-  float:right
+  float:right;
+  padding-right: 60px;
 
 }
-.buttonGroup-row>*{
+.buttonGroup-row-left>*{
+  padding: 5px;
+}
+.buttonGroup-row-right>*{
   padding: 5px;
 }
 .button-Simple {

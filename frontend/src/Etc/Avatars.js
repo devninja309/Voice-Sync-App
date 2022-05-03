@@ -52,5 +52,10 @@ export const Avatars = [
     { value: 56, label: 'Jarvis H. (Narration)'},
     { value: 57, label: 'Theo K. (Narration)'},
     { value: 58, label: 'James B. (Narration)'},
-    { value: 61137774, label: 'Industry Academy - Chris'}
+    { value: 61137774, label: 'C Black'}
   ];
+
+
+export function GetVoiceName(clip) {
+  return Avatars.find(cs => cs.value == clip.VoiceID)
+}

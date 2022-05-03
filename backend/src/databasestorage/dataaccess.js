@@ -186,7 +186,9 @@ export async function CreateSlide(slide)
 
     con.query(insert,values, (err, results, fields) => {
       if (err) {
-        return console.error(err.message);
+        console.log('Failed to insert slide: ', err);
+        console.error(err.message);
+        resolve(-1);
       }
       con.end();
       slide.ID = results.insertId
