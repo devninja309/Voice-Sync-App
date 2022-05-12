@@ -1,0 +1,52 @@
+Transform: AWS::Serverless-2016-10-31
+Globals:
+  Function:
+    Runtime: nodejs14.x
+    Timeout: 600
+    MemorySize: 256
+    Environment:
+      Variables:
+        Env:
+          Ref: Env
+        SQL_Host: ir1u4exjv62zcvp.cgljbdlc6j4o.us-west-2.rds.amazonaws.com
+        SQL_Schema: IA_VoiceSynth
+        SQL_User: VoiceSynthUser
+        SQL_PWD: 3ntranc3
+        AUTH0_Audience: VoiceSynthManagerBackend
+        AUTH0_Issuer: https://dev-l3ao-nin.us.auth0.com/
+        AUTH0_Algorithm: RS256
+        WELLSAID_API_KEY: c8ddf33c-760f-40c6-9217-7806138aeabd
+  Api:
+    EndpointConfiguration: REGIONAL
+    Cors: '''*'''
+Parameters:
+  Env:
+    Type: String
+    Default: qa
+    AllowedValues:
+    - qa
+    - prod
+Resources:
+  SubmitQueueLambdaV1:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://s3-ia-cfg/1658d82e6a84394e689e86cd89ee3023
+      Handler: main.handler
+      Events:
+        SQSEvent:
+          Type: SQS
+          Properties:
+            Queue:
+              Fn::GetAtt:
+              - WellSaidSQSQueue
+              - Arn
+            BatchSize: 5
+    Metadata:
+      SamResourceId: SubmitQueueLambdaV1
+  WellSaidSQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: WellSaidSQSQueue
+      VisibilityTimeout: 650
+    Metadata:
+      SamResourceId: WellSaidSQSQueue

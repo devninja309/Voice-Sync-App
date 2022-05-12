@@ -1,4 +1,5 @@
 import mysql, { createConnection } from 'mysql';
+import { e_ClipAudioGenerationStatus } from '../queueManagement/sqsInterface.js';
 
 //Test functions
 export function GetTestInfo()
@@ -76,7 +77,9 @@ export async function GetSlideDetails(slideID)
   
   slides.forEach(slide => {
     
-      let queryClips = `Select ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, ClipStatusID, (audioclip is not null) as HasAudio from Clips where Clips.SlideID = ?`;
+      let queryClips = `Select ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, ClipStatusID, (audioclip is not null) as HasAudio,
+      ClipAudioState, ClipAudioStateErrorMessage
+      from Clips where Clips.SlideID = ?`;
 
       promises.push(SQLQuery(queryClips, valuesSlides).then(clips => {
         slide.Clips = clips
@@ -271,7 +274,8 @@ export async function GetClipDetails(clipID)
 {
   //This is everything except AudioClip, which is binary data.
   //Consider moving AudioClip to a filestore (S3) or a separate table.
-  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, (audioclip is not null) as HasAudio, ClipStatusID
+  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, (audioclip is not null) as HasAudio, 
+     ClipStatusID, ClipAudioState, ClipAudioStateErrorMessage
      FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
   let valuesSlides = [clipID];
   let clips = await SQLQuery(querySlides, valuesSlides);
@@ -282,7 +286,7 @@ export async function GetClipDetails(clipID)
 
 export async function GetClipAudio(clipID)
 {
-  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, AudioClip
+  let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, AudioClip, ClipAudioState, ClipAudioStateErrorMessage
      FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
   let valuesSlides = [clipID];
   let clips = await SQLQuery(querySlides, valuesSlides);
@@ -330,6 +334,32 @@ export async function CreateClip(clip)
       con.end();
     }
    } );
+}
+export async function UpdateClipAudioStatus(clipID, newStatus, errorMessage)
+{
+  if (!Object.values(e_ClipAudioGenerationStatus).some(val => val == newStatus))
+  {
+    return console.error("Invalid Status");
+  }
+  return new Promise( function (resolve, reject) {
+
+    let con = getCon();
+
+    con.connect(function(err) {
+      if (err) console.log( err);
+    });
+    let update = `Update IA_VoiceSynth.Clips set ClipAudioState = ? , ClipAudioStateErrorMessage = ? Where ID = ?`;
+    let values = [newStatus, errorMessage ?? "", clipID];
+
+   con.query(update,values, (err, results, fields) => {
+     if (err) {
+       return console.error(err.message);
+     }
+     con.end();
+     resolve( );
+   });
+ });
+
 }
 
 //this function updates the entire clip AND resets the audio to null.

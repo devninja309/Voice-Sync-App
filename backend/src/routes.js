@@ -3,7 +3,7 @@ import Router from 'koa-router';
 //TODO this is dumb, fix it
 import {GetCourses, GetCourseDetails, CreateCourse, GetChapters, GetChapterDetails, GetSlides,
   CreateChapter, CreateSlide, CreateClip, GetSlideDetails, GetClipDetails, GetClipAudio,
-  UpdateClip, UpdateClipPost, UpdateSlide, UpdateClipAudio, UpdateClipOrder,
+  UpdateClip, UpdateClipPost, UpdateSlide, UpdateClipAudio, UpdateClipOrder, UpdateClipAudioStatus,
   GetSlideAudio, SetSlideAudio,
   DeleteClip, DeleteSlide, DeleteChapter, DeleteCourse, 
   GetPronunciations, CreatePronunciation, UpdatePronunciation, DeletePronunciation,
@@ -15,12 +15,14 @@ import fetch from "node-fetch";
 import Response from "node-fetch";
 import { ConvertPronunciationFast } from './voicesynthapi/Pronunciation.js';
 import {ProcessSlide} from './audioManipulation/audioProcess.js';
+import { e_ClipAudioGenerationStatus, RequestClipAudioGeneration } from './queueManagement/sqsInterface.js';
 
 //TODO I should be a parameter
 const ttsEndPoint = "https://api.wellsaidlabs.com/v1/tts/stream"
 const auth0EndPoint = "https://dev-l3ao-nin.us.auth0.com/.well-known/jwks.json"
 const auth0NameSpace = "https://industryacademy.com/"
 const defaultPageSize = 20;
+const deployedEnv = process.env.Env || 'dev'
 
 export const router = new Router({
   prefix: '/v1'
@@ -361,67 +363,97 @@ router.get('/test', (ctx) => {
       //ctx.set('Content-Disposition', 'attachment; filename=clip.mp3')
 
     })
+    .get('/clips/:clipID', async (ctx) => {
+      if (!RequirePermission(ctx,['read:courses'])) {
+        return;
+      }
+      let clip = await GetClipDetails(ctx.params.clipID);
+      ctx.body = JSON.stringify(clip);
+    })
 
 
     .get('/clips/:clipID/generateaudio', async (ctx) => {
-      try {
-        if (!RequirePermission(ctx,['read:courses'])) {
-          return;
-        }
-        let clip = await GetClipDetails(ctx.params.clipID);
-
-        const avatarId = clip.VoiceID;
-        const rawText = clip.ClipText;
-
-        const pronunciations  = await GetPronunciations();
-
-        const text = ConvertPronunciationFast(pronunciations, rawText);
-
-        const ttsResponse = await fetch(ttsEndPoint, {
-          //signal: abortController.signal,
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Api-Key': process.env.WELLSAID_API_KEY,
-          },
-          body: JSON.stringify({
-            speaker_id: avatarId,
-            text: text,
-          }),
-        });
-
-        let status = ttsResponse.status;
-        //TODO handle invalid responses here
-        if (status != 200)
-        {
-          console.log('Failed to get audio file');
-          console.log('tts Response Status was invalid');
-          console.log(ttsResponse.status);
-          ctx.status = 500;
-          console.log(ttsResponse);
-        }
-        else {
-          //console.log('Successful audio generation');
-          //console.log(ttsResponse.headers);
-        }
-
-        //https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
-        const responseBlob = await ttsResponse.blob()
-        const responseArray = await responseBlob.arrayBuffer();
-        const buffer = await Buffer.from(responseArray);
-        clip.AudioClip = buffer;
-
-        await LogClipGeneration(GetUserName(ctx), text);
-
-        await UpdateClipAudio(ctx.params.clipID, buffer);
-        clip.HasAudio = 1;
-        ctx.body = JSON.stringify(clip);
+      if (!RequirePermission(ctx,['read:courses'])) {
+        return;
       }
-      catch (exp) {
-        console.log('Error Generating Clip')
-        console.log(exp);
+      //Step 1:  Check if running local
+      if (deployedEnv != 'dev' || true){
+        //Update process status
+          let clip = await GetClipDetails(ctx.params.clipID);
+
+          const rawText = clip.ClipText;
+
+          const pronunciations  = await GetPronunciations();
+
+          const text = ConvertPronunciationFast(pronunciations, rawText);
+          await LogClipGeneration(GetUserName(ctx), text);
+          //TODO This process doesn't really delete the old audio file.  This means it's still available until the new one comes back.
+          //It should actually be seen on the front end, though, because the status indicates that there's no audio.  How do we feel about this?
+          UpdateClipAudioStatus(clip.ID, e_ClipAudioGenerationStatus.GeneratingAudio);
+          RequestClipAudioGeneration(clip.ID);
+          clip.ClipAudioState = e_ClipAudioGenerationStatus.GeneratingAudio;
+          clip.HasAudio = 0;
+          ctx.body = JSON.stringify(clip);
       }
-      })
+      else {
+        //On run this locally
+        try {
+          let clip = await GetClipDetails(ctx.params.clipID);
+
+          const avatarId = clip.VoiceID;
+          const rawText = clip.ClipText;
+
+          const pronunciations  = await GetPronunciations();
+
+          const text = ConvertPronunciationFast(pronunciations, rawText);
+
+          const ttsResponse = await fetch(ttsEndPoint, {
+            //signal: abortController.signal,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Api-Key': process.env.WELLSAID_API_KEY,
+            },
+            body: JSON.stringify({
+              speaker_id: avatarId,
+              text: text,
+            }),
+          });
+
+          let status = ttsResponse.status;
+          //TODO handle invalid responses here
+          if (status != 200)
+          {
+            console.log('Failed to get audio file');
+            console.log('tts Response Status was invalid');
+            console.log(ttsResponse.status);
+            ctx.status = 500;
+            console.log(ttsResponse);
+          }
+          else {
+            //console.log('Successful audio generation');
+            //console.log(ttsResponse.headers);
+          }
+
+          //https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
+          const responseBlob = await ttsResponse.blob()
+          const responseArray = await responseBlob.arrayBuffer();
+          const buffer = await Buffer.from(responseArray);
+          clip.AudioClip = buffer;
+
+          await LogClipGeneration(GetUserName(ctx), text);
+
+          await UpdateClipAudio(ctx.params.clipID, buffer);
+          clip.HasAudio = 1;
+          ctx.body = JSON.stringify(clip);
+        }
+        catch (exp) {
+          console.log('Error Generating Clip')
+          console.log(exp);
+        }
+        }
+      }
+    )
 
     .post('/clips', async (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {

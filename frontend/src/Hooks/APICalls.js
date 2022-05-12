@@ -66,6 +66,11 @@ export function GetSlideDetails(fetchWithAuth, slideID)
     return fetchWithAuth(getUrlPath(`slides/${slideID}`))
     .then(response => response.json());
 }
+export function GetClipDetails(fetchWithAuth, clipID)
+{
+    return fetchWithAuth(getUrlPath(`clips/${clipID}`))
+    .then(response => response.json());
+}
 export function GetPronunciations(fetchWithAuth)
 {
     return fetchWithAuth(getUrlPath('pronunciations'))
@@ -270,6 +275,7 @@ export const UseAPICallsWithAuth = (fetchWithAuth) => {
         UpdateSlide: (slide) => UpdateSlide(fetchWithAuth, slide),
         CreateClip: (clip) => CreateClip(fetchWithAuth, clip),
         UpdateClip: (clip) => UpdateClip(fetchWithAuth, clip),
+        GetClipDetails: (clipID) => GetClipDetails(fetchWithAuth, clipID),
         UpdateClipOrder: (clips) => UpdateClipOrder(fetchWithAuth, clips),
         UpdatePostClip: (clip) => UpdatePostClip(fetchWithAuth, clip),
         UpdateClipAudio: (clipID) => UpdateClipAudio(fetchWithAuth, clipID),

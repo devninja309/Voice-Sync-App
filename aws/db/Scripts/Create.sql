@@ -108,3 +108,10 @@ Alter Table `IA_VoiceSynth`.`Clips`
 Update `IA_VoiceSynth`.`Clips`
 Set `ClipStatusID` = 2 
 Where `Approved` = true;
+
+
+Alter Table `IA_VoiceSynth`.`Clips`
+    ADD COLUMN `ClipAudioState` int not null default 1
+
+Alter Table `IA_VoiceSynth`.`Clips`
+    ADD COLUMN `ClipAudioStateErrorMessage` Varchar(250) NULL

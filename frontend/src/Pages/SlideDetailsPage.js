@@ -173,20 +173,14 @@ const SlideDetailsPage = (props) => {
         //Lock down the screen
         setSlideProcessing(true);
 
-        //Submit a separate call for each clip that isn't submitted
         const promiseArray = [];
         const processClips = slide.Clips.filter(clip => !clip.HasAudio)
-        //console.log('Process Clips: ' + processClips);
         processClips.forEach(clip => {
-            //console.log('Updating an audio clip');
-            //console.log(clip);
             const promise = new Promise((resolve, reject) => {
-            APICalls.UpdateClipAudio(clip.ID).then(returnClip => resolve())
-            
+            APICalls.UpdateClipAudio(clip.ID).then(returnClip => resolve())        
             })
         promiseArray.push( promise);
         });
-        //Reload the entire slide
         Promise.all(promiseArray).then(()=>{
             LoadSlide();
         });

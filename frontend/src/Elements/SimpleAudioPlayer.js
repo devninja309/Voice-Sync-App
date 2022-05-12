@@ -3,6 +3,7 @@ import { Icon } from '@blueprintjs/core';
 import { useCallback, useEffect, useState } from 'react';
 import {LoadingSpinner} from "./LoadingSpinner";
 import {IconButton} from "./IconButton";
+import {GetClipStatus, e_ClipAudioGenerationStatus} from "../Etc/ClipStatus";
 
 export function SimpleAudioPlayer(props) {
     const [url, setUrl] = useState('');
@@ -12,9 +13,13 @@ export function SimpleAudioPlayer(props) {
 
 
 var file = props.audiofile;
-if (props.updating)
+if (props.updating || props.ClipAudioGenerationStatus == e_ClipAudioGenerationStatus.GeneratingAudio)
 {
     return <LoadingSpinner/>
+}
+if (props.ClipAudioGenerationStatus == e_ClipAudioGenerationStatus.ErrorGeneratingAudio)
+{
+    return <div className= "div-HorizontalContainer"><IconButton icon="error"/> <p className="p-no-audio"> {props.ErrorMessage}</p></div>
 }
 if (!file) {
     return (

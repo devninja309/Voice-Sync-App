@@ -4,7 +4,7 @@ Globals:
   Function:
     Runtime: nodejs14.x
     Timeout: 600
-    MemorySize: 512
+    MemorySize: 256
     Environment:
       Variables:
         Env: !Ref Env
@@ -18,11 +18,6 @@ Globals:
         AUTH0_Algorithm: 'RS256'
 
         WELLSAID_API_KEY: c8ddf33c-760f-40c6-9217-7806138aeabd
-        FFMPEG_PATH: /opt/ffmpeg
-        FFPROBE_PATH: /opt/ffprobe
-
-
-        TASK_QUEUE_URL: https://????? #Replace with the Queue's destination.
   Api:
     EndpointConfiguration: REGIONAL
     Cors: "'*'"
@@ -36,31 +31,19 @@ Parameters:
       - prod
 
 Resources:
-  WebAPILambdaV1:
+  SubmitQueueLambdaV1:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./.webpack
       Handler: main.handler
-      Layers:
-        - !Ref FFMPEGLayer
       Events:
-        ProxyGateway:
-          Type: Api
+        SQSEvent:
+          Type: SQS
           Properties:
-            Path: /{proxy+}
-            Method: ANY
-  FFMPEGLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: ffmpeg
-      Description: ffmpeg app
-      ContentUri: ./layers/ffmpeg
-      CompatibleRuntimes:
-        - nodejs14.x
-        - nodejs10.x
-        - python3.6
-        - ruby2.5
-        - java8
-        - go1.x
-      LicenseInfo: 'MIT'
-      RetentionPolicy: Retain
+            Queue: !GetAtt WellSaidSQSQueue.Arn
+            BatchSize: 5
+  WellSaidSQSQueue:
+    Type: AWS::SQS::Queue
+    Properties: 
+      QueueName: "WellSaidSQSQueue"
+      VisibilityTimeout: 650

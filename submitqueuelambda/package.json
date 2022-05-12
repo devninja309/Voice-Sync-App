@@ -1,0 +1,26 @@
+{
+  "name": "submitqueuelambda",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/lambda-index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "jwks-rsa": "^2.1.0",
+    "koa": "^2.13.4",
+    "koa-body": "^5.0.0",
+    "koa-jwt": "^4.0.3",
+    "mysql": "^2.18.1",
+    "node-fetch": "^3.2.4",
+    "serverless-http": "^3.0.1",
+    "webpack-node-externals": "^3.0.0"
+  },
+  "devDependencies": {
+    "webpack": "^5.72.0",
+    "webpack-cli": "^4.9.2"
+  }
+}

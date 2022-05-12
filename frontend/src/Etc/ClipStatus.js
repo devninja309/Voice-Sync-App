@@ -9,3 +9,15 @@ export function GetClipStatus(clip) {
     console.log("ClipStatusID: ",clip.ClipStatusID)
     return ClipStatus.find(cs => cs.value == clip.ClipStatusID) || { value: 1, label: 'Unapproved'}
 }
+
+//TODO This is defined in three places in 3 different projects.  What's the right pattern for sharing?
+export class e_ClipAudioGenerationStatus {
+    static NoAudio = 1;
+    static GeneratingAudio = 2;
+    static ErrorGeneratingAudio = 3;
+    static HasAudio = 4;
+
+    constructor(value) {
+        this.Value = value;
+    }
+}
