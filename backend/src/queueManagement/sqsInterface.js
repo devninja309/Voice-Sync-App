@@ -30,14 +30,11 @@ export async function RequestClipAudioGeneration(clipId) {
     if (err) {
         console.log("Error", err);
     } else {
-        console.log("Success", data.QueueUrls);
 
         sqs.getQueueUrl(params, function(err, data) {
             if (err) {
             console.log("Error", err);
             } else {
-            console.log("Success", data.QueueUrl);
-
                 var params = {
                     DelaySeconds: 0,
                     MessageAttributes: {

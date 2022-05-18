@@ -2,8 +2,8 @@ Transform: AWS::Serverless-2016-10-31
 Globals:
   Function:
     Runtime: nodejs14.x
-    Timeout: 10
-    MemorySize: 256
+    Timeout: 600
+    MemorySize: 512
     Environment:
       Variables:
         Env:
@@ -18,6 +18,7 @@ Globals:
         WELLSAID_API_KEY: c8ddf33c-760f-40c6-9217-7806138aeabd
         FFMPEG_PATH: /opt/ffmpeg
         FFPROBE_PATH: /opt/ffprobe
+        TASK_QUEUE_URL: https://?????
   Api:
     EndpointConfiguration: REGIONAL
     Cors: '''*'''
@@ -32,7 +33,7 @@ Resources:
   WebAPILambdaV1:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://s3-ia-cfg/893a87d3643f2e83e290c22767d9db56
+      CodeUri: s3://s3-ia-cfg/f512a424b2e0695aba98812aa9c16d9c
       Handler: main.handler
       Layers:
       - Ref: FFMPEGLayer

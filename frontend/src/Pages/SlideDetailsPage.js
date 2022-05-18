@@ -169,21 +169,26 @@ const SlideDetailsPage = (props) => {
     function sortByOrdinalValue(a,b) {
         return a.OrdinalValue - b.OrdinalValue;
     }
-    function UpdateAllClipAudio() {
+    async function UpdateAllClipAudio() {
         //Lock down the screen
         setSlideProcessing(true);
 
         const promiseArray = [];
-        const processClips = slide.Clips.filter(clip => !clip.HasAudio)
-        processClips.forEach(clip => {
+        const processClips = slide.Clips.filter(clip => clip.ClipAudioState == 1)
+    
+        for (const clip of processClips)
+        {
             const promise = new Promise((resolve, reject) => {
-            APICalls.UpdateClipAudio(clip.ID).then(returnClip => resolve())        
-            })
-        promiseArray.push( promise);
-        });
-        Promise.all(promiseArray).then(()=>{
-            LoadSlide();
-        });
+                APICalls.UpdateClipAudio(clip.ID).then(returnClip => 
+                    {
+                        UpdateClip(returnClip);
+                        resolve();
+                    })        
+                });
+            await promise;
+        }
+
+        setSlideProcessing(false);
     }
 
     function DisplayClipsList(passedSlide) {
@@ -245,9 +250,11 @@ const SlideDetailsPage = (props) => {
     }
     function UpdateClip(clip)
     {
+        //This function should just update the in memory clip with a known change from the backend
+        //preferably without reloading everything else.
         slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = clip;
 
-        //TODO This will reload all clip audios
+        //This should cause the cliplistcards to refresh.  That's the goal, at any rate.
         setSlide({...slide});
     }
     function MoveClipCard(fromOrdinal, toOrdinal)
@@ -259,15 +266,11 @@ const SlideDetailsPage = (props) => {
             clip.OrdinalValue -=1;  
             slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = {...clip}; 
             clipsToUpdate.push(clip);
-            //APICalls.UpdatePostClip(clip);  
-            //Save Clip here  
         });
         slide.Clips.filter(clip=> (clip.OrdinalValue < fromOrdinal && clip.OrdinalValue >=toOrdinal)).forEach(clip => {
             clip.OrdinalValue +=1;      
             slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = {...clip}; 
             clipsToUpdate.push(clip);
-            //it APICalls.UpdatePostClip(clip);
-            //Save Clip here  
         });
         movingClip.OrdinalValue = toOrdinal;
         //Save Clip here  

@@ -23,27 +23,38 @@ export function ClipListCard (props)
     const {token, APICalls} = useAuthTools();
     const [url, setUrl] = useState(null);
     const [recheckTimer, setRecheckTimer] = useState(null);
+    const [recheckStopped, setRecheckStopped] = useState(false);
     const [clip, setClip] = useState(null);
-    const [updating, setUpdating] = useState(false);
     const currentLocation = useLocation();
 
     useEffect( () => {
         clearInterval(recheckTimer);
         setClip(propClip);
         LoadClipAudio(propClip);
-        setRecheckTimer(setInterval(RecheckClip, 10000, propClip));
-        
+        const recheck = setInterval(RecheckClip, 5000, propClip);
+        setRecheckTimer(recheck);
+        return () => {
+            console.log('Unloading Clip:' + clip)
+            clearInterval(recheck);
+            setRecheckStopped(true);
+        }
     
-     },[propClip, propOrdinal]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
-    function RecheckClip(ctrlClip)
+    },[propClip, propOrdinal]); //TODO I SAY that I want fetchWithAuth here, but when I get it, I just update and update and update because apparently fetchWithAuth changes with every call
+    
+     function RecheckClip(ctrlClip)
     {
-        if (ctrlClip != null && ctrlClip.ClipAudioState == e_ClipAudioGenerationStatus.GeneratingAudio)
+        if (ctrlClip != null && ctrlClip.ClipAudioState == e_ClipAudioGenerationStatus.GeneratingAudio && !recheckStopped)
         {
             console.log('Reloading clip to check for updates: ' + ctrlClip.ID);
             console.log(ctrlClip);
             APICalls.GetClipDetails(ctrlClip.ID).then(returnClip => {
-                updateClip(returnClip); //This should trigger a redraw of this component.           
-                setUpdating(false);
+                console.log('Return Clip:')
+                console.log(returnClip);
+                if (returnClip.ClipAudioState != e_ClipAudioGenerationStatus.GeneratingAudio)
+                {
+                    console.log('Has Audio');
+                    updateClip(returnClip); //This should trigger a redraw of this component.  
+                }  
             });
         }
     }
@@ -64,15 +75,14 @@ export function ClipListCard (props)
                 })
         }
     }
-     function UpdateClipAudio(clipID)
-     {
-         setUpdating(true);
-         APICalls.UpdateClipAudio(clipID).then(returnClip => {
-             updateClip(returnClip); //This should trigger a redraw of this component.           
-             setUpdating(false);
-         });
-     }
-     let card = null;
+    //Request new audio generation
+    function UpdateClipAudio(clipID)
+    {
+        APICalls.UpdateClipAudio(clipID).then(returnClip => {
+            updateClip(returnClip); //This should trigger a redraw of this component.   
+        });
+    }
+    let card = null;
      
     function cardCSS() {
         const base = "SimpleCard-ClipListCard";
@@ -115,15 +125,6 @@ export function ClipListCard (props)
                     
                 </div>
                 <div class="div-Slide-Details-Container">     
-                    {/* <Tooltip
-                                content={<span>{clip.ClipText}</span>}
-                                openOnTargetFocus={false}
-                                usePortal={false}
-                            >
-                            <p class = "p-clip-card-text">
-                                ... 
-                                </p>
-                    </Tooltip> */}
                     <p class = "p-clip-card-text">
                         {GetVoiceName(clip).label}
                     </p>

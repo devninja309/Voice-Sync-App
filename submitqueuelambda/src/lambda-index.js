@@ -1,6 +1,6 @@
 
 import GenerateClipAudioFile from './audiohandler.js'
-import {UpdateClipAudioStatus, e_ClipAudioGenerationStatus} from './databasestorage/dataaccess.js'
+import {UpdateClipAudioStatus, e_ClipAudioGenerationStatus, getPooledConnection, resolvePooledConnection} from './databasestorage/dataaccess.js'
 
 // Lambda can't consume ES6 exports
 exports.handler = async (evt, ctx) => {
@@ -8,14 +8,15 @@ exports.handler = async (evt, ctx) => {
   await Promise.all(evt.Records.map(async (record) => {
     console.log(record);
     const clipId = parseInt(record.messageAttributes.ClipId.stringValue)
-    //const clipId = 1;
-    var result = await GenerateClipAudioFile(clipId);
+    console.log('Begin Processing Clip:' + clipId);
+    const con = await getPooledConnection();
+    var result = await GenerateClipAudioFile(clipId, con);
     const newStatus = result.status==200 ? e_ClipAudioGenerationStatus.HasAudio : e_ClipAudioGenerationStatus.ErrorGeneratingAudio;
-    console.log("Clip Generation Status")
-    console.log(result)
-    console.log(newStatus)
-    await UpdateClipAudioStatus(clipId, newStatus, result.message);
-    console.log("Done Generating Audio");
+    console.log("Clip Generation Status:\n",result, newStatus)
+    await UpdateClipAudioStatus(clipId, newStatus, result.message, con);
+    console.log("Done Generating Audio:" + clipId);
+
+    resolvePooledConnection(con);
 
   }));
 

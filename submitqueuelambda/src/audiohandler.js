@@ -11,18 +11,18 @@ const auth0NameSpace = "https://industryacademy.com/"
 const defaultPageSize = 20;
 
 
-export default async function GenerateClipAudioFile(clipId)
+export default async function GenerateClipAudioFile(clipId, pooledConnection)
 {
     var result = {
         status: 200,
         message: "Successful"
     }
     try {
-        let clip = await GetClipDetails(clipId);
+        let clip = await GetClipDetails(clipId), pooledConnection;
         const avatarId = clip.VoiceID;
         const rawText = clip.ClipText;
 
-        const pronunciations  = await GetPronunciations();
+        const pronunciations  = await GetPronunciations(pooledConnection);
 
         const text = ConvertPronunciationFast(pronunciations, rawText);
 
@@ -42,8 +42,7 @@ export default async function GenerateClipAudioFile(clipId)
         });
 
         let status = ttsResponse.status;
-        //TODO handle invalid responses here
-        if (status != 200)
+        if (status != 200) //TODO, this will timeout, right?
         {
             console.log('Failed to get audio file');
             console.log('tts Response Status was invalid');
@@ -65,7 +64,7 @@ export default async function GenerateClipAudioFile(clipId)
         clip.AudioClip = buffer;
 
 
-        var saveResult = await UpdateClipAudio(clipId, buffer);
+        var saveResult = await UpdateClipAudio(clipId, buffer, pooledConnection);
         if (saveResult.Successful){ 
             console.log("Successful Save")       
             return result;

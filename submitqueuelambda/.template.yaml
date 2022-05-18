@@ -30,7 +30,7 @@ Resources:
   SubmitQueueLambdaV1:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://s3-ia-cfg/1658d82e6a84394e689e86cd89ee3023
+      CodeUri: s3://s3-ia-cfg/169aa93411f157b20339740a75aa1cfa
       Handler: main.handler
       Events:
         SQSEvent:

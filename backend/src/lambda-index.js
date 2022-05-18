@@ -12,6 +12,7 @@ module.exports.handler = async (evt, ctx) => {
   try 
   {
     const res = await handler(evt, ctx)
+    return res
   }
   catch (e)
   {
@@ -19,5 +20,4 @@ module.exports.handler = async (evt, ctx) => {
     console.log(e);
   }
 
-  return res
 }

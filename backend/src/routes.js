@@ -7,7 +7,8 @@ import {GetCourses, GetCourseDetails, CreateCourse, GetChapters, GetChapterDetai
   GetSlideAudio, SetSlideAudio,
   DeleteClip, DeleteSlide, DeleteChapter, DeleteCourse, 
   GetPronunciations, CreatePronunciation, UpdatePronunciation, DeletePronunciation,
-  LogClipGeneration, GetClipLog, GetClipLogSize} from './databasestorage/dataaccess.js';
+  LogClipGeneration, GetClipLog, GetClipLogSize,
+  getPooledConnection, resolvePooledConnection} from './databasestorage/dataaccess.js';
 //import {audioProcessTest} from './audioManipulation/audioProcess'
 import {GetTestInfo} from './databasestorage/dataaccess.js';
 import { addTests } from './routes.test.js';
@@ -30,7 +31,6 @@ export const router = new Router({
 
 // TODO: This function is dumb and should be replaced with whatever a standard method is
 function RequirePermission(ctx,permissions){
-  return true;
   if (!ctx.state )
   {
     ctx.status = 401;
@@ -67,31 +67,16 @@ function GetUserName(ctx) {
 
 }
 
+  /*************************************
+   * 
+   *  TESTBED Functionality
+   * 
+   *************************************/
 router.get('/test', (ctx) => {
   ctx.body = 'Hello World Updated orig 3'
 })
 .get('/v1/test', (ctx) => {
     ctx.body = 'Hello World Updated test'
-})
-.get('/audiotest', async(ctx) => {
-  console.log('AudioTest 1');
-  const testSlideID = 81; //Hardcoded to Two Sentence Slide for testing.
-  //Load slide
-    let slide = await GetSlideDetails(81);
-
-  //Process slide
-  console.log('AudioTest 2');
-    const audioFile = await ProcessSlide(slide);
-
-  //return slide
-  console.log('AudioTest 3');
-    ctx.isBase64Encoded = true; 
-    ctx.body = audioFile;  
-    ctx.set('Content-Type', 'audio/mpeg');
-    ctx.set('Content-Disposition', 'attachment; filename=clip.mp3')
-    //Amazon encoding code
-    //ctx.body =  Buffer.from(clip.AudioClip).toString('base64');
-
 })
 .get('/dbtest', async (ctx) => {
 
@@ -255,20 +240,6 @@ router.get('/test', (ctx) => {
         ctx.body = JSON.stringify(slide);
         })
 
-      .post('/slides', async (ctx) => {
-        if (!RequirePermission(ctx,['read:courses'])) {
-          return;
-        }
-        let slide = ctx.request.body;
-        if (typeof(slide) == "undefined")
-        {
-          ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
-          return;
-        }
-        var insertSlide = await CreateSlide(slide);
-        ctx.body = JSON.stringify(insertSlide);
-  
-      })
       .put('/slides/:slideID', async (ctx) => {
         if (!RequirePermission(ctx,['read:courses'])) {
           return;
@@ -378,22 +349,27 @@ router.get('/test', (ctx) => {
       }
       //Step 1:  Check if running local
       if (deployedEnv != 'dev' || true){
+        const con = await getPooledConnection();
+        console.log('Creating pooled connection');
         //Update process status
-          let clip = await GetClipDetails(ctx.params.clipID);
+          let clip = await GetClipDetails(ctx.params.clipID, con);
 
+          //Process Pronunciation Changes
           const rawText = clip.ClipText;
-
-          const pronunciations  = await GetPronunciations();
-
+          const pronunciations  = await GetPronunciations(con);
           const text = ConvertPronunciationFast(pronunciations, rawText);
-          await LogClipGeneration(GetUserName(ctx), text);
+
+          await LogClipGeneration(GetUserName(ctx), text, con);
+
           //TODO This process doesn't really delete the old audio file.  This means it's still available until the new one comes back.
           //It should actually be seen on the front end, though, because the status indicates that there's no audio.  How do we feel about this?
-          UpdateClipAudioStatus(clip.ID, e_ClipAudioGenerationStatus.GeneratingAudio);
-          RequestClipAudioGeneration(clip.ID);
+          await UpdateClipAudioStatus(clip.ID, e_ClipAudioGenerationStatus.GeneratingAudio, "", con);
+
+          await RequestClipAudioGeneration(clip.ID);
           clip.ClipAudioState = e_ClipAudioGenerationStatus.GeneratingAudio;
           clip.HasAudio = 0;
           ctx.body = JSON.stringify(clip);
+          resolvePooledConnection(con);
       }
       else {
         //On run this locally
@@ -465,8 +441,14 @@ router.get('/test', (ctx) => {
         ctx.body = JSON.stringify([{CourseID: "Bad", courseName: "call"}]);
         return;
       }
-      var insertClip = await CreateClip(clip);
-      ctx.body = JSON.stringify(insertClip);
+      try {
+        var insertClip = await CreateClip(clip);
+        ctx.body = JSON.stringify(insertClip);
+      }
+      catch (e)
+      {
+        console.log('Error creating clip', e);
+      }
 
     })
 
@@ -540,6 +522,7 @@ router.get('/test', (ctx) => {
       var result = await GetClipLog(defaultPageSize, parseInt(ctx.params.offset,10) * defaultPageSize, query);
       ctx.body = JSON.stringify(result);
     })
+
     .get('/logs/info', async (ctx) => {
 
       if (!RequirePermission(ctx, ['read:logs'])) {
@@ -559,12 +542,12 @@ router.get('/test', (ctx) => {
 * 
 *************************************/
     .get('/pronunciations', async (ctx) => {
-    if (!RequirePermission(ctx,['read:courses'])) {
-      return;
-    }
+      if (!RequirePermission(ctx,['read:courses'])) {
+        return;
+      }
 
-    let pronunciationList = await GetPronunciations();
-    ctx.body = JSON.stringify(pronunciationList);
+      let pronunciationList = await GetPronunciations();
+      ctx.body = JSON.stringify(pronunciationList);
     }) 
 
     .post('/pronunciations/check' , async (ctx) => {

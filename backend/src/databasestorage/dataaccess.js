@@ -61,7 +61,7 @@ export function GetSlides(chapterID)
                   Where ChapterID = ?`;
     let values = [chapterID];
     try{
-    return SQLQuery(query, values)
+      return SQLQuery(query, values)
     }
     catch (error)
     {
@@ -74,7 +74,6 @@ export async function GetSlideDetails(slideID)
   let querySlides = `SELECT * FROM IA_VoiceSynth.Slides as Slides Where Slides.ID = ?`;
   let valuesSlides = [slideID];
   let slides = await SQLQuery(querySlides, valuesSlides);
-  
   slides.forEach(slide => {
     
       let queryClips = `Select ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, ClipStatusID, (audioclip is not null) as HasAudio,
@@ -94,10 +93,10 @@ export async function GetSlideDetails(slideID)
   await Promise.all(promises);
   return slides[0];
 }
-export function GetPronunciations ()
+export function GetPronunciations (pooledConnection)
 {
     let query = "SELECT * FROM IA_VoiceSynth.Pronunciations";
-    return SQLQuery(query);
+    return SQLQuery(query, "", pooledConnection);
 }
 
 export async function CreateCourse(course)
@@ -106,26 +105,13 @@ export async function CreateCourse(course)
   if (!course.CourseName){    
     //Blow up?
   }
-  return new Promise( function (resolve, reject) {
-
-    let con = getCon();
-
-    con.connect(function(err) {
-      if (err) console.log( err);
-    });
-
-    let insert = 'Insert into IA_VoiceSynth.Courses (CourseName) Values (?)';
-    let values = [course.CourseName];
-
-    con.query(insert,values, (err, results, fields) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      con.end();
-      course.ID = results.insertId
-      resolve( course);
-    });
-  });
+  let insert = 'Insert into IA_VoiceSynth.Courses (CourseName) Values (?)';
+  let values = [course.CourseName];
+  const results = await SQLQuery(insert, values);
+  console.log('Create Results');
+  console.log(results);
+  course.ID = results.insertId
+  return course;
 }
 export async function CreateChapter(chapter)
 {
@@ -137,26 +123,13 @@ export async function CreateChapter(chapter)
     error = true;
     errorString += "Invalid ChapterID\n";
   }
-  return new Promise( function (resolve, reject) {
 
-    let con = getCon();
-
-    con.connect(function(err) {
-      if (err) console.log( err);
-    });
-
-    let insert = 'Insert into IA_VoiceSynth.Chapters (ChapterName, CourseID) Values (?,?)';
-    let values = [chapter.ChapterName, chapter.CourseID];
-
-    con.query(insert,values, (err, results, fields) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      con.end();
-      chapter.ID = results.insertId
-      resolve( chapter);
-    });
-  });
+  let insert = 'Insert into IA_VoiceSynth.Chapters (ChapterName, CourseID) Values (?,?)';
+  let values = [chapter.ChapterName, chapter.CourseID];
+  const results = await SQLQuery(insert,values);
+    
+  chapter.ID = results.insertId
+  return chapter;
 }
 
 export async function CreateSlide(slide)
@@ -176,30 +149,15 @@ export async function CreateSlide(slide)
     error = true;
     errorString += "Invalid VoiceID\n";
   }
-  return new Promise( function (resolve, reject) {
 
-    let con = getCon();
+  let insert = 'Insert into IA_VoiceSynth.Slides (SlideName,SlideText, VoiceID, ChapterID, OrdinalValue) Values (?,?,?,?,?)';
+  let values = [slide.SlideName, slide.SlideText,slide.VoiceID, slide.ChapterID, slide.OrdinalValue];
 
-    con.connect(function(err) {
-      if (err) console.log( err);
-    });
-
-    let insert = 'Insert into IA_VoiceSynth.Slides (SlideName,SlideText, VoiceID, ChapterID, OrdinalValue) Values (?,?,?,?,?)';
-    let values = [slide.SlideName, slide.SlideText,slide.VoiceID, slide.ChapterID, slide.OrdinalValue];
-
-    con.query(insert,values, (err, results, fields) => {
-      if (err) {
-        console.log('Failed to insert slide: ', err);
-        console.error(err.message);
-        resolve(-1);
-      }
-      con.end();
-      slide.ID = results.insertId
-      resolve( slide);
-    });
-  });
+  const results = await SQLQuery(insert, values);
+  slide.ID = results.insertId
+  return slide;
 }
-export function CreatePronunciation(pronunciation)
+export async function CreatePronunciation(pronunciation)
 {
   //Check pronunciation
   if (!pronunciation.Word){
@@ -208,26 +166,12 @@ export function CreatePronunciation(pronunciation)
   if (!pronunciation.Pronunciation){
     //Blow up?
   }
-  return new Promise( function (resolve, reject) {
 
-    let con = getCon();
-
-    con.connect(function(err) {
-      if (err) console.log( err);
-    });
-
-    let insert = 'Insert into IA_VoiceSynth.Pronunciations (Word, Pronunciation) Values (?,?)';
-    let values = [pronunciation.Word, pronunciation.Pronunciation];
-
-    con.query(insert,values, (err, results, fields) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      con.end();
-      pronunciation.ID = results.insertId
-      resolve( pronunciation);
-    });
-  });
+  let insert = 'Insert into IA_VoiceSynth.Pronunciations (Word, Pronunciation) Values (?,?)';
+  let values = [pronunciation.Word, pronunciation.Pronunciation];
+  const results = await SQLQuery(insert, values);
+  pronunciation.ID = results.insertId
+  return pronunciation;
 }
 
 export async function UpdateSlide(slide, resetAudio = true)
@@ -247,30 +191,15 @@ export async function UpdateSlide(slide, resetAudio = true)
     error = true;
     errorString += "Invalid VoiceID\n";
   }
-  return new Promise( function (resolve, reject) {
+  let voiceID = slide.VoiceID || 3
 
-    let con = getCon();
-
-    let voiceID = slide.VoiceID || 3
-
-    con.connect(function(err) {
-      if (err) console.log( err);
-    });
-
-     let update = 'Update  IA_VoiceSynth.Slides set SlideName = ?,SlideText = ?, VoiceID = ?, ChapterID = ?, OrdinalValue = ? Where ID = ?';
-     let values = [slide.SlideName, slide.SlideText,slide.VoiceID, slide.ChapterID, slide.OrdinalValue, slide.ID];
- 
-     con.query(update,values, (err, results, fields) => {
-       if (err) {
-         return console.error(err.message);
-       }
-       con.end();
-       resolve(slide);
-     });
-    });
+  let update = 'Update  IA_VoiceSynth.Slides set SlideName = ?,SlideText = ?, VoiceID = ?, ChapterID = ?, OrdinalValue = ? Where ID = ?';
+  let values = [slide.SlideName, slide.SlideText,slide.VoiceID, slide.ChapterID, slide.OrdinalValue, slide.ID];
+  await SQLQuery(update, values)
+  return slide;
 }
 
-export async function GetClipDetails(clipID)
+export async function GetClipDetails(clipID, pooledConnection)
 {
   //This is everything except AudioClip, which is binary data.
   //Consider moving AudioClip to a filestore (S3) or a separate table.
@@ -278,7 +207,7 @@ export async function GetClipDetails(clipID)
      ClipStatusID, ClipAudioState, ClipAudioStateErrorMessage
      FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
   let valuesSlides = [clipID];
-  let clips = await SQLQuery(querySlides, valuesSlides);
+  let clips = await SQLQuery(querySlides, valuesSlides, pooledConnection);
 
   let clip = clips[0];
   return clip;
@@ -307,59 +236,26 @@ export async function CreateClip(clip)
     error = true;
     errorString += "Invalid VoiceID\n";
   }
-  return new Promise( function (resolve, reject) {
+  let voiceID = clip.VoiceID || 3
 
-    let con = getCon();
-
-    try {
-
-      let voiceID = clip.VoiceID || 3
-
-      con.connect(function(err) {
-        if (err) console.log( err);
-      });
-
-      let insert = 'Insert into IA_VoiceSynth.Clips (SlideID,ClipText, VoiceID, OrdinalValue, ClipStatusID) Values (?,?,?,?,1)';
-      let values = [clip.SlideID, clip.ClipText, voiceID,clip.OrdinalValue];
-
-      con.query(insert,values, (err, results, fields) => {
-        if (err) {
-          return console.error(err.message);
-        }
-        clip.ID = results.insertId
-        resolve( clip);
-      });
-    }
-    finally {
-      con.end();
-    }
-   } );
+  let insert = 'Insert into IA_VoiceSynth.Clips (SlideID,ClipText, VoiceID, OrdinalValue, ClipStatusID) Values (?,?,?,?,1)';
+  let values = [clip.SlideID, clip.ClipText, voiceID,clip.OrdinalValue];
+  var results = await SQLQuery(insert, values);
+  clip.ID = results.insertId
+  return clip;
 }
-export async function UpdateClipAudioStatus(clipID, newStatus, errorMessage)
+export async function UpdateClipAudioStatus(clipID, newStatus, errorMessage, pooledConnection)
 {
   if (!Object.values(e_ClipAudioGenerationStatus).some(val => val == newStatus))
   {
     return console.error("Invalid Status");
   }
-  return new Promise( function (resolve, reject) {
 
-    let con = getCon();
+  let update = `Update IA_VoiceSynth.Clips set ClipAudioState = ? , ClipAudioStateErrorMessage = ? Where ID = ?`;
+  let values = [newStatus, "Updated via API", clipID];
 
-    con.connect(function(err) {
-      if (err) console.log( err);
-    });
-    let update = `Update IA_VoiceSynth.Clips set ClipAudioState = ? , ClipAudioStateErrorMessage = ? Where ID = ?`;
-    let values = [newStatus, errorMessage ?? "", clipID];
-
-   con.query(update,values, (err, results, fields) => {
-     if (err) {
-       return console.error(err.message);
-     }
-     con.end();
-     resolve( );
-   });
- });
-
+  var result = await SQLQuery(update,values, pooledConnection);
+  console.log("Updated Audio State", result);
 }
 
 //this function updates the entire clip AND resets the audio to null.
@@ -380,26 +276,13 @@ export async function UpdateClip(clip)
     error = true;
     errorString += "Invalid ClipID\n";
   }
-  return new Promise( function (resolve, reject) {
 
-    let con = getCon();
+  let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, Volume =?, Speed=?, Delay=?, ClipStatusID =?, AudioClip = null Where ID = ?`;
+  let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Delay, clip.ClipStatusID, clip.ID];
 
-    con.connect(function(err) {
-      if (err) console.log( err);
-    });
+  await SQLQuery(insert, values);
 
-
-     let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, Volume =?, Speed=?, Delay=?, ClipStatusID =?, AudioClip = null Where ID = ?`;
-     let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Delay, clip.ClipStatusID, clip.ID];
-
-    con.query(insert,values, (err, results, fields) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      con.end();
-      resolve( clip);
-    });
-  });
+  return clip;
 }
 export async function GetSlideAudio(slideID) {
   let querySlides = `SELECT SlideID, AudioFile
@@ -420,27 +303,13 @@ export async function SetSlideAudio(slideID, audioBuffer) {
     error = true;
     errorString += "Invalid SlideID\n";
   }
-  await DeleteSlideAudio(slideID); //Get rid of any pre-existing slide audio files
-  return new Promise( function (resolve, reject) {
+  await DeleteSlideAudio(slideID); 
 
-    let con = getCon();
+  let insert = `Insert into IA_VoiceSynth.SlideAudio (SlideID, AudioFile) values (?,?)`;
+  let values = [slideID, audioBuffer];
 
-    con.connect(function(err) {
-      if (err) console.log( err);
-    });
+  return SQLQuery(insert, values);
 
-     let insert = `Insert into IA_VoiceSynth.SlideAudio (SlideID, AudioFile) values (?,?)`;
-     let values = [slideID, audioBuffer];
-
-    con.query(insert,values, (err, results, fields) => {
-      if (err) {
-        console.log(err);
-        return console.error(err.message);
-      }
-      con.end();
-      resolve( );
-    });
-  });
 }
 export async function UpdateClipAudio(clipID, audioBuffer)
 {
@@ -451,26 +320,9 @@ export async function UpdateClipAudio(clipID, audioBuffer)
     error = true;
     errorString += "Invalid ClipID\n";
   }
-  return new Promise( function (resolve, reject) {
-
-    let con = getCon();
-
-    con.connect(function(err) {
-      if (err) console.log( err);
-    });
-
-     let insert = `Update IA_VoiceSynth.Clips set AudioClip = ? Where ID = ?`;
-     let values = [audioBuffer, clipID];
-
-    con.query(insert,values, (err, results, fields) => {
-      if (err) {
-        console.log(err);
-        return console.error(err.message);
-      }
-      con.end();
-      resolve( );
-    });
-  });
+  let insert = `Update IA_VoiceSynth.Clips set AudioClip = ? Where ID = ?`;
+  let values = [audioBuffer, clipID];
+  return SQLQuery(insert,values);
 
 }
 
@@ -484,34 +336,19 @@ export async function UpdateClipPost(clip)
     error = true;
     errorString += "Invalid ClipID\n";
   }
-  return new Promise( function (resolve, reject) {
 
-    let con = getCon();
+    let update = `Update IA_VoiceSynth.Clips set Volume = ?, Speed = ?, Delay = ?, ClipStatusID = ? Where ID = ?`;
+    let values = [clip.Volume, clip.Speed, clip.Delay, clip.ClipStatusID, clip.ID];
 
-    let voiceID = clip.VoiceID || 3
-
-    con.connect(function(err) {
-      if (err) console.log( err);
-    });
-
-     let insert = `Update IA_VoiceSynth.Clips set Volume = ?, Speed = ?, Delay = ?, ClipStatusID =? Where ID = ?`;
-     let values = [clip.Volume, clip.Speed, clip.Delay, clip.ClipStatusID, clip.ID];
-
-    con.query(insert,values, (err, results, fields) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      con.end();
-      resolve( clip);
-    });
-  });
+    await SQLQuery(update,values);
+    return clip;
 
 }
 export async function UpdateClipOrder(clips) {
 
   //Check Clip
   let error = false;
-  let errorString = "";
+  let errorString = "Error Updating Clip Order\n";
   if (!clips.every(clip => clip.ID)) {
     error = true;
     errorString += "Invalid ClipID\n";
@@ -532,13 +369,8 @@ export async function UpdateClipOrder(clips) {
 
   clips.forEach(clip => {
       const values = [clip.OrdinalValue, clip.ID];
-      console.log('Updating');
-      console.log(values);
-    
       promises.push (SQLQuery(update, values));
     })
-
-  //con.query(update,values, (err, results, fields) => { if (err) { return connection.rollback(function() { throw err }); } });
   });
 
   //TODO This is messier than it should be.
@@ -547,10 +379,14 @@ export async function UpdateClipOrder(clips) {
     function(result){con.commit(function(err) {
       if (err) { 
         con.rollback(function() {
+          console.log('Error updating clip order');
+          console.log(err);
           throw err;
         })}})},
     function(rejected){
       con.rollback(function() {
+        console.log('Rejection updating clip order');
+        console.log(rejected);
         throw(rejected);
       })
     }
@@ -578,26 +414,10 @@ export async function UpdatePronunciation(pronunciation)
     errorString += "Invalid Pronunciation\n";
   }
 
-  return new Promise( function (resolve, reject) {
+  let insert = `Update IA_VoiceSynth.Pronunciations set Word = ?, Pronunciation = ? Where ID = ?`;
+  let values = [pronunciation.Word, pronunciation.Pronunciation,  pronunciation.ID];
 
-    let con = getCon();
-
-    con.connect(function(err) {
-      if (err) console.log( err);
-    });
-
-     let insert = `Update IA_VoiceSynth.Pronunciations set Word = ?, Pronunciations = ? Where ID = ?`;
-     let values = [pronunciation.Word, pronunciation.Pronunciation,  pronunciation.ID];
-
-      con.query(insert,values, (err, results, fields) => {
-      if (err) {
-        console.log('Error');
-        return console.error(err.message);
-      }
-      con.end();
-      resolve( pronunciation );
-    });
-  });
+  return SQLQuery(insert,values);
 }
 //Delete functions
 export async function DeleteClip(clipID)
@@ -656,6 +476,7 @@ export async function DeletePronunciation(pronunciationID)
 
   return "success";
 }
+
 export async function DeleteSlideAudio(slideID)
 {
   let query = `Delete FROM IA_VoiceSynth.SlideAudio Where SlideAudio.SlideID = ?`;
@@ -670,8 +491,8 @@ const LogTypes = {
   ClipGenerated: 1,
 }
 
-export async function LogClipGeneration(User, Text) {
-  return CreateLogEntry(LogTypes.ClipGenerated, User, Text);
+export async function LogClipGeneration(User, Text, pooledConnection) {
+  return CreateLogEntry(LogTypes.ClipGenerated, User, Text, pooledConnection);
 }
 export async function LogError(Err) {
   return LogErrorMessage(Err.message)
@@ -680,40 +501,21 @@ export async function LogErrorMessage(Message) {
   return CreateLogEntry(LogTypes.Error, `Unknown`, Message);
 }
 
-function CreateLogEntry(LogType, User, Message) {
-
-  return new Promise( function (resolve, reject) {
-
-    let con = getCon();
-
-    con.connect(function(err) {
-      if (err) console.log( err);
-    });
+async function CreateLogEntry(LogType, User, Message, pooledConnection) {
 
     let insert = 'Insert into IA_VoiceSynth.LogEntry (ID, User, LogType, Message) Values (UUID_TO_BIN(UUID()),?,?,?)';
     let values = [User, LogType, Message];
 
-    con.query(insert,values, (err, results, fields) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      con.end();
-      resolve( );
-    });
-  });
+    await SQLQuery(insert, values, pooledConnection);
 }
+
 export async function GetClipLog(limit, offset, query)
 {
-    //let today = new Date();
-    //defaulting to 1 week.  TODO: Make this whole thing more stepwise
-    // let select = 'Select TimeStamp, User, Message from IA_VoiceSynth.LogEntry where LogType = 1 and TimeStamp > ? LIMIT ? OFFSET ?'
-    // let values = [new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7), limit, offset]
-
     let select = 'Select TimeStamp, User, Message from IA_VoiceSynth.LogEntry where LogType = 1 order by TimeStamp desc LIMIT ? OFFSET ?'
     let values = [limit, offset]
 
     let logs = await SQLQuery(select, values);
-     return logs;
+    return logs;
 }
 export async function GetClipLogSize() {
 
@@ -740,33 +542,49 @@ function getCon()
     const conObj = getConObj();
     return mysql.createConnection(conObj);
 }
-
-function SQLQuery(query, values)
+//Create a pooled connection that can be used multiple times.
+export function getPooledConnection()
 {
-    try {
-      return new Promise( function (resolve, reject) {
+  return new Promise( function (resolve, reject) {
+    const con = getCon();
 
-    let con = getCon();
     con.connect(function(err) {
       if (err) {
         console.log( err);
         resolve(err.message);
       }
-    
-    
-    con.query(query, values, function (error, results, fields) {
-      if (error) {
-        console.log('Query Error');
-        console.log(error)
-        resolve(error.message);
-      }
-      con.end();
-      resolve( results);
+      resolve(con);
     });
+  });
+}
+export function resolvePooledConnection(con)
+{
+  con.destroy();
+}
 
-  });
-    
-  });
+async function SQLQuery(query, values, pooledConnection)
+{
+    try {
+      return new Promise( async function (resolve, reject) {
+
+        const con = pooledConnection ?? await getPooledConnection()
+        console.log('Query:' + query + '\nvalues:' + values);
+
+        con.query(query, values, function (error, results, fields) {
+          if (error) {
+            console.log('Query Error');
+            console.log(error)
+            if (pooledConnection == null) {
+              con.destroy();
+            }
+            resolve(error.message);
+          }
+          if (pooledConnection == null) {
+            con.destroy();
+          }
+          resolve( results);
+        });
+      });
   }
   catch (error)
   {

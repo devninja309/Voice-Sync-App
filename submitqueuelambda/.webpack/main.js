@@ -20636,39 +20636,38 @@ function GetTestInfo()
   }
 }
 
-function GetPronunciations ()
+function GetPronunciations (pooledConnection)
 {
     let query = "SELECT * FROM IA_VoiceSynth.Pronunciations";
-    return SQLQuery(query);
+    return SQLQuery(query,"", pooledConnection);
 }
 
-async function GetClipDetails(clipID)
+async function GetClipDetails(clipID, pooledConnection)
 {
   //This is everything except AudioClip, which is binary data.
   //Consider moving AudioClip to a filestore (S3) or a separate table.
   let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, (audioclip is not null) as HasAudio, ClipStatusID
      FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
   let valuesSlides = [clipID];
-  let clips = await SQLQuery(querySlides, valuesSlides);
+  let clips = await SQLQuery(querySlides, valuesSlides, pooledConnection);
 
   let clip = clips[0];
   console.log("Loading Clip:" + clipID)
-  console.log(clip);
   return clip;
 }
 
-async function GetClipAudio(clipID)
+async function GetClipAudio(clipID, pooledConnection)
 {
   let querySlides = `SELECT ID, SlideID, ClipText, VoiceID, OrdinalValue, Volume,Speed, Delay, Approved, AudioClip
      FROM IA_VoiceSynth.Clips as Clips Where Clips.ID = ?`;
   let valuesSlides = [clipID];
-  let clips = await SQLQuery(querySlides, valuesSlides);
+  let clips = await SQLQuery(querySlides, valuesSlides, pooledConnection);
 
   let clip = clips[0];
   return clip;
 }
 //this function updates the entire clip AND resets the audio to null.
-async function UpdateClip(clip)
+async function UpdateClip(clip, pooledConnection)
 {
   //Check Clip
   let error = false;
@@ -20685,28 +20684,14 @@ async function UpdateClip(clip)
     error = true;
     errorString += "Invalid ClipID\n";
   }
-  return new Promise( function (resolve, reject) {
 
-    let con = getCon();
+  let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, Volume =?, Speed=?, Delay=?, ClipStatusID =?, AudioClip = null Where ID = ?`;
+  let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Delay, clip.ClipStatusID, clip.ID];
 
-    con.connect(function(err) {
-      if (err) console.log( err);
-    });
+  SQLQuery(insert, values, pooledConnection);
 
-
-     let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, Volume =?, Speed=?, Delay=?, ClipStatusID =?, AudioClip = null Where ID = ?`;
-     let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Delay, clip.ClipStatusID, clip.ID];
-
-    con.query(insert,values, (err, results, fields) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      con.end();
-      resolve( clip);
-    });
-  });
 }
-async function UpdateClipAudio(clipID, audioBuffer)
+async function UpdateClipAudio(clipID, audioBuffer, pooledConnection)
 {
   //Check Clip
   var result = {
@@ -20718,32 +20703,20 @@ async function UpdateClipAudio(clipID, audioBuffer)
     result.errorString += "Invalid ClipID\n";
     return result;
   }
-  return new Promise( function (resolve, reject) {
 
-    let con = getCon();
+  let insert = `Update IA_VoiceSynth.Clips set AudioClip = ? Where ID = ?`;
+  let values = [audioBuffer, clipID];
+  
+  var res = await SQLQuery(insert, values, pooledConnection); //TODO check for DB failure here.
 
-    con.connect(function(err) {
-      if (err) console.log( err);
-    });
+  console.log('Update Audio Clip results:', res)
 
-     let insert = `Update IA_VoiceSynth.Clips set AudioClip = ? Where ID = ?`;
-     let values = [audioBuffer, clipID];
-
-    con.query(insert,values, (err, results, fields) => {
-      if (err) {
-        console.log(err);
-        result.errorString = err.message;
-        result.Successful = false;
-      }
-      con.end();
-      resolve( result );
-    });
-  });
+  return result;
 
 }
 
-async function LogClipGeneration(User, Text) {
-  return CreateLogEntry(LogTypes.ClipGenerated, User, Text);
+async function LogClipGeneration(User, Text, pooledConnection) {
+  return CreateLogEntry(LogTypes.ClipGenerated, User, Text, pooledConnection);
 }
 async function LogError(Err) {
   return LogErrorMessage(Err.message)
@@ -20752,56 +20725,25 @@ async function LogErrorMessage(Message) {
   return CreateLogEntry(LogTypes.Error, `Unknown`, Message);
 }
 
-function CreateLogEntry(LogType, User, Message) {
+async function CreateLogEntry(LogType, User, Message, pooledConnection) {
 
-  return new Promise( function (resolve, reject) {
 
-    let con = getCon();
+  let insert = 'Insert into IA_VoiceSynth.LogEntry (ID, User, LogType, Message) Values (UUID_TO_BIN(UUID()),?,?,?)';
+  let values = [User, LogType, Message];
 
-    con.connect(function(err) {
-      if (err) console.log( err);
-    });
+  return await SQLQuery(insert, values, pooledConnection);
 
-    let insert = 'Insert into IA_VoiceSynth.LogEntry (ID, User, LogType, Message) Values (UUID_TO_BIN(UUID()),?,?,?)';
-    let values = [User, LogType, Message];
-
-    con.query(insert,values, (err, results, fields) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      con.end();
-      resolve( );
-    });
-  });
 }
-async function UpdateClipAudioStatus(clipID, newStatus, errorMessage)
+async function UpdateClipAudioStatus(clipID, newStatus, errorMessage, pooledConnection)
 {
   console.log("Start UpdateClipAudioStatus")
   if (!Object.values(e_ClipAudioGenerationStatus).some(val => val == newStatus))
   {
     return console.error("Invalid Status");
   }
-  return new Promise( function (resolve, reject) {
-    let con = getCon();
-
-    con.connect(function(err) {
-      if (err) console.log( err);
-    });
-    let update = `Update IA_VoiceSynth.Clips set ClipAudioState = ? , ClipAudioStateErrorMessage = ? Where ID = ?`;
-    let values = [newStatus, errorMessage ?? "", clipID];
-    console.log("Update Query")
-    console.log(update);
-    console.log(values)
-
-   con.query(update,values, (err, results, fields) => {
-     if (err) {
-        console.log(err.message);
-     }
-     con.end();
-     console.log("Updating Clip Status " + clipID)
-     resolve( );
-   });
- });
+  let update = `Update IA_VoiceSynth.Clips set ClipAudioState = ? , ClipAudioStateErrorMessage = ? Where ID = ?`;
+  let values = [newStatus, errorMessage ?? "", clipID];
+  await SQLQuery(update,values, pooledConnection)
 
 }
 
@@ -20817,43 +20759,60 @@ function getConObj()
 
 }
 
+
 function getCon()
 {
     const conObj = getConObj();
     return mysql.createConnection(conObj);
 }
 
-function SQLQuery(query, values)
+//Create a pooled connection that can be used multiple times.
+function getPooledConnection()
 {
-    try {
-      return new Promise( function (resolve, reject) {
+  return new Promise( function (resolve, reject) {
+    const con = getCon();
 
-    let con = getCon();
     con.connect(function(err) {
       if (err) {
         console.log( err);
         resolve(err.message);
       }
-    
-    
-    con.query(query, values, function (error, results, fields) {
-      if (error) {
-        console.log('Query Error');
-        console.log(error)
-        resolve(error.message);
-      }
-      con.end();
-      resolve( results);
+      resolve(con);
     });
+  });
+}
+function resolvePooledConnection(con)
+{
+  con.destroy();
+}
 
-  });
-    
-  });
+async function SQLQuery(query, values, pooledConnection)
+{
+    try {
+      return new Promise( async function (resolve, reject) {
+
+        const con = pooledConnection ?? await getPooledConnection()
+
+        con.query(query, values, function (error, results, fields) {
+          if (error) {
+            console.log('Query Error');
+            console.log(error)
+            if (pooledConnection == null) {
+              con.destroy();
+            }
+            resolve(error.message);
+          }
+          if (pooledConnection == null) {
+            con.destroy();
+          }
+          resolve( results);
+        });
+      });
   }
   catch (error)
   {
       console.error(error)
-      reject(error.message);
+      return error.message;
   }
 }
 
@@ -22993,18 +22952,18 @@ const auth0NameSpace = "https://industryacademy.com/"
 const defaultPageSize = 20;
 
 
-async function GenerateClipAudioFile(clipId)
+async function GenerateClipAudioFile(clipId, pooledConnection)
 {
     var result = {
         status: 200,
         message: "Successful"
     }
     try {
-        let clip = await GetClipDetails(clipId);
+        let clip = await GetClipDetails(clipId), pooledConnection;
         const avatarId = clip.VoiceID;
         const rawText = clip.ClipText;
 
-        const pronunciations  = await GetPronunciations();
+        const pronunciations  = await GetPronunciations(pooledConnection);
 
         const text = ConvertPronunciationFast(pronunciations, rawText);
 
@@ -23024,8 +22983,7 @@ async function GenerateClipAudioFile(clipId)
         });
 
         let status = ttsResponse.status;
-        //TODO handle invalid responses here
-        if (status != 200)
+        if (status != 200) //TODO, this will timeout, right?
         {
             console.log('Failed to get audio file');
             console.log('tts Response Status was invalid');
@@ -23047,7 +23005,7 @@ async function GenerateClipAudioFile(clipId)
         clip.AudioClip = buffer;
 
 
-        var saveResult = await UpdateClipAudio(clipId, buffer);
+        var saveResult = await UpdateClipAudio(clipId, buffer, pooledConnection);
         if (saveResult.Successful){ 
             console.log("Successful Save")       
             return result;
@@ -23081,14 +23039,15 @@ exports.handler = async (evt, ctx) => {
   await Promise.all(evt.Records.map(async (record) => {
     console.log(record);
     const clipId = parseInt(record.messageAttributes.ClipId.stringValue)
-    //const clipId = 1;
-    var result = await GenerateClipAudioFile(clipId);
+    console.log('Begin Processing Clip:' + clipId);
+    const con = await getPooledConnection();
+    var result = await GenerateClipAudioFile(clipId, con);
     const newStatus = result.status==200 ? e_ClipAudioGenerationStatus.HasAudio : e_ClipAudioGenerationStatus.ErrorGeneratingAudio;
-    console.log("Clip Generation Status")
-    console.log(result)
-    console.log(newStatus)
-    await UpdateClipAudioStatus(clipId, newStatus, result.message);
-    console.log("Done Generating Audio");
+    console.log("Clip Generation Status:\n",result, newStatus)
+    await UpdateClipAudioStatus(clipId, newStatus, result.message, con);
+    console.log("Done Generating Audio:" + clipId);
+
+    resolvePooledConnection(con);
 
   }));
 
