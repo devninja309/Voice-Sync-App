@@ -159,15 +159,9 @@ export async function SplitVoiceIntoClips(slide, voice, text, APICalls ,ordinalV
                 console.log('clip:', newClip);
                 resolve()
             })
-            // APICalls.CreateClip(clip,voice).then(()=>{
-            //     resolve()
-            // })
         })
         promiseArray.push(promise);
     })
-
-    //const sleep = ms => new Promise(r => setTimeout(r, ms));
-    //promiseArray.push(sleep(10000).then(x => {console.log('nanny nanny boo boo')}));
 
     const allPromise = Promise.all(promiseArray);
 

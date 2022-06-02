@@ -348,7 +348,7 @@ router.get('/test', (ctx) => {
         return;
       }
       //Step 1:  Check if running local
-      if (deployedEnv != 'dev' || true){
+      if (deployedEnv != 'dev'){
         const con = await getPooledConnection();
         console.log('Creating pooled connection');
         //Update process status
@@ -374,12 +374,13 @@ router.get('/test', (ctx) => {
       else {
         //On run this locally
         try {
-          let clip = await GetClipDetails(ctx.params.clipID);
+          const con = await getPooledConnection();
+          let clip = await GetClipDetails(ctx.params.clipID, con);
 
           const avatarId = clip.VoiceID;
           const rawText = clip.ClipText;
 
-          const pronunciations  = await GetPronunciations();
+          const pronunciations  = await GetPronunciations(con);
 
           const text = ConvertPronunciationFast(pronunciations, rawText);
 
@@ -417,11 +418,12 @@ router.get('/test', (ctx) => {
           const buffer = await Buffer.from(responseArray);
           clip.AudioClip = buffer;
 
-          await LogClipGeneration(GetUserName(ctx), text);
+          await LogClipGeneration(GetUserName(ctx), text, con);
 
-          await UpdateClipAudio(ctx.params.clipID, buffer);
+          await UpdateClipAudio(ctx.params.clipID, buffer, con);
           clip.HasAudio = 1;
           ctx.body = JSON.stringify(clip);
+          await UpdateClipAudioStatus(clip.ID, e_ClipAudioGenerationStatus.HasAudio, "", con);
         }
         catch (exp) {
           console.log('Error Generating Clip')

@@ -5,7 +5,7 @@
 import { Avatars } from '../Etc/Avatars';
  import{useAuthTools} from '../Hooks/Auth';
 
-import { SimpleSlider } from '../Elements/SImpleSlider';
+import { SimpleSlider } from '../Elements/SimpleSlider';
 
  
  export function DelaySelect (props) 

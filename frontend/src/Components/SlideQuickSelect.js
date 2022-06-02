@@ -51,7 +51,6 @@ export function SlideQuickSelect (props)
         </div>
         )
     }
-    console.log(array);
     return (
     <div className ="div-SlidQuickSelectContainer">
         {array.map((ColumnIndex) => {

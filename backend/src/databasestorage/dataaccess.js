@@ -568,7 +568,6 @@ async function SQLQuery(query, values, pooledConnection)
       return new Promise( async function (resolve, reject) {
 
         const con = pooledConnection ?? await getPooledConnection()
-        console.log('Query:' + query + '\nvalues:' + values);
 
         con.query(query, values, function (error, results, fields) {
           if (error) {

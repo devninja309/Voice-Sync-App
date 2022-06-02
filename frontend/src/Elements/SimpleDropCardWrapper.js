@@ -6,6 +6,7 @@ import { useState, useEffect,useRef } from 'react';
 
 export function SimpleDropCardWrapper(props) {
 
+
     const children = {...props.children}
     const ordinal = props.ordinal;
 
@@ -16,7 +17,8 @@ export function SimpleDropCardWrapper(props) {
         console.log('Dropped Item');
         const original = item.card.props.ordinal;
         const index = calculateInsertIndex(offset.x, original);
-        props.MoveCard(original, index);
+        const {movecard} = props;
+        movecard(original, index);
     }
     function onHover(item, monitor) {
         const offset = monitor.getClientOffset();

@@ -1,8 +1,7 @@
 
  
- import {useState, useEffect} from 'react';
 import { Avatars } from '../Etc/Avatars';
- import {SimpleSlider} from '../Elements/SImpleSlider'
+ import {SimpleSlider} from '../Elements/SimpleSlider'
 
  const Speeds = [
     {value: 70, label: 'Slowest'},
@@ -23,7 +22,6 @@ import { Avatars } from '../Etc/Avatars';
          var newClip = {...clip, Speed: value}
          onChange(newClip);
      }
-  //<SimpleSelect className = "simpleSelect-small" onChange={UpdateClip} options={Speeds} value = {clip.Speed}/>
   return (
 
     <div className = 'div-Slider'>

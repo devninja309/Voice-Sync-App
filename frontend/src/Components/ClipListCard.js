@@ -16,6 +16,7 @@ import {ItemTypes} from "./DnDItemTypes";
 import {SimpleDropCardWrapper} from "../Elements/SimpleDropCardWrapper";
 import {GetClipStatus, e_ClipAudioGenerationStatus} from "../Etc/ClipStatus";
 import { GetVoiceName } from "../Etc/Avatars";
+import {useCardContextTools} from "../Hooks/CardManager";
 
 export function ClipListCard (props) 
 {
@@ -26,6 +27,9 @@ export function ClipListCard (props)
     const [recheckStopped, setRecheckStopped] = useState(false);
     const [clip, setClip] = useState(null);
     const currentLocation = useLocation();
+
+
+    const { overrideDND } = useCardContextTools();
 
     useEffect( () => {
         clearInterval(recheckTimer);
@@ -138,6 +142,12 @@ export function ClipListCard (props)
         () => ({
             type: ItemTypes.ClipCard,
             item: { card },
+            canDrag : () => {
+                console.log('Checking canDrag?')
+                console.log(overrideDND);
+                return false;
+                return !overrideDND;
+            },
             collect: (monitor) => ({
                 opacity: monitor.isDragging() ? 0.5 : 1,
                 isDragging: !!monitor.isDragging()
@@ -145,16 +155,24 @@ export function ClipListCard (props)
             }),
             [clip]
     )
-    const MoveCard = props.MoveClipCard;
-
+    const MoveCard = props.moveClipCard;
+    
+    const handleDragStart = (e) => {
+        if (overrideDND) {
+            //e.preventDefault();
+            //e.stopPropagation();
+        }
+        else {
+        }
+      };
 
     return (
         <SimpleDropCardWrapper  className = "div-ClipListCard" onClick={()=>setSelectedClip(clip)} 
-            MoveCard={MoveCard}
+            movecard={MoveCard}
             id={clip ? clip.ID : 0} 
             key={clip ? clip.ID : 0} 
             ordinal = {propOrdinal || (clip?clip.OrdinalValue:0)}>
-            <div ref = {dragRef}> 
+            <div ref = {dragRef} /*onDragStart = {handleDragStart} */>
                 {!isDragging && card}
                 {isDragging && 'Original Spot'}
             </div>

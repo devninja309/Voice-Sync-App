@@ -34,6 +34,7 @@ import {Breadcrumbs} from '@blueprintjs/core';
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import {LoadingSpinner} from "../Elements/LoadingSpinner";
+import {CardManagerProvider} from '../Hooks/CardManager';
 
 
 const SlideDetailsPage = (props) => {
@@ -123,7 +124,7 @@ const SlideDetailsPage = (props) => {
         if (selectedClipEdited) {
             clip.AudioClip = null;
             clip.HasAudio = false;
-            if (clip.ClipStatusID == 2) {
+            if (clip.ClipStatusID === 2) {
                 clip.ClipStatusID = 1;
             }
             APICalls.UpdateClip(clip)
@@ -174,7 +175,7 @@ const SlideDetailsPage = (props) => {
         setSlideProcessing(true);
 
         const promiseArray = [];
-        const processClips = slide.Clips.filter(clip => clip.ClipAudioState == 1)
+        const processClips = slide.Clips.filter(clip => clip.ClipAudioState === 1)
     
         for (const clip of processClips)
         {
@@ -197,7 +198,7 @@ const SlideDetailsPage = (props) => {
         }
         else if (passedSlide.Clips){
             return passedSlide.Clips.sort(sortByOrdinalValue).map((clip,index) => ( 
-                <ClipListCard className="ClipsCard" key={clip.ID} clip = {clip} ordinal = {clip.OrdinalValue} setSelectedClip={changeSelectedClip} updateClip={UpdateClip} MoveClipCard = {MoveClipCard}/>
+                <CardManagerProvider><ClipListCard className="ClipsCard" key={clip.ID} clip = {clip} ordinal = {clip.OrdinalValue} setSelectedClip={changeSelectedClip} updateClip={UpdateClip} moveClipCard = {MoveClipCard}/></CardManagerProvider>
             ))
         }      
     }
@@ -205,7 +206,7 @@ const SlideDetailsPage = (props) => {
         if (!Array.isArray(slide.Clips)){ 
             return false;
         }
-        const approved = slide.Clips.every((clip) => clip.ClipStatusID == 2);
+        const approved = slide.Clips.every((clip) => clip.ClipStatusID === 2);
         return approved;
     }
 
@@ -229,9 +230,9 @@ const SlideDetailsPage = (props) => {
                         {(selectedClipEdited || selectedClipPostEdited) && <SimpleButton onClick= {()=> pushChangedClip(selectedClip)} Text="Save Changes" className="simpleButtonSlideButtonGroup" disabled = {slideProcessing} />}
                         <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => changeSelectedClip(null)} Text="Deselect Clip" disabled = {slideProcessing}/>
                         <VoiceSelect className ="simpleButtonSlideButtonGroup" clip = {selectedClip} onChange={(newClip) => UpdateSelectedClip(newClip)}/>
-                        {selectedClip.ClipStatusID != 2 && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipStatus(2)} Text="Approve Clip and Save" disabled = {slideProcessing} rightIcon ="thumbs-up"/>}
-                        {selectedClip.ClipStatusID == 2 && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipStatus(1)} Text="Disapprove Clip and Save" disabled = {slideProcessing} rightIcon ="thumbs-down"/>}
-                        {selectedClip.ClipStatusID != 3 && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipStatus(3)} Text="Request Review and Save" disabled = {slideProcessing} rightIcon ="warning-sign"/>}
+                        {selectedClip.ClipStatusID !== 2 && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipStatus(2)} Text="Approve Clip and Save" disabled = {slideProcessing} rightIcon ="thumbs-up"/>}
+                        {selectedClip.ClipStatusID === 2 && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipStatus(1)} Text="Disapprove Clip and Save" disabled = {slideProcessing} rightIcon ="thumbs-down"/>}
+                        {selectedClip.ClipStatusID !== 3 && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipStatus(3)} Text="Request Review and Save" disabled = {slideProcessing} rightIcon ="warning-sign"/>}
                         </div>
                         <div className="div-ClipEditButtonRow">
                         <VolumeSelect clip = {selectedClip} onChange={(newClip) => UpdateSelectedClipPost(newClip)} disabled = {slideProcessing}/>
@@ -252,7 +253,7 @@ const SlideDetailsPage = (props) => {
     {
         //This function should just update the in memory clip with a known change from the backend
         //preferably without reloading everything else.
-        slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = clip;
+        slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID === clip.ID)] = clip;
 
         //This should cause the cliplistcards to refresh.  That's the goal, at any rate.
         setSlide({...slide});
@@ -264,12 +265,12 @@ const SlideDetailsPage = (props) => {
         const movingClip = slide.Clips.find(clip => clip.OrdinalValue === fromOrdinal);
         slide.Clips.filter(clip=> (clip.OrdinalValue > fromOrdinal && clip.OrdinalValue <=toOrdinal)).forEach(clip => {
             clip.OrdinalValue -=1;  
-            slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = {...clip}; 
+            slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID === clip.ID)] = {...clip}; 
             clipsToUpdate.push(clip);
         });
         slide.Clips.filter(clip=> (clip.OrdinalValue < fromOrdinal && clip.OrdinalValue >=toOrdinal)).forEach(clip => {
             clip.OrdinalValue +=1;      
-            slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = {...clip}; 
+            slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID === clip.ID)] = {...clip}; 
             clipsToUpdate.push(clip);
         });
         movingClip.OrdinalValue = toOrdinal;
@@ -278,7 +279,7 @@ const SlideDetailsPage = (props) => {
         //APICalls.UpdatePostClip(movingClip);
         
         if (selectedClip) {
-            selectedClip.OrdinalValue = slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == selectedClip.ID)].OrdinalValue;
+            selectedClip.OrdinalValue = slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID === selectedClip.ID)].OrdinalValue;
         }
         //TODO This will reload all clip audios
         APICalls.UpdateClipOrder(clipsToUpdate).then( setSlide({...slide}))
@@ -312,9 +313,9 @@ const SlideDetailsPage = (props) => {
 
     return  (     
         <PageWrapper><DndProvider backend={HTML5Backend}>
-        <div className="App">
-            <header className="App-header">
-                <div className="div-SlideHeader">
+        <div class="App">
+            <header class="App-header">
+                <div class="div-SlideHeader">
                     <div style={{width: '40%'}}>
                     <div><MidLogo/></div>
                     </div>
@@ -322,7 +323,7 @@ const SlideDetailsPage = (props) => {
                         <SlideQuickSelect Columns={3} ChapterID={slide.ChapterID}/>
                     </div>
             </div>
-            <div className ="course-Name-Box">
+            <div class ="course-Name-Box">
             <h3>
             {slide.SlideName}
             </h3>
@@ -333,22 +334,22 @@ const SlideDetailsPage = (props) => {
             </div>
             <div class = "div-Slide-Details-Container">
             <PronunciationEditDialog isOpen = {isPronunciationOpen} handleClose = {handlePronunciationClose}/>
-                <div className = "div-Slide-Details-Container-Slide">
-                    <div className ="div-Slide-Details-Container-TextArea">
+                <div class = "div-Slide-Details-Container-Slide">
+                    <div class ="div-Slide-Details-Container-TextArea">
                         {TextEditArea()}
                     </div>
                     <ButtonGroup>
-                    {allClipsApproved() && <button className="input" onClick={mergeSlide}>Merge all clips</button>}
+                    {allClipsApproved() && <button class="input" onClick={mergeSlide}>Merge all clips</button>}
                     <SimpleAudioPlayer audiofile = {slideAudioURL} updating={slideAudioUpdating}/>  
                     {slideHasAudio && <a href={slideAudioURL} download={'Slide-' + slide.ID + '-Audio.mp3'}>
                         <IconButton icon="cloud-download" text="Download Slide Audio" download/>
                     </a>}
                     </ButtonGroup>
                 </div>
-                <div className = "div-Slide-Details-ClipsList-Column">
+                <div class = "div-Slide-Details-ClipsList-Column">
                     <div>
                         <p></p>
-                    <div className = "buttonGroup-row">
+                    <div class = "buttonGroup-row">
                         <ButtonGroup className = "buttonGroup-row buttonGroup-row-left">     
                             <Tooltip
                                 content={<span>Add New Clip</span>}
