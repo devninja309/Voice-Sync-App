@@ -1,7 +1,7 @@
 //List of active courses
 import { PageWrapper } from '../Components/PageWrapper';
 import CourseList from '../Components/CourseList';
-import { BigLogo, MidLogo } from '../Elements/Logos';
+import { MidLogo } from '../Elements/Logos';
 
 const CourseListPage = (props) => {
 

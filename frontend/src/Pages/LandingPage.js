@@ -3,7 +3,6 @@ import React from "react";
 import { PageWrapper } from '../Components/PageWrapper';
 import {LinkButton} from '../Elements/LinkButton';
 import { BigLogo } from "../Elements/Logos";
-import { DBTest } from "../Elements/DBTest";
 
 export function LandingPage () 
 {

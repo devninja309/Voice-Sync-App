@@ -15,12 +15,16 @@ import{useAuthTools} from '../Hooks/Auth';
 
  const [slides, setSlides] = useState('');
  const {token, APICalls} = useAuthTools();
+ const [nextSlideOrdinal, setNextSlideOrdinal] = useState(1);
  
  useEffect( () => {
      if (ChapterID) {
         APICalls.GetSlides(ChapterID)
         .then(
             data => {
+                var ordinalValues =  data.map(slide => parseInt(slide.OrdinalValue ?? 1,10));
+                var nextValue = Math.max(...ordinalValues) + 1
+                setNextSlideOrdinal( nextValue);
                 setSlides(data);
             })
     }
@@ -49,9 +53,10 @@ import{useAuthTools} from '../Hooks/Auth';
     }
 }
 
+
     return (
         <div className = "courseListBox"> 
-        <div className = 'info-row'><h3>Slides </h3> <ButtonGroup height = '10px'><SlideCreateButton CourseID = {CourseID} ChapterID = {ChapterID}/>
+        <div className = 'info-row'><h3>Slides </h3> <ButtonGroup height = '10px'><SlideCreateButton CourseID = {CourseID} ChapterID = {ChapterID} nextSlideOrdinal = {nextSlideOrdinal}/>
         </ButtonGroup></div>
         {DisplaySlideList()}
         </div>

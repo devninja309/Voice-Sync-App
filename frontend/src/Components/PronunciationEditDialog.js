@@ -77,7 +77,7 @@ export function PronunciationEditDialog (props)
                 <SimpleButton onClick={CheckPronunciation} Text="Check Pronunciation"/>
                 <SimpleButton onClick={UpdatePronunciation} Text="Save Pronunciation"/>
                 <SimpleButton onClick={handleClose} Text="Cancel"/> 
-                <SimpleAudioPlayer audiofile = {url} updating={updating}/>  
+                <SimpleAudioPlayer audiofile = {url} updating={updating} objectURL = {props.Word} typeString = {"Pronunciation"}/>  
             </ButtonGroup>
         </SimpleDialog>
     )

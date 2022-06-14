@@ -1,8 +1,7 @@
 //Simple button, base class for other buttons
 
 import * as React from "react";
-import {Tooltip} from "@blueprintjs/core";
-import { useState, useEffect,useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthTools } from '../Hooks/Auth';
 import { useLocation} from "react-router-dom";
 import { useDrag } from 'react-dnd'
@@ -11,6 +10,7 @@ import { SimpleCard } from "../Elements/SimpleCard";
 import {SimpleAudioPlayer} from "../Elements/SimpleAudioPlayer";
 import { IconButton } from '../Elements/IconButton'; 
 import {LoadingSpinner} from "../Elements/LoadingSpinner";
+import {SimpleButton} from "../Elements/SimpleButton";
 import {ClipDeleteButton} from "./ClipDeleteButton";
 import {ItemTypes} from "./DnDItemTypes";
 import {SimpleDropCardWrapper} from "../Elements/SimpleDropCardWrapper";
@@ -20,8 +20,8 @@ import {useCardContextTools} from "../Hooks/CardManager";
 
 export function ClipListCard (props) 
 {
-    const {clip: propClip, setSelectedClip, updateClip, ordinal: propOrdinal, ...childProps} = props;
-    const {token, APICalls} = useAuthTools();
+    const {clip: propClip, setSelectedClip, updateClip, ordinal: propOrdinal, selectedClip, selectedClipChanged, saveSelectedClip, ...childProps} = props;
+    const { APICalls} = useAuthTools();
     const [url, setUrl] = useState(null);
     const [recheckTimer, setRecheckTimer] = useState(null);
     const [recheckStopped, setRecheckStopped] = useState(false);
@@ -47,14 +47,14 @@ export function ClipListCard (props)
     
      function RecheckClip(ctrlClip)
     {
-        if (ctrlClip != null && ctrlClip.ClipAudioState == e_ClipAudioGenerationStatus.GeneratingAudio && !recheckStopped)
+        if (ctrlClip != null && ctrlClip.ClipAudioState === e_ClipAudioGenerationStatus.GeneratingAudio && !recheckStopped)
         {
             console.log('Reloading clip to check for updates: ' + ctrlClip.ID);
             console.log(ctrlClip);
             APICalls.GetClipDetails(ctrlClip.ID).then(returnClip => {
                 console.log('Return Clip:')
                 console.log(returnClip);
-                if (returnClip.ClipAudioState != e_ClipAudioGenerationStatus.GeneratingAudio)
+                if (returnClip.ClipAudioState !== e_ClipAudioGenerationStatus.GeneratingAudio)
                 {
                     console.log('Has Audio');
                     updateClip(returnClip); //This should trigger a redraw of this component.  
@@ -66,7 +66,7 @@ export function ClipListCard (props)
      function LoadClipAudio(audioClip) //from database
     {
         setUrl(null);
-        if (audioClip.HasAudio && audioClip.ClipAudioState == 4)
+        if (audioClip.HasAudio && audioClip.ClipAudioState === 4)
         {
             APICalls.GetClipAudio(audioClip.ID)
                 .then(
@@ -86,17 +86,29 @@ export function ClipListCard (props)
             updateClip(returnClip); //This should trigger a redraw of this component.   
         });
     }
+    function ApproveClip() {
+        const updatedClip = {...clip, ClipStatusID: 2}
+        APICalls.UpdatePostClip(updatedClip).then(returnClip => {
+            updateClip(returnClip, true); //This should trigger a redraw of this component.   
+        });
+    }
     let card = null;
      
     function cardCSS() {
-        const base = "SimpleCard-ClipListCard";
+        const baseCSS = "SimpleCard-ClipListCard";
+        const selectedCSS = selectedClip ? " SimpleCard-Selected" : "";
         if (clip === null) {
-            return base;
+            return baseCSS;
         }
 
         const statusCSS =  " SimpleCard-ClipListCard-"+GetClipStatus(clip).label;
 
-        return base + statusCSS;
+        return baseCSS + statusCSS + selectedCSS;
+    }
+    function titleCSS() {
+        const baseCSS = "p-clip-card-text-left";
+        const selectedCSS = "p-clip-card-text-left-selected";
+        return selectedClip ? selectedCSS : baseCSS
     }
     
     if (clip === null){
@@ -113,18 +125,21 @@ export function ClipListCard (props)
         <div ordinal = {clip.OrdinalValue}>
             <SimpleCard  {...childProps} className={cardCSS()} ordinal = {clip.OrdinalValue}>
                 <div class="div-Slide-Details-Container">
-                    <p class = "p-clip-card-text-left">
+                    <p class = {titleCSS()}>
                         Clip: {clip.OrdinalValue}
                     </p>
-                    <IconButton icon="refresh" onClick={()=>UpdateClipAudio(clip.ID)}/>
+                    {(selectedClipChanged && selectedClip) ? <IconButton icon="cloud-upload" onClick={()=>saveSelectedClip()}/>
+                        : <IconButton icon="refresh" onClick={()=>UpdateClipAudio(clip.ID)}/>}
+                    
                     <ClipDeleteButton 
                             ItemID = {clip.ID}
                             SlideID = {clip.SlideID}
                             Redirect = {currentLocation.pathname}
                             />
                 </div>
-                <div class="div-Slide-Details-Container">                               
-                    <SimpleAudioPlayer pace = {clip.Speed} volume = {clip.Volume/2} audiofile = {url} 
+                <div class="div-Slide-Details-Container"> 
+                                                 
+                    <SimpleAudioPlayer pace = {clip.Speed} volume = {clip.Volume/2} audiofile = {url} objectURL = {clip.ID} typeString = {"Clip"}
                         ClipAudioGenerationStatus={clip.ClipAudioState} ErrorMessage = {clip.ClipAudioStateErrorMessage}/>  
                     
                 </div>
@@ -132,20 +147,18 @@ export function ClipListCard (props)
                     <p class = "p-clip-card-text">
                         {GetVoiceName(clip).label}
                     </p>
+                    {(clip.ClipStatusID === 1) &&<IconButton icon="thumbs-up" onClick={()=>ApproveClip()}/> }
                 </div>            
             </SimpleCard>
         </div>);
     }   
     
 
-   const [{ isDragging, opacity }, dragRef] = useDrag(
+   const [{ isDragging }, dragRef] = useDrag(
         () => ({
             type: ItemTypes.ClipCard,
             item: { card },
             canDrag : () => {
-                console.log('Checking canDrag?')
-                console.log(overrideDND);
-                return false;
                 return !overrideDND;
             },
             collect: (monitor) => ({
@@ -156,15 +169,6 @@ export function ClipListCard (props)
             [clip]
     )
     const MoveCard = props.moveClipCard;
-    
-    const handleDragStart = (e) => {
-        if (overrideDND) {
-            //e.preventDefault();
-            //e.stopPropagation();
-        }
-        else {
-        }
-      };
 
     return (
         <SimpleDropCardWrapper  className = "div-ClipListCard" onClick={()=>setSelectedClip(clip)} 

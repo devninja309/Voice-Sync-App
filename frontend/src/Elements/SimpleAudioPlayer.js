@@ -5,7 +5,6 @@ import {IconButton} from "./IconButton";
 import {SimpleSlider} from "./SimpleSlider";
 import { e_ClipAudioGenerationStatus} from "../Etc/ClipStatus";
 import {useCardContextTools} from "../Hooks/CardManager";
-import audio from 'fluent-ffmpeg/lib/options/audio';
 //import audio from 'fluent-ffmpeg/lib/options/audio';
 
 export function SimpleAudioPlayer(props) {
@@ -25,12 +24,10 @@ export function SimpleAudioPlayer(props) {
     });
 
     useEffect( () => {
-        console.log('props Effect Firing');
         setFile(props.audiofile);
      },[props.audiofile]);
 
     useEffect( () => {
-        console.log('file testing')
         if (file != null) {
             const audio = new Audio(file);
             audio.addEventListener('loadeddata', () => {    
@@ -40,18 +37,17 @@ export function SimpleAudioPlayer(props) {
         } 
     }, [file]);
 
-if (props.updating || props.ClipAudioGenerationStatus == e_ClipAudioGenerationStatus.GeneratingAudio)
+if (props.updating || props.ClipAudioGenerationStatus === e_ClipAudioGenerationStatus.GeneratingAudio)
 {
     return <LoadingSpinner/>
 }
-if (props.ClipAudioGenerationStatus == e_ClipAudioGenerationStatus.ErrorGeneratingAudio)
+if (props.ClipAudioGenerationStatus === e_ClipAudioGenerationStatus.ErrorGeneratingAudio)
 {
     return <div className= "div-HorizontalContainer"><IconButton icon="error"/> <p className="p-no-audio"> {props.ErrorMessage}</p></div>
 }
 if (!file) {
     return (
         <div className = "div-HorizontalContainer">
-        <IconButton icon='disable'/>
         <p className="p-no-audio">No Audio</p>
         </div>
     )
@@ -94,11 +90,6 @@ async function StopAudio() {
     }
 }
 async function SetCurrentTime(number) {
-    if (audioControl != null) {
-        audioControl.currentTime = number;
-    }
-  }
-async function SetCurrentTime2(number) {
     console.log('Here!' + number);
     if (audioControl !== null) {
         audioControl.currentTime = number;
@@ -118,13 +109,11 @@ function updateSlider() {
     }
 }
 const enter = () => {
-    console.log('In');
     if (cardContextTools?.setOverrideDND){
         cardContextTools.setOverrideDND(true)
     }
 }
 const exit = () => {
-    console.log('Out');
     if (cardContextTools?.setOverrideDND){
         cardContextTools.setOverrideDND(false)
     }
@@ -149,15 +138,19 @@ function getMaxDuration() {
 }
  /*<SimpleSlider max={getMaxDuration()} min={0} stepSize={.25} showTrackFill = {true} value = {audioControl?.currentTime ?? 0}
                 labelValues = {getLabelValues()} onRelease = {SetCurrentTime2}/>*/
+console.log("isWideStyle:" , props.isWideStyle);
 if (!playing || audioControl && audioControl.ended) {
     return (
-        <div
+        <div style={props.isWideStyle?({ display:'flex'}):({display:'block'})}
             onMouseEnter={enter}
             onMouseLeave={exit}>
+            {file!= null && <a href={file} download={props.typeString +'-' + props.objectURL + '-Audio.mp3'}>
+            <IconButton icon="cloud-download" text={"Download " + props.typeString + " Audio"} download/>
+            </a>} 
             <IconButton icon='play' onClick={PlayAudio}/>
-            <div style={{ position: "relative", zIndex: "10" }}>
+            <div style={{ position: "relative", zIndex: "10", paddingLeft: "10pt", paddingRight: "10pt" }}>
                 <SimpleSlider max={getMaxDuration()} min={0} stepSize={.25} showTrackFill = {true} value = {trackProgress}
-                        labelValues = {getLabelValues()} onRelease = {SetCurrentTime2} onChange= {MovingSlider} />
+                        labelValues = {getLabelValues()} onRelease = {SetCurrentTime} onChange= {MovingSlider} />
             </div>
         </div>
     )
@@ -173,7 +166,7 @@ else{
             </div>
             <div style={{ position: "relative", zIndex: "10" }}>
                 <SimpleSlider max={getMaxDuration()} min={0} stepSize={.25} value = {trackProgress}
-                    labelValues = {getLabelValues()}  onRelease = {(number) => SetCurrentTime2} />
+                    labelValues = {getLabelValues()}  onRelease = {(number) => SetCurrentTime} />
             </div>
         </div>
     )

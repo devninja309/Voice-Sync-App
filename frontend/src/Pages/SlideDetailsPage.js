@@ -17,14 +17,12 @@ import { SimpleAudioPlayer } from '../Elements/SimpleAudioPlayer';
 import { SimpleTextArea } from '../Elements/SimpleTextArea';
 import { useAuthTools } from '../Hooks/Auth';
 import { MidLogo } from '../Elements/Logos';
-import { getUrlPath, UpdateClipAudio } from '../Hooks/APICalls';
 import { SimpleButton } from '../Elements/SimpleButton';
 import { IconButton } from '../Elements/IconButton';
-import { ButtonGroup, Icon } from '@blueprintjs/core';
+import { ButtonGroup } from '@blueprintjs/core';
 import {Tooltip} from "@blueprintjs/core";
 import {UpdateSlideText} from '../Etc/TextManagement';
 import { PronunciationEditDialog } from '../Components/PronunciationEditDialog';
-import { SimpleSelect } from '../Elements/SimpleSelect';
 import { SlideQuickSelect } from '../Components/SlideQuickSelect';
 import {VoiceSelect} from '../Components/VoiceSelect';
 import { VolumeSelect } from '../Components/VolumeSelect';
@@ -120,6 +118,7 @@ const SlideDetailsPage = (props) => {
         pushChangedClip(updatedClip);
 
      }
+
      const pushChangedClip = (clip) => {
         if (selectedClipEdited) {
             clip.AudioClip = null;
@@ -134,7 +133,7 @@ const SlideDetailsPage = (props) => {
         }
          setSelectedClipEdited(false);
          setSelectedClipPostEdited(false);
-         slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID == clip.ID)] = clip;
+         slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID === clip.ID)] = clip;
          const newSlide = UpdateSlideText(slide);
          setSlide(newSlide);
          APICalls.UpdateSlide(newSlide);
@@ -159,13 +158,6 @@ const SlideDetailsPage = (props) => {
             })
          })
      }
-     function downloadSlideAudio () {
-         APICalls.DownloadSlideAudio(slide.ID).then ((data) => {
-             data.blob().then (responseBlob => {
-                const objectURL = URL.createObjectURL(responseBlob);
-                window.open(responseBlob);
-            })})
-     }
 
     function sortByOrdinalValue(a,b) {
         return a.OrdinalValue - b.OrdinalValue;
@@ -174,7 +166,6 @@ const SlideDetailsPage = (props) => {
         //Lock down the screen
         setSlideProcessing(true);
 
-        const promiseArray = [];
         const processClips = slide.Clips.filter(clip => clip.ClipAudioState === 1)
     
         for (const clip of processClips)
@@ -197,8 +188,13 @@ const SlideDetailsPage = (props) => {
             return <LoadingSpinner/>
         }
         else if (passedSlide.Clips){
+            //console.log('clip ID:' + clip.Id);
+            //console.log('selectedClipID:' selectedClip?.ID)
             return passedSlide.Clips.sort(sortByOrdinalValue).map((clip,index) => ( 
-                <CardManagerProvider><ClipListCard className="ClipsCard" key={clip.ID} clip = {clip} ordinal = {clip.OrdinalValue} setSelectedClip={changeSelectedClip} updateClip={UpdateClip} moveClipCard = {MoveClipCard}/></CardManagerProvider>
+                <CardManagerProvider><ClipListCard className="ClipsCard" key={clip.ID} clip = {clip} ordinal = {clip.OrdinalValue} 
+                    saveSelectedClip = {selectedClipEdited? ()=>pushChangedClip(selectedClip) : () =>{/*do nothing*/}}
+                    selectedClipChanged = {selectedClipEdited} selectedClip = {clip.ID === selectedClip?.ID}
+                    setSelectedClip={changeSelectedClip} updateClip={UpdateClip} moveClipCard = {MoveClipCard}/></CardManagerProvider>
             ))
         }      
     }
@@ -227,8 +223,8 @@ const SlideDetailsPage = (props) => {
                             disabled = {slideProcessing}
                             />
                         <div className="div-ClipEditButtonRow">
-                        {(selectedClipEdited || selectedClipPostEdited) && <SimpleButton onClick= {()=> pushChangedClip(selectedClip)} Text="Save Changes" className="simpleButtonSlideButtonGroup" disabled = {slideProcessing} />}
-                        <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => changeSelectedClip(null)} Text="Deselect Clip" disabled = {slideProcessing}/>
+                        {(selectedClipEdited || selectedClipPostEdited) && <SimpleButton onClick= {()=> pushChangedClip(selectedClip)} Text="Save Changes" className="simpleButtonSlideButtonGroup" disabled = {slideProcessing}  rightIcon="cloud-upload" />}
+                        <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => changeSelectedClip(null)} Text="Deselect Clip" disabled = {slideProcessing} rightIcon="undo" />
                         <VoiceSelect className ="simpleButtonSlideButtonGroup" clip = {selectedClip} onChange={(newClip) => UpdateSelectedClip(newClip)}/>
                         {selectedClip.ClipStatusID !== 2 && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipStatus(2)} Text="Approve Clip and Save" disabled = {slideProcessing} rightIcon ="thumbs-up"/>}
                         {selectedClip.ClipStatusID === 2 && <SimpleButton className="simpleButtonSlideButtonGroup" onClick={() => selectedClipStatus(1)} Text="Disapprove Clip and Save" disabled = {slideProcessing} rightIcon ="thumbs-down"/>}
@@ -249,7 +245,7 @@ const SlideDetailsPage = (props) => {
                     </div>
         }
     }
-    function UpdateClip(clip)
+    function UpdateClip(clip, deselect)
     {
         //This function should just update the in memory clip with a known change from the backend
         //preferably without reloading everything else.
@@ -257,6 +253,10 @@ const SlideDetailsPage = (props) => {
 
         //This should cause the cliplistcards to refresh.  That's the goal, at any rate.
         setSlide({...slide});
+        if (deselect)
+        {
+            changeSelectedClip(null);
+        }
     }
     function MoveClipCard(fromOrdinal, toOrdinal)
     {
@@ -339,11 +339,8 @@ const SlideDetailsPage = (props) => {
                         {TextEditArea()}
                     </div>
                     <ButtonGroup>
-                    {allClipsApproved() && <button class="input" onClick={mergeSlide}>Merge all clips</button>}
-                    <SimpleAudioPlayer audiofile = {slideAudioURL} updating={slideAudioUpdating}/>  
-                    {slideHasAudio && <a href={slideAudioURL} download={'Slide-' + slide.ID + '-Audio.mp3'}>
-                        <IconButton icon="cloud-download" text="Download Slide Audio" download/>
-                    </a>}
+                    {allClipsApproved() && <SimpleButton class="input" onClick={mergeSlide} text={"Merge all clips"}/>}
+                    <SimpleAudioPlayer audiofile = {slideAudioURL} updating={slideAudioUpdating} objectURL = {slide.ID} typeString = {"Slide"} isWideStyle = {true}/>  
                     </ButtonGroup>
                 </div>
                 <div class = "div-Slide-Details-ClipsList-Column">
@@ -376,11 +373,8 @@ const SlideDetailsPage = (props) => {
                             </Tooltip>
                         </ButtonGroup>
                         <ButtonGroup className = "buttonGroup-row buttonGroup-row-right">     
-                                {allClipsApproved() && <button className="input" onClick={mergeSlide}>Merge all clips</button>}
-                                <SimpleAudioPlayer audiofile = {slideAudioURL} updating={slideAudioUpdating}/>  
-                                {slideHasAudio && <a href={slideAudioURL} download={'Slide-' + slide.ID + '-Audio.mp3'}>
-                                    <IconButton icon="cloud-download" text="Download Slide Audio" download/>
-                                    </a>}
+                                {allClipsApproved() && <SimpleButton className="input" onClick={mergeSlide}Text="Merge all clips"/>}
+                                <SimpleAudioPlayer audiofile = {slideAudioURL} updating={slideAudioUpdating} objectURL = {slide.ID} typeString = {"Slide"} isWideStyle = {true}/>  
                         </ButtonGroup>
                     </div>
                     </div>

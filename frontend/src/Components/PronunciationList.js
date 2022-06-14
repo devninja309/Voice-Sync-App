@@ -1,10 +1,8 @@
 //List of courses in DB
-import { ButtonGroup } from '@blueprintjs/core';
 import React from 'react';
 
 import {useState, useEffect} from 'react';
 import { IconButton } from '../Elements/IconButton';
-import { SimpleButton } from '../Elements/SimpleButton';
 
 import{useAuthTools} from '../Hooks/Auth';
 import { PronunciationEditDialog } from './PronunciationEditDialog';
@@ -46,7 +44,7 @@ import { PronunciationEditDialog } from './PronunciationEditDialog';
 
      APICalls.DeletePronunciation(pronunciationID)
         .then(
-            setPronunciations(pronunciations.filter(pron => pron.ID != pronunciationID))        
+            setPronunciations(pronunciations.filter(pron => pron.ID !== pronunciationID))        
         )
  }
  

@@ -23,19 +23,21 @@ export function SlideCreateDialog (props)
     const [slideName, setSlideName] = React.useState(null);
     const [slideText, setSlideText] = React.useState(null);
 
-    const {token,APICalls} = useAuthTools();
+    const {APICalls} = useAuthTools();
+
+    const {children, handleClose,nextSlideOrdinal, ...childProps} = props;
 
     function AddSlide(){
-        let promise = ImportNewSlideText(ChapterID, slideName, 61137774, slideText,APICalls)
-        console.log('Promise:' , promise);
+        let promise = ImportNewSlideText(ChapterID, slideName, 61137774, slideText,APICalls, nextSlideOrdinal)
         promise.then(
             data => {
-                console.log('Navigating');
-                navigate(`/courses/${CourseID}/chapters/${ChapterID}/slides/` + data.ID)
+                if (data != null)
+                {
+                    navigate(`/courses/${CourseID}/chapters/${ChapterID}/slides/` + data.ID)
+                }
             }
          );
     }
-    const {children, handleClose, ...childProps} = props;
     return  (  
         <SimpleDialog {...childProps}>
             <h3>Create a new slide</h3>

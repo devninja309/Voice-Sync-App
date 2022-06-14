@@ -20,7 +20,7 @@ export function IsAdmin() {
     const { user } = useAuth0();
     if (user) {
         //Would rather this be the permissions, but that's enough harder to get at it's not worth the time.
-        return user[`https://industryacademy.com//roles`].some(val => val == `Admin`);  
+        return user[`https://industryacademy.com//roles`].some(val => val === `Admin`);  
     }
     return false;
 }
@@ -48,7 +48,6 @@ export const useAuthTools = () => {
         return fetch(resource,merge(authInit(token),init??{})).then(response => {
             if (!response.ok) {
                 alert('There was a problem with the server');
-                var change = 0;
             }
             return response;
         });

@@ -1,6 +1,5 @@
 
  
-import { Avatars } from '../Etc/Avatars';
  import {SimpleSlider} from '../Elements/SimpleSlider'
 
  const Speeds = [
@@ -15,8 +14,7 @@ import { Avatars } from '../Etc/Avatars';
  
  export function PaceSelect (props) 
  {
-     const { clip, onChange, ...childprops} = props;
-     const avatars = Avatars;
+     const { clip, onChange} = props;
 
      const UpdateClip = (value) => {
          var newClip = {...clip, Speed: value}

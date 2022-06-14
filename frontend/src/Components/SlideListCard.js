@@ -57,7 +57,10 @@ export function SlideListCard (props)
                                 ...
                     </Tooltip>
                 </Link>
-                <SimpleAudioPlayer audiofile = {slideAudioURL} updating = {slideAudioUpdating}/>
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                <div style={{width: '100%', alignItems: 'center', display: 'flex', justifyContent: 'center'}}>
+                <SimpleAudioPlayer audiofile = {slideAudioURL} updating = {slideAudioUpdating} objectURL = {slide.ID} typeString = {"Slide"} isWideStyle = {true}/>
+                </div></div>
 
                 <SlideDeleteButton 
                         ItemID = {slide.ID}

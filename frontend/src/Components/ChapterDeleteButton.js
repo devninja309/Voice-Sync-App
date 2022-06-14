@@ -5,7 +5,7 @@ import { DeleteButton } from "../Elements/DeleteButton";
 import{useAuthTools} from '../Hooks/Auth';
 
 export function ChapterDeleteButton (props) {
-    const {token, APICalls} = useAuthTools();
+    const {APICalls} = useAuthTools();
     const courseID = props.CourseID
 
     return (

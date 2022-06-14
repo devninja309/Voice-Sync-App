@@ -14,7 +14,7 @@ export function BackButton (props)
     const address = currentLocation.pathname.slice(0,-1).split(`/`).slice(0,-2).join('/');
 
     function Back() {
-        if (address == "") {
+        if (address === "") {
             navigate ('/courses')
         }
         else {

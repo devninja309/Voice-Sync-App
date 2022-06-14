@@ -1,7 +1,7 @@
 //List of active courses
 import { PageWrapper } from '../Components/PageWrapper';
 import LogList from '../Components/LogList';
-import { BigLogo, MidLogo } from '../Elements/Logos';
+import { MidLogo } from '../Elements/Logos';
 
 const EventLogPage = (props) => {
 

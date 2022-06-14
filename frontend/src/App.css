@@ -84,6 +84,16 @@
   margin: auto;
 
 }
+.p-clip-card-text-left-selected {
+  word-break: break-all;
+  white-space: nowrap;
+  text-align: center;
+  font-size: .8vw;
+  font-weight: bolder;
+  color:sienna;
+  margin: auto;
+
+}
 .p-no-audio{
   color:red;
   font-size:x-small;
@@ -124,6 +134,12 @@
 .SimpleCard-ClipListCard-NeedsReview {
   background-color: #ffe6e6
   ;
+}
+.SimpleCard-Selected {
+
+  border-width: 1px;
+  border-style: solid;
+  border-color: green;
 }
 .SimpleCardDiv {
   padding:7px;
@@ -281,7 +297,7 @@
 .simpleButtonSlideButtonGroup {
   height: 3%;
   /*padding: 10px;*/
-  margin-top: 8px;
+  /*margin-top: 8px;*/
 }
 
 .courseListCard {
@@ -304,8 +320,9 @@
  float:left
 }
 .buttonGroup-row-right {
-  float:right;
+  /*float:right;*/
   padding-right: 60px;
+  align-items: flex-start;
 
 }
 .buttonGroup-row-left>*{
