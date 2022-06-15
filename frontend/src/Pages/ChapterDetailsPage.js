@@ -26,7 +26,6 @@ const ChapterDetailsPage = (props) => {
         APICalls.GetChapterDetails(ChapterID)
         .then(
             data => {
-                console.log('Chapter Data')
                 setChapter(data); 
             })
     

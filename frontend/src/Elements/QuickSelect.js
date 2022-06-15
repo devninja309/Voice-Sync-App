@@ -21,9 +21,6 @@ export function QuickSelect (props)
             {data.map((row, ordinalNum) => {
                 const LinkAddress = LinkAddressGenerator(row);
                 const item = ((ordinalNum)%ColumnCount == index) ? (<Link to={LinkAddress}><p>{RowTitleSelector(row)}</p></Link>) : '';
-                console.log(ordinalNum, index, ColumnCount, ordinalNum%ColumnCount);
-                console.log(row);
-                console.log(item);
                 return item;
             })}
         </div>

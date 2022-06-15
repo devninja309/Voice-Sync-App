@@ -188,8 +188,6 @@ const SlideDetailsPage = (props) => {
             return <LoadingSpinner/>
         }
         else if (passedSlide.Clips){
-            //console.log('clip ID:' + clip.Id);
-            //console.log('selectedClipID:' selectedClip?.ID)
             return passedSlide.Clips.sort(sortByOrdinalValue).map((clip,index) => ( 
                 <CardManagerProvider><ClipListCard className="ClipsCard" key={clip.ID} clip = {clip} ordinal = {clip.OrdinalValue} 
                     saveSelectedClip = {selectedClipEdited? ()=>pushChangedClip(selectedClip) : () =>{/*do nothing*/}}

@@ -38,7 +38,6 @@ export function ClipListCard (props)
         const recheck = setInterval(RecheckClip, 5000, propClip);
         setRecheckTimer(recheck);
         return () => {
-            console.log('Unloading Clip:' + clip)
             clearInterval(recheck);
             setRecheckStopped(true);
         }
@@ -49,14 +48,9 @@ export function ClipListCard (props)
     {
         if (ctrlClip != null && ctrlClip.ClipAudioState === e_ClipAudioGenerationStatus.GeneratingAudio && !recheckStopped)
         {
-            console.log('Reloading clip to check for updates: ' + ctrlClip.ID);
-            console.log(ctrlClip);
             APICalls.GetClipDetails(ctrlClip.ID).then(returnClip => {
-                console.log('Return Clip:')
-                console.log(returnClip);
                 if (returnClip.ClipAudioState !== e_ClipAudioGenerationStatus.GeneratingAudio)
                 {
-                    console.log('Has Audio');
                     updateClip(returnClip); //This should trigger a redraw of this component.  
                 }  
             });

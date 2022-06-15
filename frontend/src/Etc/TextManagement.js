@@ -18,7 +18,6 @@ export function UpdateSlideText(slide)
 //Async gets the slide from the server, updates the text based on existing clips, and pushes the changes.
 export async function UpdateSlideTextOnServer(APICalls, slideID) {
     try {
-        console.log('UpdateSlideTextOnServer')
         const results = await APICalls.GetSlideDetails(slideID);
         const slide = results[0]
         const newSlide = UpdateSlideText(slide);
@@ -36,7 +35,6 @@ export async function UpdateSlideTextOnServer(APICalls, slideID) {
 //Imports a slide text file, creates 1-many slides and returns a promise that resolves with the first slide
 export async function ImportNewSlideText(chapterID, defaultSlideName, defaultVoiceID, text, APICalls, ordinalValue = 1)
 {
-    console.log("Default Slide Name:", defaultSlideName);
 
     let dom = "";
     try {
@@ -57,7 +55,6 @@ export async function ImportNewSlideText(chapterID, defaultSlideName, defaultVoi
         let slides = dom.getElementsByTagName('Slide');
         if (slides.length === 0 )
         {
-            console.log("Single defined slide");
             const clipObjs = parseSlideElement(dom, defaultVoiceID);
             // There are no slide labels, this is all one slide
             const promise = new Promise((resolve, reject) => {
@@ -102,7 +99,6 @@ export async function CreateSlides(chapterID, defaultSlideName, defaultSlideVoic
     
     const minNumSlides = Math.ceil(clipObjs.length / MAXCLIPSPERSLIDE); //This could be 1
     const avgSize = Math.ceil(clipObjs.length / minNumSlides); //Support for not creating 
-    console.log("Create Slides minSlides:",minNumSlides, " avgSize: ", avgSize);
     let promiseArray = [];
     for (let i = 0; i < minNumSlides; i++)
     {
@@ -115,8 +111,6 @@ export async function CreateSlides(chapterID, defaultSlideName, defaultSlideVoic
     return new Promise((resolve, reject) => {
         //Promise.all(promiseArray).then(values => resolve(values));
         Promise.all(promiseArray).then(values => {
-            console.log("CreateSlides - results");
-            console.log(values);
             resolve(values)
         });
     });
@@ -148,7 +142,6 @@ export function CreateSlide(chapterID, slideName, slideVoice, clipObjs, APICalls
                     const clip = {SlideID:slide.ID, ClipText:clipTextObj.text, VoiceID: clipTextObj.voiceID, OrdinalValue: clipOrdinalValue++}                
                     
                     APICalls.CreateClip(clip,clipTextObj.voiceID).then(async newClip=>{
-                        console.log('clip:', newClip);
                         resolve()
                     })
                 })
@@ -191,7 +184,6 @@ Single Slide test.
 //Return a list of clip objects : [{text: , voiceID: }]
 export function parseSlideElement(slideDom, defaultSlideVoiceID)
 {
-    console.log("parseSlideElement start");
     var clipObjs = [];
     if (slideDom == null)
     {
@@ -218,8 +210,6 @@ export function parseSlideElement(slideDom, defaultSlideVoiceID)
             clipObjs.push( ...SplitTextIntoClipText(text.textContent, defaultSlideVoiceID));
         })
     }
-    console.log("parseSlideElement Finished:")
-    console.log(clipObjs);
     return clipObjs;
 }
 

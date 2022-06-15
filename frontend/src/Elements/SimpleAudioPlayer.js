@@ -60,7 +60,6 @@ async function  PlayAudio() {
     try {
         audioControl.playbackRate = pace;
         audioControl.volume = vol;
-        console.log('Volume: ' + audioControl.volume)
 
         setPlaying(true);     
         
@@ -90,14 +89,12 @@ async function StopAudio() {
     }
 }
 async function SetCurrentTime(number) {
-    console.log('Here!' + number);
     if (audioControl !== null) {
         audioControl.currentTime = number;
         setTrackProgress(number);
     }
 }
 function MovingSlider(number) {
-    console.log('Moving!' + number);
     if (audioControl !== null) {
         audioControl.currentTime = number;
         setTrackProgress(number);
@@ -138,7 +135,6 @@ function getMaxDuration() {
 }
  /*<SimpleSlider max={getMaxDuration()} min={0} stepSize={.25} showTrackFill = {true} value = {audioControl?.currentTime ?? 0}
                 labelValues = {getLabelValues()} onRelease = {SetCurrentTime2}/>*/
-console.log("isWideStyle:" , props.isWideStyle);
 if (!playing || audioControl && audioControl.ended) {
     return (
         <div style={props.isWideStyle?({ display:'flex'}):({display:'block'})}
