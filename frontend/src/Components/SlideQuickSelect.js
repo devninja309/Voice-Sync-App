@@ -2,6 +2,7 @@
 
 import {useState, useEffect} from 'react';
 import { Link } from 'react-router-dom';
+import { QuickSelect } from '../Elements/QuickSelect';
 import{useAuthTools} from '../Hooks/Auth';
 
 export function SlideQuickSelect (props) 
@@ -21,11 +22,6 @@ export function SlideQuickSelect (props)
             })    
      },[token, ChapterID]); 
 
-     if (!slideList)
-     {
-         return (<div></div>)
-     }
-
      function slideSort(a,b) {
          if (a.OrdinalValue && b.OrdinalValue) {
              const val =  a.OrdinalValue - b.OrdinalValue;
@@ -36,28 +32,20 @@ export function SlideQuickSelect (props)
          }
          else return a.ID - b.ID
      }
+     function LinkAddressGenerator(slide) {
+        var link =  '/courses/' + slide.CourseID + '/chapters/' + slide.ChapterID + '/slides/' + slide.ID  ;
+        console.log("Link: ", link)   
+        return link       
+     }
+     function RowTitleSelector(slide) {
+         return slide.SlideName;
+     }
     
-
-    function drawColumn(index, ColumnCount) {
-        let data = [...slideList];
-        data = [...data.sort(slideSort)];
-        return (
-        <div className="div-SlideQuickSelectColumn">
-            {data.map((slide, slideNum) => {
-                const LinkAddress = '/courses/' + slide.CourseID + '/chapters/' + slide.ChapterID + '/slides/' + slide.ID
-                const item = ((slideNum)%ColumnCount == index) ? (<Link to={LinkAddress}><p>{slide.SlideName}</p></Link>) : '';
-                return item;
-            })}
-        </div>
-        )
-    }
-    return (
-    <div className ="div-SlidQuickSelectContainer">
-        {array.map((ColumnIndex) => {
-            return (
-                drawColumn(ColumnIndex, Columns)
-            )
-        })}
-    </div>
-    )
+     return <QuickSelect
+        Columns = {Columns}
+        Rows = {slideList}
+        Sort = {slideSort}
+        LinkAddressGenerator = {LinkAddressGenerator}
+        RowTitleSelector = {RowTitleSelector}
+     />;
 }

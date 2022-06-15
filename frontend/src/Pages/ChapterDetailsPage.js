@@ -8,6 +8,7 @@ import { PageWrapper } from '../Components/PageWrapper';
 import{useAuthTools} from '../Hooks/Auth';
 
 import SlideList from '../Components/SlideList';
+import { ChapterQuickSelect } from '../Components/ChapterQuickSelect';
 import { MidLogo } from '../Elements/Logos';
 import { LoadingSpinner } from '../Elements/LoadingSpinner';
 import { ChapterDownloadAllClipsButton } from '../Components/ChapterDownloadAllClipsButton';
@@ -39,7 +40,14 @@ const ChapterDetailsPage = (props) => {
         <PageWrapper>
         <div className="App">
             <header className="App-header">
-            <MidLogo/>
+                <div class="div-SlideHeader">
+                    <div style={{width: '40%'}}>
+                    <div><MidLogo/></div>
+                    </div>
+                    <div style={{width: '40%'}}>
+                        <ChapterQuickSelect Columns={3} CourseID={CourseID}/>
+                    </div>
+                </div>
             <div className ="course-Name-Box">
             <h3>
             {chapter.ChapterName}

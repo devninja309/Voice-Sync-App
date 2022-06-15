@@ -227,7 +227,7 @@
   width: 65%;
   margin-left: 5px;
 }
-.div-SlidQuickSelectContainer {
+.div-QuickSelectContainer {
   display: flex;
   flex-direction: row;
 }
@@ -244,7 +244,7 @@
   margin-left: 10px;
   margin-right: 10px;
 }
-.div-SlideQuickSelectColumn {
+.div-QuickSelectColumn {
   display: flex;
   width: 33%;
   font-size: .8vw;
