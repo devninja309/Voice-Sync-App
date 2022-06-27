@@ -1,7 +1,6 @@
 //This is meant to be a control that displays all the slides in a chapter in quickselect format
 
 import {useState, useEffect} from 'react';
-import { Link } from 'react-router-dom';
 import { QuickSelect } from '../Elements/QuickSelect';
 import{useAuthTools} from '../Hooks/Auth';
 

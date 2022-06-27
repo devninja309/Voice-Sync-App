@@ -6,7 +6,6 @@ import { BrowserRouter } from 'react-router-dom'
 import { Routes, Route } from 'react-router-dom'
 import { useAuth0 } from "@auth0/auth0-react";
 
-import {UglyPage} from './Pages/UglyPage'
 import {LandingPage} from './Pages/LandingPage'
 import LoginPage from './Pages/LoginPage'
 import CourseListPage from './Pages/CourseListPage'
@@ -52,7 +51,6 @@ function App() {
       <div>
         <Routes>
           <Route path ="/" element = {<LandingPage/>}></Route>
-          <Route path ="/Ugly" element = {<UglyPage/>}></Route>
           <Route path ="/Login" element = {<LoginPage/>}></Route>
           <Route path ="/courses" element = {<CourseListPage accessToken = {userToken}/>}></Route>
           <Route path ="/logs" element = {<EventLogPage/>}></Route>

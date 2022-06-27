@@ -29,7 +29,7 @@ export const router = new Router({
   prefix: '/v1'
 })
 
-// TODO: This function is dumb and should be replaced with whatever a standard method is
+// TODO: Replace this with a standard permission manager
 function RequirePermission(ctx,permissions){
   if (!ctx.state )
   {
@@ -362,7 +362,7 @@ router.get('/test', (ctx) => {
           await LogClipGeneration(GetUserName(ctx), text, con);
 
           //TODO This process doesn't really delete the old audio file.  This means it's still available until the new one comes back.
-          //It should actually be seen on the front end, though, because the status indicates that there's no audio.  How do we feel about this?
+          //It should not actually be seen on the front end, though, because the status indicates that there's no audio.  How do we feel about this?
           await UpdateClipAudioStatus(clip.ID, e_ClipAudioGenerationStatus.GeneratingAudio, "", con);
 
           await RequestClipAudioGeneration(clip.ID);

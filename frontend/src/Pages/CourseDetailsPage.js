@@ -1,8 +1,6 @@
 //Page that loads when a course is opened
 //This should contain extended course information, including a list of narrations
 
-
-//I'm still a copy of the course list screen
 //List of active courses
 import {useState, useEffect} from 'react';
 import { useParams } from 'react-router';

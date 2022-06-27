@@ -1,6 +1,3 @@
-
-import { Avatars } from '../Etc/Avatars';
-
 import { SimpleSlider } from '../Elements/SimpleSlider';
 
  

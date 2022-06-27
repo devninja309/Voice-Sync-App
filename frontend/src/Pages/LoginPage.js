@@ -7,8 +7,6 @@ import logo from '../logo.svg';
 
 const LoginPage = () => {
 
-
-
   return  (     
     <PageWrapper>
     <div className="App">

@@ -6,10 +6,10 @@
     {value: 70, label: 'Slowest'},
     {value: 80, label: 'Slower'},
     {value: 90, label: 'Slow'},
-        {value: 100, label: 'Normal Pace'},
-        {value: 115, label: 'Fast'},
-        {value: 130, label: 'Faster'},
-        {value: 145, label: 'Fastest'},
+    {value: 100, label: 'Normal Pace'},
+    {value: 115, label: 'Fast'},
+    {value: 130, label: 'Faster'},
+    {value: 145, label: 'Fastest'},
 ];
  
  export function PaceSelect (props) 

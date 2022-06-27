@@ -1,9 +1,7 @@
-//Simple button, base class for other buttons
-
 import * as React from "react";
 import { Link } from "react-router-dom";
 import {Tooltip} from "@blueprintjs/core";
-import { useState, useEffect,useCallback } from 'react';
+import { useState, useEffect } from 'react';
 
 import { SimpleCard } from "../Elements/SimpleCard";
 import {SimpleAudioPlayer} from "../Elements/SimpleAudioPlayer";

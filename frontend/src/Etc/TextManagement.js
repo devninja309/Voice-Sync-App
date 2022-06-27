@@ -161,24 +161,6 @@ export function CreateSlide(chapterID, slideName, slideVoice, clipObjs, APICalls
 
     return promise
 }
-/*
-Single Slide test.
-Single Slide test.
-Single Slide test.
-Single Slide test.
-Single Slide test.
-Single Slide test.
-Single Slide test.
-Single Slide test.
-Single Slide test.
-Single Slide test.
-Single Slide test.
-Single Slide test.
-Single Slide test.
-Single Slide test.
-Single Slide test.
-Single Slide test.
-*/
 
 //Parse out information inside a give <Slide> element, including voice information.
 //Return a list of clip objects : [{text: , voiceID: }]

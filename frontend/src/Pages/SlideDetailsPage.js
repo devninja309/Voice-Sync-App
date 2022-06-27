@@ -51,6 +51,7 @@ const SlideDetailsPage = (props) => {
     const [selectedClipEdited, setSelectedClipEdited] = useState(false);
     const [selectedClipPostEdited, setSelectedClipPostEdited] = useState(false);
     const [slideProcessing, setSlideProcessing] = useState(false);
+    const [clipOrderUpdating, setClipOrderUpdating] = useState(false);
     const {token, APICalls} = useAuthTools();
 
     const [isPronunciationOpen, setIsPronunciationOpen] = useState(false);
@@ -92,6 +93,13 @@ const SlideDetailsPage = (props) => {
 
      const changeSelectedClip = (clip) =>
      {
+         if (selectedClipEdited || selectedClipPostEdited)
+         {
+             if (!window.confirm("You have unsaved changes. \n  Are you sure?"))
+             {
+                 return;
+             }
+         }
          setSelectedClipEdited(false);
          setSelectedClipPostEdited(false);
          setSelectedClip(clip);
@@ -184,7 +192,7 @@ const SlideDetailsPage = (props) => {
     }
 
     function DisplayClipsList(passedSlide) {
-        if (slideProcessing) {
+        if (slideProcessing || clipOrderUpdating) {
             return <LoadingSpinner/>
         }
         else if (passedSlide.Clips){
@@ -192,7 +200,8 @@ const SlideDetailsPage = (props) => {
                 <CardManagerProvider><ClipListCard className="ClipsCard" key={clip.ID} clip = {clip} ordinal = {clip.OrdinalValue} 
                     saveSelectedClip = {selectedClipEdited? ()=>pushChangedClip(selectedClip) : () =>{/*do nothing*/}}
                     selectedClipChanged = {selectedClipEdited} selectedClip = {clip.ID === selectedClip?.ID}
-                    setSelectedClip={changeSelectedClip} updateClip={UpdateClip} moveClipCard = {MoveClipCard}/></CardManagerProvider>
+                    setSelectedClip={changeSelectedClip} updateClip={UpdateClip} moveClipCard = {MoveClipCard}
+                    enabled={selectedClipEdited ||selectedClipPostEdited}/></CardManagerProvider>
             ))
         }      
     }
@@ -258,7 +267,7 @@ const SlideDetailsPage = (props) => {
     }
     function MoveClipCard(fromOrdinal, toOrdinal)
     {
-        //start spinner
+        setClipOrderUpdating(true);
         const clipsToUpdate = [];
         const movingClip = slide.Clips.find(clip => clip.OrdinalValue === fromOrdinal);
         slide.Clips.filter(clip=> (clip.OrdinalValue > fromOrdinal && clip.OrdinalValue <=toOrdinal)).forEach(clip => {
@@ -280,7 +289,10 @@ const SlideDetailsPage = (props) => {
             selectedClip.OrdinalValue = slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID === selectedClip.ID)].OrdinalValue;
         }
         //TODO This will reload all clip audios
-        APICalls.UpdateClipOrder(clipsToUpdate).then( setSlide({...slide}))
+        APICalls.UpdateClipOrder(clipsToUpdate).then( () => {
+            setClipOrderUpdating(false);
+            setSlide({...slide})      
+        })
         
     }
     //TODO This default clip definition is fragile
@@ -376,9 +388,11 @@ const SlideDetailsPage = (props) => {
                         </ButtonGroup>
                     </div>
                     </div>
+                
                 <div class = "div-Slide-Details-ClipsList">
-                    {DisplayClipsList(slide) }
-                </div>
+                    {DisplayClipsList(slide)} 
+                </div> 
+
             </div>
                 </div>
             </header>
