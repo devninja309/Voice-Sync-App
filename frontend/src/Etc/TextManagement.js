@@ -168,7 +168,7 @@ export function parseSlideElement(slideDom, defaultSlideVoiceID)
 {
     var clipObjs = [];
     var documentDom = slideDom.getElementsByTagName('document');
-    if (documentDom.length === 0)
+    if (documentDom.length !== 0 || documentDom == null)
     {
         //no actual slides
         clipObjs.push(...SplitTextIntoClipText(documentDom[0].textContent, defaultSlideVoiceID));
@@ -176,6 +176,7 @@ export function parseSlideElement(slideDom, defaultSlideVoiceID)
     else if (slideDom.getElementsByTagName('Voice').length === 0 )
     {
         // There are no voice labels, so this is all one voice
+        console.log(documentDom, slideDom);
         clipObjs.push(...SplitTextIntoClipText(slideDom.textContent, defaultSlideVoiceID));
     }
     else {
