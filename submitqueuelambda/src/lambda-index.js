@@ -5,20 +5,25 @@ import {UpdateClipAudioStatus, e_ClipAudioGenerationStatus, getPooledConnection,
 // Lambda can't consume ES6 exports
 exports.handler = async (evt, ctx) => {
 
-  await Promise.all(evt.Records.map(async (record) => {
-    console.log(record);
-    const clipId = parseInt(record.messageAttributes.ClipId.stringValue)
-    console.log('Begin Processing Clip:' + clipId);
-    const con = await getPooledConnection();
-    var result = await GenerateClipAudioFile(clipId, con);
-    const newStatus = result.status==200 ? e_ClipAudioGenerationStatus.HasAudio : e_ClipAudioGenerationStatus.ErrorGeneratingAudio;
-    console.log("Clip Generation Status:\n",result, newStatus)
-    await UpdateClipAudioStatus(clipId, newStatus, result.message, con);
-    console.log("Done Generating Audio:" + clipId);
+  const con = await getPooledConnection();
+  try {
+    await Promise.all(evt.Records.map(async (record) => {
+      const clipId = parseInt(record.messageAttributes.ClipId.stringValue)
+      console.log('Begin Processing Clip:', clipId , "\n Timestamp:", Date.now());
+      var result = await GenerateClipAudioFile(clipId, con);
+      const newStatus = result.status==200 ? e_ClipAudioGenerationStatus.HasAudio : e_ClipAudioGenerationStatus.ErrorGeneratingAudio;
+      console.log("Clip Generation Complete\n Status:",result, newStatus, "\n Timestamp: ", Date.now())
+      await UpdateClipAudioStatus(clipId, newStatus, result.message, con);
+      console.log("Done Generating Audio:" + clipId, "\n Database update complete\n Timestamp:", Date.now());
 
-    resolvePooledConnection(con);
 
-  }));
+    }));
+  }
+  catch (e) {
+    console.log("Error Generating Audion", "\nError:", e, "\nTimestamp: ", Date.now())
+    await UpdateClipAudioStatus(clipId, e_ClipAudioGenerationStatus.ErrorGeneratingAudio, e, con);
+  }
+  resolvePooledConnection(con);
 
 
   return {};

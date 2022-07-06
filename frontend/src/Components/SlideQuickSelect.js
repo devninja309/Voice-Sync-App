@@ -32,8 +32,7 @@ export function SlideQuickSelect (props)
          else return a.ID - b.ID
      }
      function LinkAddressGenerator(slide) {
-        var link =  '/courses/' + slide.CourseID + '/chapters/' + slide.ChapterID + '/slides/' + slide.ID  ;
-        console.log("Link: ", link)   
+        var link =  '/courses/' + slide.CourseID + '/chapters/' + slide.ChapterID + '/slides/' + slide.ID  ; 
         return link       
      }
      function RowTitleSelector(slide) {

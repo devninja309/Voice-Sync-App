@@ -28,12 +28,14 @@ export async function RequestClipAudioGeneration(clipId) {
     //Test functionality
     sqs.listQueues(listparams, function(err, data) {
     if (err) {
+        console.log("Error Loading SQS Queue Names");
         console.log("Error", err);
     } else {
 
         sqs.getQueueUrl(params, function(err, data) {
             if (err) {
-            console.log("Error", err);
+                console.log("Error Loading SQS Queue");
+                console.log("Error", err);
             } else {
                 var params = {
                     DelaySeconds: 0,
@@ -48,9 +50,11 @@ export async function RequestClipAudioGeneration(clipId) {
                     };
                 sqs.sendMessage(params, function(err, data) {
                     if (err) {
+                        console.log("Error submitting to SQS queue Message:", data.MessageID, "\nClipId: ", clipId.toString())
                         console.log("Send Error", err);
                     } else {
-                        console.log("Send Success", data.MessageId);
+                        //console.log("Send Success", data.MessageId);
+                        console.log("Submitting Message:", data.MessageId, "\nTimeStamp:", Date.now())
                     }
                     });
             }

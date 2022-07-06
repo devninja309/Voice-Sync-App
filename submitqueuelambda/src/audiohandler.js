@@ -13,6 +13,8 @@ const defaultPageSize = 20;
 
 export default async function GenerateClipAudioFile(clipId, pooledConnection)
 {
+    const timeout = 30000; //Timeout after 30 seconds
+    
     var result = {
         status: 200,
         message: "Successful"
@@ -26,10 +28,11 @@ export default async function GenerateClipAudioFile(clipId, pooledConnection)
 
         const text = ConvertPronunciationFast(pronunciations, rawText);
 
-        console.log('Audio text:' + text)
+        const abortController = new AbortController();
+        const id = setTimeout(() => abortController.abort(), timeout);
 
         const ttsResponse = await fetch(ttsEndPoint, {
-            //signal: abortController.signal,
+            signal: abortController.signal,
             method: 'POST',
             headers: {
             'Content-Type': 'application/json',
@@ -40,6 +43,7 @@ export default async function GenerateClipAudioFile(clipId, pooledConnection)
             text: text,
             }),
         });
+        clearTimeout(id);
 
         let status = ttsResponse.status;
         if (status != 200) //TODO, this will timeout, right?

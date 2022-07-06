@@ -347,10 +347,10 @@ router.get('/test', (ctx) => {
       if (!RequirePermission(ctx,['read:courses'])) {
         return;
       }
+      console.log("Starting Generate Audio \n Timestamp: ", Date.now())
       //Step 1:  Check if running local
       if (deployedEnv != 'dev'){
         const con = await getPooledConnection();
-        console.log('Creating pooled connection');
         //Update process status
           let clip = await GetClipDetails(ctx.params.clipID, con);
 

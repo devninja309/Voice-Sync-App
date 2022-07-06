@@ -167,14 +167,15 @@ export function CreateSlide(chapterID, slideName, slideVoice, clipObjs, APICalls
 export function parseSlideElement(slideDom, defaultSlideVoiceID)
 {
     var clipObjs = [];
-    if (slideDom == null)
+    var documentDom = slideDom.getElementsByTagName('document');
+    if (documentDom.length === 0)
     {
-        var documentDom = slideDom.getElementsByTagName('document');
-        // There are no voice labels, so this is all one voice
+        //no actual slides
         clipObjs.push(...SplitTextIntoClipText(documentDom[0].textContent, defaultSlideVoiceID));
     }
     else if (slideDom.getElementsByTagName('Voice').length === 0 )
     {
+        // There are no voice labels, so this is all one voice
         clipObjs.push(...SplitTextIntoClipText(slideDom.textContent, defaultSlideVoiceID));
     }
     else {
