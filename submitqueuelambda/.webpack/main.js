@@ -22954,6 +22954,8 @@ const defaultPageSize = 20;
 
 async function GenerateClipAudioFile(clipId, pooledConnection)
 {
+    const timeout = 30000; //Timeout after 30 seconds
+    
     var result = {
         status: 200,
         message: "Successful"
@@ -22967,10 +22969,11 @@ async function GenerateClipAudioFile(clipId, pooledConnection)
 
         const text = ConvertPronunciationFast(pronunciations, rawText);
 
-        console.log('Audio text:' + text)
+        const abortController = new AbortController();
+        const id = setTimeout(() => abortController.abort(), timeout);
 
         const ttsResponse = await fetch(ttsEndPoint, {
-            //signal: abortController.signal,
+            signal: abortController.signal,
             method: 'POST',
             headers: {
             'Content-Type': 'application/json',
@@ -22981,6 +22984,7 @@ async function GenerateClipAudioFile(clipId, pooledConnection)
             text: text,
             }),
         });
+        clearTimeout(id);
 
         let status = ttsResponse.status;
         if (status != 200) //TODO, this will timeout, right?
@@ -23036,20 +23040,25 @@ async function GenerateClipAudioFile(clipId, pooledConnection)
 // Lambda can't consume ES6 exports
 exports.handler = async (evt, ctx) => {
 
-  await Promise.all(evt.Records.map(async (record) => {
-    console.log(record);
-    const clipId = parseInt(record.messageAttributes.ClipId.stringValue)
-    console.log('Begin Processing Clip:' + clipId);
-    const con = await getPooledConnection();
-    var result = await GenerateClipAudioFile(clipId, con);
-    const newStatus = result.status==200 ? e_ClipAudioGenerationStatus.HasAudio : e_ClipAudioGenerationStatus.ErrorGeneratingAudio;
-    console.log("Clip Generation Status:\n",result, newStatus)
-    await UpdateClipAudioStatus(clipId, newStatus, result.message, con);
-    console.log("Done Generating Audio:" + clipId);
+  const con = await getPooledConnection();
+  try {
+    await Promise.all(evt.Records.map(async (record) => {
+      const clipId = parseInt(record.messageAttributes.ClipId.stringValue)
+      console.log('Begin Processing Clip:', clipId , "\n Timestamp:", Date.now());
+      var result = await GenerateClipAudioFile(clipId, con);
+      const newStatus = result.status==200 ? e_ClipAudioGenerationStatus.HasAudio : e_ClipAudioGenerationStatus.ErrorGeneratingAudio;
+      console.log("Clip Generation Complete\n Status:",result, newStatus, "\n Timestamp: ", Date.now())
+      await UpdateClipAudioStatus(clipId, newStatus, result.message, con);
+      console.log("Done Generating Audio:" + clipId, "\n Database update complete\n Timestamp:", Date.now());
 
-    resolvePooledConnection(con);
 
-  }));
+    }));
+  }
+  catch (e) {
+    console.log("Error Generating Audion", "\nError:", e, "\nTimestamp: ", Date.now())
+    await UpdateClipAudioStatus(clipId, e_ClipAudioGenerationStatus.ErrorGeneratingAudio, e, con);
+  }
+  resolvePooledConnection(con);
 
 
   return {};

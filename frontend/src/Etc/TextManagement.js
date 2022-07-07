@@ -176,7 +176,6 @@ export function parseSlideElement(slideDom, defaultSlideVoiceID)
     else if (slideDom.getElementsByTagName('Voice').length === 0 )
     {
         // There are no voice labels, so this is all one voice
-        console.log(documentDom, slideDom);
         clipObjs.push(...SplitTextIntoClipText(slideDom.textContent, defaultSlideVoiceID));
     }
     else {
