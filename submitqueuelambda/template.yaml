@@ -2,7 +2,7 @@ Transform: 'AWS::Serverless-2016-10-31'
 
 Globals:
   Function:
-    Runtime: nodejs16.x
+    Runtime: nodejs14.x
     Timeout: 600
     MemorySize: 256
     Environment:
@@ -41,7 +41,7 @@ Resources:
           Type: SQS
           Properties:
             Queue: !GetAtt WellSaidSQSQueue.Arn
-            BatchSize: 1
+            BatchSize: 5
   WellSaidSQSQueue:
     Type: AWS::SQS::Queue
     Properties: 

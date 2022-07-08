@@ -33,9 +33,9 @@ export async function UpdateSlideTextOnServer(APICalls, slideID) {
 }
 
 //Imports a slide text file, creates 1-many slides and returns a promise that resolves with the first slide
-export async function ImportNewSlideText(chapterID, defaultSlideName, defaultVoiceID, text, APICalls, ordinalValue = 1)
+export async function ImportNewSlideText(chapterID, defaultSlideName, defaultVoiceID, text, APICalls, originalOrdinalValue)
 {
-
+    let ordinalValue = originalOrdinalValue ?? 1;
     let dom = "";
     try {
         let xmlText = "<document>" + text.replace(/”/g, '"')

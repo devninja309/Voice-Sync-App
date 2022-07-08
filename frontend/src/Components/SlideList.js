@@ -23,7 +23,7 @@ import{useAuthTools} from '../Hooks/Auth';
         .then(
             data => {
                 var ordinalValues =  data.map(slide => parseInt(slide.OrdinalValue ?? 1,10));
-                var nextValue = Math.max(...ordinalValues) + 1
+                var nextValue = Math.max(...ordinalValues, 1) + 1
                 setNextSlideOrdinal( nextValue);
                 setSlides(data);
             })

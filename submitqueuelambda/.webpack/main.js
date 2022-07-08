@@ -22989,17 +22989,13 @@ async function GenerateClipAudioFile(clipId, pooledConnection)
         let status = ttsResponse.status;
         if (status != 200) //TODO, this will timeout, right?
         {
-            console.log('Failed to get audio file');
-            console.log('tts Response Status was invalid');
-            console.log(ttsResponse.status);
-            ctx.status = 500;
-            console.log(ttsResponse);
+            console.log('Failed to get audio file', 'tts Response Status was invalid', ttsResponse , "\nStatus: ", ttsResponse.status, '\nTimestamp: ', Date.now());
             result.status = status;
-            result.message = ttsResponse
+            result.message =  (!ttsResponse || ttsResponse.length === 0 ) ? 'Unknown Error From WellSaid Generating Clip' : ttsResponse.statusText
+            return result;
         }
         else {
-            console.log('Successful audio generation');
-            console.log(ttsResponse.headers);
+            console.log('Successful audio generation\n', ttsResponse.headers);
         }     
 
         //https://developer.mozilla.org/en-US/docs/Web/API/Streams_API/Using_readable_streams
@@ -23010,8 +23006,7 @@ async function GenerateClipAudioFile(clipId, pooledConnection)
 
 
         var saveResult = await UpdateClipAudio(clipId, buffer, pooledConnection);
-        if (saveResult.Successful){ 
-            console.log("Successful Save")       
+        if (saveResult.Successful){    
             return result;
         }
         else {
@@ -23023,10 +23018,9 @@ async function GenerateClipAudioFile(clipId, pooledConnection)
         }
     }
     catch (exp) {
-        console.log('Error Generating Clip')
-        console.log(exp);
+        console.log('Error Generating Clip:', exp, '\nTimestamp: ', Date.now())
         result.status = 0
-        result.message = exp
+        result.message = (!exp || exp.length === 0 ) ? 'Unknown Error Generating Clip' : err
         return result;
     }
         

@@ -50,7 +50,7 @@ export default async function GenerateClipAudioFile(clipId, pooledConnection)
         {
             console.log('Failed to get audio file', 'tts Response Status was invalid', ttsResponse , "\nStatus: ", ttsResponse.status, '\nTimestamp: ', Date.now());
             result.status = status;
-            result.message =  (!ttsResponse || ttsResponse.length === 0 ) ? 'Unknown Error From WellSaid Generating Clip' : ttsResponse
+            result.message =  (!ttsResponse || ttsResponse.length === 0 ) ? 'Unknown Error From WellSaid Generating Clip' : ttsResponse.statusText
             return result;
         }
         else {
