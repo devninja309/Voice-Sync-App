@@ -1,0 +1,27 @@
+Accounts 
+-DevOps 
+    https://dev.azure.com/entrance-IndustryAcademy/WellSaid%20Management%20Tool/
+-Auth0
+    https://manage.auth0.com/dashboard/us/dev-l3ao-nin/
+    P@ssWord1
+-AWS 
+    Create Admin (login) user via iam (Admin.First.Last) and admin permissions (this is for logging into the web console)
+    Create Dev account user via iam (AK.First.Last) and developer permissions (this is for running the app locally)
+    
+-AWS CLI
+    brew upgrade awscli
+-Install sam
+
+
+-Setup app
+    -Install database
+        install MySQL and MySQL Workbench
+        aws\db\Scripts\Create.sql
+    NPM I in both the frontend and backend directory
+
+
+-Run the app
+    NPM Start in both the frontend and backend directory
+
+!The app currently does not have a model for running the SQS Queue locally.
+
