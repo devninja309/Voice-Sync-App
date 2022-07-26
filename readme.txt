@@ -24,3 +24,8 @@ Because of the way the AWS security works, the Lambda(backend) needs to be in th
 to a public one via the NAT : https://aws.amazon.com/premiumsupport/knowledge-center/internet-access-lambda-function/
 This isn't something that's set up in the YAML atm, so if you change the stack, you'll need to add it back in, or the database won't work.
 
+Cloudfront :
+We're using Legacy Cache settings.  for headers : Add Header: 'Authorization'
+Response headers should be cors with preflight and security headers policy
+
+

@@ -127,13 +127,15 @@ const SlideDetailsPage = (props) => {
 
      }
 
-     const pushChangedClip = (clip) => {
+     const pushChangedClip = (oclip) => {
+        var clip = {...oclip}
         if (selectedClipEdited) {
             clip.AudioClip = null;
             clip.HasAudio = false;
             if (clip.ClipStatusID === 2) {
                 clip.ClipStatusID = 1;
             }
+            clip.ClipAudioState = 1;
             APICalls.UpdateClip(clip)
         }
         else {
@@ -141,10 +143,11 @@ const SlideDetailsPage = (props) => {
         }
          setSelectedClipEdited(false);
          setSelectedClipPostEdited(false);
-         slide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID === clip.ID)] = clip;
-         const newSlide = UpdateSlideText(slide);
-         setSlide(newSlide);
-         APICalls.UpdateSlide(newSlide);
+         var newSlide = {...slide};
+         newSlide.Clips[slide.Clips.findIndex(slideClip => slideClip.ID === clip.ID)] = clip;
+         const updatedSlide = UpdateSlideText(newSlide);
+         setSlide(updatedSlide);
+         APICalls.UpdateSlide(updatedSlide);
      }
 
      const mergeSlide = () => {

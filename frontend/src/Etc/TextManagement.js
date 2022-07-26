@@ -127,7 +127,7 @@ export function CreateSlide(chapterID, slideName, slideVoice, clipObjs, APICalls
     const promise = new Promise((resolve, reject) => {
     
     APICalls.CreateSlide({ChapterID:chapterID, SlideName:slideName, DefaultVoice:slideVoice , 
-            lideText: clipObjs.map(clip => clip.text).join(" "), OrdinalValue: ordinalValue}).then(slide => {
+            SlideText: clipObjs.map(clip => clip.text).join(" "), OrdinalValue: ordinalValue}).then(slide => {
 
         if (slide.ID == null) {
             alert(`Invalid slide creation.  Aborting`);

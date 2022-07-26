@@ -277,7 +277,7 @@ export async function UpdateClip(clip)
     errorString += "Invalid ClipID\n";
   }
 
-  let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, Volume =?, Speed=?, Delay=?, ClipStatusID =?, AudioClip = null Where ID = ?`;
+  let insert = `Update IA_VoiceSynth.Clips set VoiceID = ?, OrdinalValue = ?, ClipText = ?, Volume =?, Speed=?, Delay=?, ClipAudioState = 1, ClipStatusID =?, AudioClip = null Where ID = ?`;
   let values = [clip.VoiceID, clip.OrdinalValue, clip.ClipText, clip.Volume,clip.Speed,clip.Delay, clip.ClipStatusID, clip.ID];
 
   await SQLQuery(insert, values);
