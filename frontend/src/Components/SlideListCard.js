@@ -39,6 +39,12 @@ export function SlideListCard (props)
         })
     }
 
+    function parseSlideName() {
+        //remove illegal file name characters, then grab first 10 letters
+        let newSlideName = slide.SlideName.replace(/[\/|\\:*?"<>]/g, '').slice(0,11);
+        return newSlideName;
+    }
+
     return (
         <div className = "courseListCard" key={slide.ID} >
             <SimpleCard  {...childProps}>
@@ -57,7 +63,7 @@ export function SlideListCard (props)
                 </Link>
                 <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                 <div style={{width: '100%', alignItems: 'center', display: 'flex', justifyContent: 'center'}}>
-                <SimpleAudioPlayer audiofile = {slideAudioURL} updating = {slideAudioUpdating} objectURL = {slide.ID} typeString = {"Slide"} isWideStyle = {true}/>
+                <SimpleAudioPlayer audiofile = {slideAudioURL} updating = {slideAudioUpdating} objectURL = {parseSlideName()} typeString = {"Slide"} isWideStyle = {true}/>
                 </div></div>
 
                 <SlideDeleteButton 
