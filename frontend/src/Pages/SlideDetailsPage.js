@@ -151,6 +151,7 @@ const SlideDetailsPage = (props) => {
      }
 
      const mergeSlide = () => {
+       setSlide({...slide}); // update slide so simple text area gets updated
        setSlideAudioUpdating(true);
        setSlideAudioURL(null);
        APICalls.GenerateSlideAudio(slide.ID).then(() => {
