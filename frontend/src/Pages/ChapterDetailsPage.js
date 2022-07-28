@@ -7,11 +7,11 @@ import { useParams } from 'react-router';
 import { PageWrapper } from '../Components/PageWrapper';
 import{useAuthTools} from '../Hooks/Auth';
 
-import SlideList from '../Components/SlideList';
-import { ChapterQuickSelect } from '../Components/ChapterQuickSelect';
+import SlideList from '../Components/Slide/SlideList';
+import { ChapterQuickSelect } from '../Components/Chapter/ChapterQuickSelect';
 import { MidLogo } from '../Elements/Logos';
 import { LoadingSpinner } from '../Elements/LoadingSpinner';
-import { ChapterDownloadAllClipsButton } from '../Components/ChapterDownloadAllClipsButton';
+import { ChapterDownloadAllClipsButton } from '../Components/Chapter/ChapterDownloadAllClipsButton';
 
 //useparams here react-router-dom
 

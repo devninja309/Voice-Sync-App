@@ -19,7 +19,7 @@ export function SimpleAudioPlayer(props) {
     useEffect( () => {
         const updateSliderInterval = setInterval(updateSlider, 100);
         return () => {
-            StopAudio();
+            //StopAudio();
             clearInterval(updateSliderInterval);
         }
     });
@@ -55,6 +55,7 @@ if (!file) {
 }
 async function  PlayAudio() {
 
+    debugger;
     const vol = (props.volume||100) /100;
     const pace = (props.pace||100) /100;
 

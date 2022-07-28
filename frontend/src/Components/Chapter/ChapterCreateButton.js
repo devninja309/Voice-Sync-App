@@ -1,7 +1,7 @@
 
 import * as React from "react";
 
-import { ChapterCreateDialog } from "../ChapterCreateDialog";
+import { ChapterCreateDialog } from "./ChapterCreateDialog";
 import { IconButton } from "../../Elements/IconButton";
 
 export function ChapterCreateButton (props) {

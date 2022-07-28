@@ -7,7 +7,7 @@ import { useParams } from 'react-router';
 import { PageWrapper } from '../Components/PageWrapper';
 import{useAuthTools} from '../Hooks/Auth';
 
-import ChapterList from '../Components/ChapterList';
+import ChapterList from '../Components//Chapter/ChapterList';
 import { MidLogo } from '../Elements/Logos';
 
 //useparams here react-router-dom

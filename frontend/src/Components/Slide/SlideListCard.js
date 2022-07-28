@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import {Tooltip} from "@blueprintjs/core";
 import { useState, useEffect } from 'react';
 
-import { SimpleCard } from "../Elements/SimpleCard";
-import {SimpleAudioPlayer} from "../Elements/SimpleAudioPlayer";
-import { useAuthTools } from '../Hooks/Auth';
+import { SimpleCard } from "../../Elements/SimpleCard";
+import {SimpleAudioPlayer} from "../../Elements/SimpleAudioPlayer";
+import { useAuthTools } from '../../Hooks/Auth';
 
 import {SlideDeleteButton} from "./SlideDeleteButton";
 
@@ -40,9 +40,13 @@ export function SlideListCard (props)
     }
 
     function parseSlideName() {
+        if (slide && slide.SlideName) {
         //remove illegal file name characters, then grab first 10 letters
-        let newSlideName = slide.SlideName.replace(/[\/|\\:*?"<>]/g, '').slice(0,11);
-        return newSlideName;
+        //let newSlideName = slide.SlideName.replace(/[\/|\\:*?"<>]/g, '').slice(0,11);
+        return "Known";
+        //return newSlideName;
+        }
+        return "unknown";
     }
 
     return (

@@ -2,13 +2,13 @@
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 
-import { SimpleButton } from "../Elements/SimpleButton";
-import { SimpleDialog } from "../Elements/SimpleDialog";
+import { SimpleButton } from "../../Elements/SimpleButton";
+import { SimpleDialog } from "../../Elements/SimpleDialog";
 
 import { ButtonGroup } from "@blueprintjs/core";
-import { SimpleTextInput } from "../Elements/SimpleTextEntry";
+import { SimpleTextInput } from "../../Elements/SimpleTextEntry";
 
-import{useAuthTools} from '../Hooks/Auth';
+import{useAuthTools} from '../../Hooks/Auth';
 
 
 export function ChapterCreateDialog (props) 

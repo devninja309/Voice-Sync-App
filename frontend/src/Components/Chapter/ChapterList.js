@@ -2,7 +2,7 @@
 import React from 'react';
 
 import {useState, useEffect} from 'react';
-import { ChapterListCard } from '../ChapterListCard';
+import { ChapterListCard } from './ChapterListCard';
 import { ButtonGroup } from '@blueprintjs/core';
 import { ChapterCreateButton } from './ChapterCreateButton';
 

@@ -1,5 +1,6 @@
 Overview
-    VoiceSynth is a SPA app runnig primarly React on the frontend and Node 14 on the backend.  It's intended to be deployed to aws
+    VoiceSynth is a SPA app runnig primarly React on the frontend and Node 14 on the backend.  It's intended to be deployed to aws.  
+    See GettingStarted.txt for installation instructions
 
 CodeBase Overview
     aws contains external build files for deploying to aws

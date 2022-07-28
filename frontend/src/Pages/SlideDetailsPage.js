@@ -23,7 +23,7 @@ import { ButtonGroup } from '@blueprintjs/core';
 import {Tooltip} from "@blueprintjs/core";
 import {UpdateSlideText} from '../Etc/TextManagement';
 import { PronunciationEditDialog } from '../Components/PronunciationEditDialog';
-import { SlideQuickSelect } from '../Components/SlideQuickSelect';
+import { SlideQuickSelect } from '../Components/Slide/SlideQuickSelect';
 import {VoiceSelect} from '../Components/VoiceSelect';
 import { VolumeSelect } from '../Components/VolumeSelect';
 import { PaceSelect } from '../Components/PaceSelect';

@@ -1,8 +1,8 @@
 
 import * as React from "react";
 
-import { DeleteButton } from "../Elements/DeleteButton";
-import{useAuthTools} from '../Hooks/Auth';
+import { DeleteButton } from "../../Elements/DeleteButton";
+import{useAuthTools} from '../../Hooks/Auth';
 
 export function CourseDeleteButton (props) {
     const {APICalls} = useAuthTools();

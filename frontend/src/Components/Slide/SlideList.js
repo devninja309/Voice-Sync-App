@@ -2,7 +2,7 @@
 import React from 'react';
 
 import {useState, useEffect} from 'react';
-import { SlideListCard } from '../SlideListCard';
+import { SlideListCard } from './SlideListCard';
 import { ButtonGroup } from '@blueprintjs/core';
 import { SlideCreateButton } from './SlideCreateButton';
 
