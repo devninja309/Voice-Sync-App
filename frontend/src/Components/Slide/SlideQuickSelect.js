@@ -1,8 +1,8 @@
 //This is meant to be a control that displays all the slides in a chapter in quickselect format
 
 import {useState, useEffect} from 'react';
-import { QuickSelect } from '../Elements/QuickSelect';
-import{useAuthTools} from '../Hooks/Auth';
+import { QuickSelect } from '../../Elements/QuickSelect';
+import{useAuthTools} from '../../Hooks/Auth';
 
 export function SlideQuickSelect (props) 
 {

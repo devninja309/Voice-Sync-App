@@ -1,8 +1,8 @@
 
 import * as React from "react";
 
-import { SlideCreateDialog } from "./SlideCreateDialog";
-import { IconButton } from "../Elements/IconButton";
+import { SlideCreateDialog } from "../SlideCreateDialog";
+import { IconButton } from "../../Elements/IconButton";
 
 export function SlideCreateButton (props) {
     var ChapterID = props.ChapterID;

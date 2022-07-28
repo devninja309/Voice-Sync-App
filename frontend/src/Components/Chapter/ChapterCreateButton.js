@@ -1,8 +1,8 @@
 
 import * as React from "react";
 
-import { ChapterCreateDialog } from "./ChapterCreateDialog";
-import { IconButton } from "../Elements/IconButton";
+import { ChapterCreateDialog } from "../ChapterCreateDialog";
+import { IconButton } from "../../Elements/IconButton";
 
 export function ChapterCreateButton (props) {
     var CourseID = props.CourseID;
