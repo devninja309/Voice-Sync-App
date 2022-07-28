@@ -19,6 +19,7 @@ export function SimpleAudioPlayer(props) {
     useEffect( () => {
         const updateSliderInterval = setInterval(updateSlider, 100);
         return () => {
+            StopAudio();
             clearInterval(updateSliderInterval);
         }
     });
@@ -135,7 +136,7 @@ function getMaxDuration() {
 }
  /*<SimpleSlider max={getMaxDuration()} min={0} stepSize={.25} showTrackFill = {true} value = {audioControl?.currentTime ?? 0}
                 labelValues = {getLabelValues()} onRelease = {SetCurrentTime2}/>*/
-if (!playing || audioControl && audioControl.ended) {
+if (!playing || (audioControl && audioControl.ended)) {
     return (
         <div style={props.isWideStyle?({ display:'flex'}):({display:'block'})}
             onMouseEnter={enter}

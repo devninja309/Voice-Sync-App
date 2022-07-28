@@ -1,5 +1,4 @@
 
-import * as React from "react";
 import {useState, useEffect} from 'react';
 import { useNavigate } from "react-router-dom";
 import{useAuthTools} from '../Hooks/Auth';
@@ -17,12 +16,12 @@ export function PronunciationEditDialog (props)
 {
     const pronunciationID = props.ID;
 
-    const { APICalls} = useAuthTools();
+    const { APICalls } = useAuthTools();
     
-    const [word, setWord] = React.useState('');
-    const [pronunciation, setPronunciation] = React.useState('');
-    const [url, setUrl] = React.useState('');
-    const [updating, setUpdating] = React.useState(false);
+    const [word, setWord] = useState('');
+    const [pronunciation, setPronunciation] = useState('');
+    const [url, setUrl] = useState('');
+    const [updating, setUpdating] = useState(false);
  
     useEffect( () => {
          setWord(props.Word || '');
@@ -66,6 +65,12 @@ export function PronunciationEditDialog (props)
             );
         }
     }
+    
+    function CancelPronunciation() {
+        handleClose();
+        setUrl(null);
+    }
+    
     const {children, handleClose, ...childProps} = props;
     return  (  
         <SimpleDialog {...childProps}>
@@ -76,7 +81,7 @@ export function PronunciationEditDialog (props)
             <ButtonGroup>
                 <SimpleButton onClick={CheckPronunciation} Text="Check Pronunciation"/>
                 <SimpleButton onClick={UpdatePronunciation} Text="Save Pronunciation"/>
-                <SimpleButton onClick={handleClose} Text="Cancel"/> 
+                <SimpleButton onClick={CancelPronunciation} Text="Cancel"/> 
                 <SimpleAudioPlayer audiofile = {url} updating={updating} objectURL = {props.Word} typeString = {"Pronunciation"}/>  
             </ButtonGroup>
         </SimpleDialog>

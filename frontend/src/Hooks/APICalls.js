@@ -68,8 +68,9 @@ export function GetSlideDetails(fetchWithAuth, slideID)
 }
 export function GetClipDetails(fetchWithAuth, clipID)
 {
-    return fetchWithAuth(getUrlPath(`clips/${clipID}`))
+    return fetchWithAuth(getUrlPath(`clips/${clipID}`), NoCacheHeadersForGet())
     .then(response => response.json());
+    // add fetchWithAuth param NoCacheHeaders
 }
 export function GetPronunciations(fetchWithAuth)
 {
@@ -83,6 +84,15 @@ const GetHeadersForMP3 = (object) => {
             'Content-Type':'application/json', 
             'Accept': 'audio/mpeg'},
         }      
+    }
+
+const NoCacheHeadersForGet = () => {
+    // no-cache vs. no-store
+    return {
+        method: 'get',
+        headers: {
+            'Cache-Control': 'no-cache, max-age=0'}
+        }
     }
 
 //Put all the Create stuff here

@@ -6,7 +6,7 @@ import { CourseListCard } from './CourseListCard';
 import { ButtonGroup } from '@blueprintjs/core';
 import { CourseCreateButton } from './CourseCreateButton';
 
-import{useAuthTools} from '../Hooks/Auth';
+import{useAuthTools} from '../../Hooks/Auth';
 
  export default function CourseList (props) {
 
@@ -34,6 +34,7 @@ import{useAuthTools} from '../Hooks/Auth';
     return (
         <div className = "courseListBox"> 
         <div className = 'info-row'><h3>Courses</h3><ButtonGroup><CourseCreateButton/>
+        {console.log(courses)}
         </ButtonGroup></div>
         {DisplayCoursesList()}
         </div>

@@ -4,8 +4,8 @@ import * as React from "react";
 import {useState, useEffect} from 'react';
 import { useParams } from 'react-router';
 
-import { IconButton } from "../Elements/IconButton";
-import{useAuthTools} from '../Hooks/Auth';
+import { IconButton } from "../../Elements/IconButton";
+import{useAuthTools} from '../../Hooks/Auth';
 
 
 export function ChapterDownloadAllClipsButton (props) 

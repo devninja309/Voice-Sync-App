@@ -2,7 +2,7 @@
 import * as React from "react";
 import { useDrop } from 'react-dnd'
 import {ItemTypes} from "../Components/DnDItemTypes";
-import { useState, useEffect,useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export function SimpleDropCardWrapper(props) {
 

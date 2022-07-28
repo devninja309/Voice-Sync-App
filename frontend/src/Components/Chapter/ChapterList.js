@@ -2,11 +2,11 @@
 import React from 'react';
 
 import {useState, useEffect} from 'react';
-import { ChapterListCard } from './ChapterListCard';
+import { ChapterListCard } from '../ChapterListCard';
 import { ButtonGroup } from '@blueprintjs/core';
 import { ChapterCreateButton } from './ChapterCreateButton';
 
-import{useAuthTools} from '../Hooks/Auth';
+import{useAuthTools} from '../../Hooks/Auth';
 
  export default function ChapterList (props) {
      var CourseID = props.CourseID;

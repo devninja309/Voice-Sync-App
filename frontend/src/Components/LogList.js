@@ -66,8 +66,6 @@ export default function LogList(props) {
             return (<p>No Data</p>);
         }
         const array = Array.from({ length: pageCount }, (_, index) => index + 1);
-        console.log(page, array[array.length - 2]); //5
-
         if (pageCount <= 5) {
             return array.map(pageVar => (
                 <SimpleButton onClick={() => setPage(pageVar - 1)} text={pageVar} disabled={(pageVar - 1) === page} minimal={true} />

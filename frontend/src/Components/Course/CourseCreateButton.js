@@ -1,8 +1,8 @@
 
 import * as React from "react";
 
-import { CourseCreateDialog } from "./CourseCreateDialog";
-import { IconButton } from "../Elements/IconButton";
+import { CourseCreateDialog } from "../CourseCreateDialog";
+import { IconButton } from "../../Elements/IconButton";
 
 export function CourseCreateButton (props) {
 

@@ -2,8 +2,8 @@
 
 import {useState, useEffect} from 'react';
 import { Link } from 'react-router-dom';
-import { QuickSelect } from '../Elements/QuickSelect';
-import{useAuthTools} from '../Hooks/Auth';
+import { QuickSelect } from '../../Elements/QuickSelect';
+import{useAuthTools} from '../../Hooks/Auth';
 
 export function ChapterQuickSelect (props) 
 {
