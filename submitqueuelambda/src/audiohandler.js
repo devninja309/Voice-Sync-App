@@ -1,6 +1,3 @@
-
-
-
 import { GetClipDetails, UpdateClipAudio, GetPronunciations, LogClipGeneration } from './databasestorage/dataaccess.js';
 import fetch from "node-fetch";
 import { ConvertPronunciationFast } from './voicesynthapi/Pronunciation.js';
@@ -12,14 +9,14 @@ const defaultPageSize = 20;
 
 
 export default async function GenerateClipAudioFile(clipId, pooledConnection) {
-    const timeout = 30000; //Timeout after 30 seconds
 
     var result = {
         status: 200,
         message: "Successful"
     }
+
     try {
-        let clip = await GetClipDetails(clipId), pooledConnection;
+        let clip = await GetClipDetails(clipId, pooledConnection);
         const avatarId = clip.VoiceID;
         const rawText = clip.ClipText;
 
@@ -28,10 +25,15 @@ export default async function GenerateClipAudioFile(clipId, pooledConnection) {
         const text = ConvertPronunciationFast(pronunciations, rawText);
 
         const abortController = new AbortController();
-        const id = setTimeout(() => { abortController.abort() }, timeout);
+        
+        // const id = setTimeout(() => { abortController.abort() }, 30000);
 
         const ttsResponse = await fetch(ttsEndPoint, {
-            signal: abortController.signal,
+            /*
+            //  AbortController built in timeout function
+            //  https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal/timeout
+            */
+            signal: abortController.timeout(30000), //abortController.signal,
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -42,7 +44,7 @@ export default async function GenerateClipAudioFile(clipId, pooledConnection) {
                 text: text,
             }),
         });
-        clearTimeout(id);
+        // clearTimeout(id);
 
         let status = ttsResponse.status;
         if (status != 200) //TODO, this will timeout, right?
