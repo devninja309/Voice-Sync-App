@@ -17,7 +17,7 @@ import { SimpleAudioPlayer } from '../Elements/SimpleAudioPlayer';
 import { SimpleTextArea } from '../Elements/SimpleTextArea';
 import { useAuthTools } from '../Hooks/Auth';
 import { MidLogo } from '../Elements/Logos';
-import { SimpleButton } from '../Elements/SimpleButton';
+import { SimpleButton } from '../Elements/SimpleButton'
 import { IconButton } from '../Elements/IconButton';
 import { ButtonGroup } from '@blueprintjs/core';
 import {Tooltip} from "@blueprintjs/core";

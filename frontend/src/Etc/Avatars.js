@@ -57,5 +57,7 @@ export const Avatars = [
 
 
 export function GetVoiceName(clip) {
-  return Avatars.find(cs => cs.value === clip.VoiceID)
+  const voiceID = Number(clip.VoiceID)
+  const result =  Avatars.find(cs => cs.value === voiceID)
+  return result;
 }
