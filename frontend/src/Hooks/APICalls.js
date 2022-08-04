@@ -91,7 +91,7 @@ const NoCacheHeadersForGet = () => {
     return {
         method: 'get',
         headers: {
-            'Cache-Control': 'no-cache, max-age=0'}
+            'Cache-Control': 'no-store'}
         }
     }
 
