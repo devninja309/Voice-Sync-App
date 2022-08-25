@@ -33,6 +33,7 @@ export function ClipListCard (props)
 
     useEffect( () => {
         clearInterval(recheckTimer);
+        setRecheckStopped(false);
         setClip(propClip);
         LoadClipAudio(propClip);
         const recheck = setInterval(RecheckClip, 5000, propClip);
@@ -46,6 +47,7 @@ export function ClipListCard (props)
     
      function RecheckClip(ctrlClip)
     {
+        console.log("clips logging", propClip, clip, ctrlClip); //these should all be the same.
         if (ctrlClip != null && ctrlClip.ClipAudioState === e_ClipAudioGenerationStatus.GeneratingAudio && !recheckStopped)
         {
             APICalls.GetClipDetails(ctrlClip.ID).then(returnClip => {

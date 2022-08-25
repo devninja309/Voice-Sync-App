@@ -365,6 +365,7 @@ router.get('/test', (ctx) => {
           //It should not actually be seen on the front end, though, because the status indicates that there's no audio.  How do we feel about this?
           await UpdateClipAudioStatus(clip.ID, e_ClipAudioGenerationStatus.GeneratingAudio, "", con);
 
+          console.log('Finished Update Clip Audio Status');
           await RequestClipAudioGeneration(clip.ID);
           clip.ClipAudioState = e_ClipAudioGenerationStatus.GeneratingAudio;
           clip.HasAudio = 0;

@@ -22,45 +22,52 @@ export class e_ClipAudioGenerationStatus {
 
 
 export async function RequestClipAudioGeneration(clipId) {
-
+    console.log('RequestClipAudioGeneration Start')
     var listparams = {};
-
-    //Test functionality
-    sqs.listQueues(listparams, function(err, data) {
-    if (err) {
-        console.log("Error Loading SQS Queue Names");
-        console.log("Error", err);
-    } else {
-
-        sqs.getQueueUrl(params, function(err, data) {
-            if (err) {
-                console.log("Error Loading SQS Queue");
-                console.log("Error", err);
-            } else {
-                var params = {
-                    DelaySeconds: 0,
-                    MessageAttributes: {
-                        "ClipId": {
-                        DataType: "Number",
-                        StringValue: clipId.toString()
+    var sqsPromise = new Promise((resolve, reject) => {
+        //Test functionality
+        sqs.listQueues(listparams, function(err, data) {
+        if (err) {
+            console.log("Error Loading SQS Queue Names");
+            console.log("Error", err);
+            reject("Error Loading SQS Queue Names")
+        } else {
+            console.log('Got SQS List');
+            sqs.getQueueUrl(params, function(err, data) {
+                if (err) {
+                    console.log("Error Loading SQS Queue");
+                    console.log("Error", err);
+                    reject("Error Loading SQS Queue")
+                } else {
+                    console.log('Got Specific Queue')
+                    var params = {
+                        DelaySeconds: 0,
+                        MessageAttributes: {
+                            "ClipId": {
+                            DataType: "Number",
+                            StringValue: clipId.toString()
+                            }
+                        },
+                        MessageBody: "Request for audio generation by clipId",
+                        QueueUrl: data.QueueUrl
+                        };
+                    sqs.sendMessage(params, function(err, data) {
+                        if (err) {
+                            console.log("Error submitting to SQS queue Message:", data.MessageID, "\nClipId: ", clipId.toString())
+                            console.log("Send Error", err);
+                            reject("Error submitting to SQS queue Message:", data.MessageID, "\nClipId: ", clipId.toString());
+                        } else {
+                            //console.log("Send Success", data.MessageId);
+                            console.log("Submitting Message:", data.MessageId, "\nTimeStamp:", Date.now())
+                            resolve();
                         }
-                    },
-                    MessageBody: "Request for audio generation by clipId",
-                    QueueUrl: data.QueueUrl
-                    };
-                sqs.sendMessage(params, function(err, data) {
-                    if (err) {
-                        console.log("Error submitting to SQS queue Message:", data.MessageID, "\nClipId: ", clipId.toString())
-                        console.log("Send Error", err);
-                    } else {
-                        //console.log("Send Success", data.MessageId);
-                        console.log("Submitting Message:", data.MessageId, "\nTimeStamp:", Date.now())
-                    }
-                    });
+                        });
+                    console.log('tried to send message to SQS');
+                }
+            });
             }
-        });
-        }
+        })
     });
-
-    
+    await sqsPromise;   
+    return sqsPromise;
 }

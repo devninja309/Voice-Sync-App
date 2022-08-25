@@ -3,6 +3,7 @@ export const isLocal = window.location.hostname === 'localhost'
 
 export const getUrlPath = (route) => isLocal ? `http://localhost:3001/v1/${route}` : `/v1/${route}`
 //export const getUrlPath = (route) => isLocal ? `http://localhost:3001/${route}` : `https://d333dqbzp50nvv.cloudfront.net/${route}`
+//export const getUrlPath = (route) => `https://d333dqbzp50nvv.cloudfront.net/v1/${route}`
 //export const getUrlPath = (route) => isLocal ? `http://localhost:3001/${route}` : `https://ffo9tmh1jh.execute-api.us-west-2.amazonaws.com/Prod/${route}`
 
 //Database  
@@ -68,7 +69,8 @@ export function GetSlideDetails(fetchWithAuth, slideID)
 }
 export function GetClipDetails(fetchWithAuth, clipID)
 {
-    return fetchWithAuth(getUrlPath(`clips/${clipID}`), NoCacheHeadersForGet())
+    const uniq = Date.now();
+    return fetchWithAuth(getUrlPath(`clips/${clipID}?Date=${uniq}`), NoCacheHeadersForGet())
     .then(response => response.json());
     // add fetchWithAuth param NoCacheHeaders
 }
