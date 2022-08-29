@@ -37,34 +37,40 @@ export function DBTestCall(fetchWithAuth)
 //Basic Gets
 export function GetCourses(fetchWithAuth)
 {
-    return fetchWithAuth(getUrlPath('courses'))
+    const uniq = Date.now();
+    return fetchWithAuth(getUrlPath(`courses?Date=${uniq}`))
     .then(response => response.json());
 }
 export function GetCourseDetails(fetchWithAuth, CourseID)
 {
-    return fetchWithAuth(getUrlPath(`courses/${CourseID}`))
+    const uniq = Date.now();
+    return fetchWithAuth(getUrlPath(`courses/${CourseID}?Date=${uniq}`))
     .then(response => response.json());
 }
 export function GetChapters(fetchWithAuth, CourseID)
 {
-    return fetchWithAuth(getUrlPath(`courses/${CourseID}/chapters`))
+    const uniq = Date.now();
+    return fetchWithAuth(getUrlPath(`courses/${CourseID}/chapters?Date=${uniq}`))
     .then(response => response.json());
 }
 export function GetChapterDetails(fetchWithAuth, chapterID)
 {
-    return fetchWithAuth(getUrlPath(`chapters/${chapterID}`))
+    const uniq = Date.now();
+    return fetchWithAuth(getUrlPath(`chapters/${chapterID}?Date=${uniq}`))
     .then(response => response.json());
 }
 
 export function GetSlides(fetchWithAuth, chapterID)
 {
-    return fetchWithAuth(getUrlPath(`chapters/${chapterID}/slides`))
+    const uniq = Date.now();
+    return fetchWithAuth(getUrlPath(`chapters/${chapterID}/slides?Date=${uniq}`))
     .then(response => response.json());
 }
 
 export function GetSlideDetails(fetchWithAuth, slideID)
 {
-    return fetchWithAuth(getUrlPath(`slides/${slideID}`))
+    const uniq = Date.now();
+    return fetchWithAuth(getUrlPath(`slides/${slideID}?Date=${uniq}`))
     .then(response => response.json());
 }
 export function GetClipDetails(fetchWithAuth, clipID)
@@ -76,7 +82,8 @@ export function GetClipDetails(fetchWithAuth, clipID)
 }
 export function GetPronunciations(fetchWithAuth)
 {
-    return fetchWithAuth(getUrlPath('pronunciations'))
+    const uniq = Date.now();
+    return fetchWithAuth(getUrlPath(`pronunciations?Date=${uniq}`))
     .then(response => response.json());
 }
 const GetHeadersForMP3 = (object) => {
@@ -201,7 +208,8 @@ export function UpdatePronunciation(fetchWithAuth, pronunciation)
 }
 export function GetSlideAudio(fetchWithAuth, slideID)
 {
-    return fetchWithAuth(getUrlPath(`slides/${slideID}/audio`), GetHeadersForMP3())
+    const uniq = Date.now();
+    return fetchWithAuth(getUrlPath(`slides/${slideID}/audio?Date=${uniq}`), GetHeadersForMP3())
     .then(response => response); 
 
 }
@@ -213,19 +221,22 @@ export function GenerateSlideAudio(fetchWithAuth, slideID)
 }
 export function DownloadSlideAudio(fetchWithAuth, slideID)
 {
-    return fetchWithAuth(getUrlPath(`slides/${slideID}/downloadaudio`), GetHeadersForMP3())
+    const uniq = Date.now();
+    return fetchWithAuth(getUrlPath(`slides/${slideID}/downloadaudio?Date=${uniq}`), GetHeadersForMP3())
     .then(response => response); 
 
 }
 export function GetClipAudio(fetchWithAuth, clipID)
 {
-    return fetchWithAuth(getUrlPath(`clips/${clipID}/audio`), GetHeadersForMP3())
+    const uniq = Date.now();
+    return fetchWithAuth(getUrlPath(`clips/${clipID}/audio?Date=${uniq}`), GetHeadersForMP3())
     .then(response => response); 
 
 }
 export function GetPronunciationAudio(fetchWithAuth, text)
 {
-    return fetchWithAuth(getUrlPath(`pronunciations/check`), PostHeadersForMP3({
+    const uniq = Date.now();
+    return fetchWithAuth(getUrlPath(`pronunciations/check?Date=${uniq}`), PostHeadersForMP3({
         "Pronunciation": text}))
     .then(response => response); 
 
@@ -262,13 +273,15 @@ export function DeletePronunciation(fetchWithAuth, pronunciationID)
 }
 export function GetEventLogs(fetchWithAuth, page, query)
 {
-    return fetchWithAuth(getUrlPath(`logs/${page}`), PostHeadersForCreate(query))
+    const uniq = Date.now();
+    return fetchWithAuth(getUrlPath(`logs/${page}?Date=${uniq}`), PostHeadersForCreate(query))
         .then(response => response.json())
 }
 
 export function GetEventLogSize(fetchWithAuth) 
 {
-    return fetchWithAuth(getUrlPath(`logs/info`))
+    const uniq = Date.now();
+    return fetchWithAuth(getUrlPath(`logs/info?Date=${uniq}`))
         .then(response => response.json());
 }
 //Put any alternate stuff here
